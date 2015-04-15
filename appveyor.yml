@@ -16,6 +16,8 @@ install:
     - go env
     - cinst pkgconfiglite -y
     - cinst mingw -y
+    - cinst mingw-get -y
+    - mingw-get gmp
 
 build: off
 
