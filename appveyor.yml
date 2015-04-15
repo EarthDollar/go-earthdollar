@@ -10,7 +10,7 @@ branches:
             - appveyor
 
 install:
-    - set PATH=c:\tools\mingw;%PATH%
+    - set PATH=C:\MinGW\bin;%PATH%
     - go version
     - go env
     - cinst pkgconfiglite -y
