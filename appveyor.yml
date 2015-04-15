@@ -1,0 +1,25 @@
+version: 0.9.9.{build}
+
+clone_folder: c:\gopath\src\github.com\ethereum\go-ethereum
+
+environment:
+    GOPATH: c:\gopath\src\github.com\ethereum\go-ethereum\Godeps\_workspace;c:\gopath
+
+branches:
+    only:
+            - appveyor
+
+install:
+    - set PATH=c:\go\bin;c:\MinGW;%PATH%
+    - appveyor DownloadFile https://storage.googleapis.com/golang/go1.4.2.windows-amd64.msi
+    - msiexec /i go1.4.2.windows-amd64.msi /q
+    - go version
+    - go env
+
+build: off
+
+test_script:
+    - cd c:\gopath\src\github.com\ethereum\go-ethereum
+    - go install ./...
+    - go test -v
+
