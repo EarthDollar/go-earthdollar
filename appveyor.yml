@@ -3,17 +3,19 @@ version: 0.9.9.{build}
 clone_folder: c:\gopath\src\github.com\ethereum\go-ethereum
 
 environment:
-    GOPATH: c:\gopath\src\github.com\ethereum\go-ethereum\Godeps\_workspace;c:\gopath
+    global:
+        GOPATH: c:\gopath\src\github.com\ethereum\go-ethereum\Godeps\_workspace;c:\gopath
 
 branches:
     only:
-            - appveyor
+        - appveyor
 
 install:
-    - set PATH=C:\MinGW\bin;%PATH%
+    - set PATH=C:\tools\MinGW64\bin;%PATH%
     - go version
     - go env
     - cinst pkgconfiglite -y
+    - cinst mingw -y
 
 build: off
 
