@@ -17,6 +17,7 @@ install:
     - cinst pkgconfiglite -y
     - cinst mingw -y
     - cinst mingw-get -y -version 1.0.3
+    - mingw-get install mingw-developer-toolkit
     - mingw-get install gmp
 
 build: off
