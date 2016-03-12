@@ -19,6 +19,7 @@ package core
 import (
 	"math/big"
 
+	//"github.com/Tzunami/go-earthdollar/common" //earthdollar
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -167,9 +168,21 @@ func execDelegateCall(env vm.Environment, caller vm.ContractRef, originAddr, toA
 
 	return ret, addr, err
 }
-
+//earthdollar
 // generic transfer method
 func Transfer(from, to vm.Account, amount *big.Int) {
+	// if(from.token(ED_SECURED_ACCOUNT && to.token(ED_SECURED_ACCOUNT) {
 	from.SubBalance(amount)
 	to.AddBalance(amount)
+	//}
 }
+
+// generic secured transfer method
+/*func SecureTransfer(from, amount *big.Int) {
+	// if(from.token(ED_SECURED_ACCOUNT && to.token(ED_SECURED_ACCOUNT) {
+	var to vm.Account
+	to = env.Db().GetAccount(from.token.wallet) 
+	from.SubBalance(amount)
+	to.AddBalance(amount)
+	//}
+}*/

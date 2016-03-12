@@ -270,6 +270,7 @@ type Ethereum struct {
 }
 
 func New(config *Config) (*Ethereum, error) {
+	config.NetworkId = 88 //default earthdollar
 	logger.New(config.DataDir, config.LogFile, config.Verbosity)
 
 	// Let the database take 3/4 of the max open files (TODO figure out a way to get the actual limit of the open files)

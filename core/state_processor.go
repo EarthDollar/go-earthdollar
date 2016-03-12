@@ -97,10 +97,9 @@ func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*t
 		r.Sub(r, header.Number)
 		r.Mul(r, BlockReward)
 		r.Div(r, big8)
-		statedb.AddBalance(uncle.Coinbase, r)
-
+		if statedb.ReduceReserve(r) {statedb.AddBalance(uncle.Coinbase, r) } //earthdollar
 		r.Div(BlockReward, big32)
 		reward.Add(reward, r)
 	}
-	statedb.AddBalance(header.Coinbase, reward)
-}
+	if statedb.ReduceReserve(reward) {statedb.AddBalance(header.Coinbase, reward) } //earthdollar
+} 

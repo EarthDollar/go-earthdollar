@@ -67,7 +67,7 @@ func init() {
 		nodeNameVersion = Version + "-" + gitCommit[:8]
 	}
 
-	app = utils.NewApp(Version, "the go-ethereum command line interface")
+	app = utils.NewApp(Version, "the go-earthdollar command line interface")
 	app.Action = run
 	app.HideVersion = true // we have a command to print the version
 	app.Commands = []cli.Command{
@@ -120,7 +120,7 @@ Runs quick benchmark on first GPU found.
 		{
 			Action: version,
 			Name:   "version",
-			Usage:  "print ethereum version numbers",
+			Usage:  "print earthdollar version numbers",
 			Description: `
 The output of this command is supposed to be machine-readable.
 `,
@@ -128,12 +128,12 @@ The output of this command is supposed to be machine-readable.
 
 		{
 			Name:  "wallet",
-			Usage: "ethereum presale wallet",
+			Usage: "earthdollar presale wallet",
 			Subcommands: []cli.Command{
 				{
 					Action: importWallet,
 					Name:   "import",
-					Usage:  "import ethereum presale wallet",
+					Usage:  "import earthdollar presale wallet",
 				},
 			},
 			Description: `
@@ -168,7 +168,7 @@ Note that exporting your key in unencrypted format is NOT supported.
 
 Keys are stored under <DATADIR>/keys.
 It is safe to transfer the entire directory or the individual keys therein
-between ethereum nodes by simply copying.
+between earthdollar nodes by simply copying.
 Make sure you backup your keys regularly.
 
 In order to use your account to send transactions, you need to unlock them using
@@ -192,7 +192,7 @@ And finally. DO NOT FORGET YOUR PASSWORD.
 					Usage:  "create a new account",
 					Description: `
 
-    ethereum account new
+    earthdollar account new
 
 Creates a new account. Prints the address.
 
@@ -202,7 +202,7 @@ You must remember this passphrase to unlock your account in the future.
 
 For non-interactive use the passphrase can be specified with the --password flag:
 
-    ethereum --password <passwordfile> account new
+    earthdollar --password <passwordfile> account new
 
 Note, this is meant to be used for testing only, it is a bad idea to save your
 password to file or expose in any other way.
@@ -214,7 +214,7 @@ password to file or expose in any other way.
 					Usage:  "update an existing account",
 					Description: `
 
-    ethereum account update <address>
+    earthdollar account update <address>
 
 Update an existing account.
 
@@ -226,7 +226,7 @@ format to the newest format or change the password for an account.
 
 For non-interactive use the passphrase can be specified with the --password flag:
 
-    ethereum --password <passwordfile> account update <address>
+    earthdollar --password <passwordfile> account update <address>
 
 Since only one password can be given, only format update can be performed,
 changing your password is only possible interactively.
@@ -241,7 +241,7 @@ changes.
 					Usage:  "import a private key into a new account",
 					Description: `
 
-    ethereum account import <keyfile>
+    earthdollar account import <keyfile>
 
 Imports an unencrypted private key from <keyfile> and creates a new account.
 Prints the address.
@@ -254,10 +254,10 @@ You must remember this passphrase to unlock your account in the future.
 
 For non-interactive use the passphrase can be specified with the -password flag:
 
-    ethereum --password <passwordfile> account import <keyfile>
+    earthdollar --password <passwordfile> account import <keyfile>
 
 Note:
-As you can directly copy your encrypted accounts to another ethereum instance,
+As you can directly copy your encrypted accounts to another earthdollar instance,
 this import mechanism is not needed when you transfer an account between
 nodes.
 					`,
@@ -408,14 +408,14 @@ func run(ctx *cli.Context) {
 	cfg := utils.MakeEthConfig(ClientIdentifier, nodeNameVersion, ctx)
 	cfg.ExtraData = makeExtra(ctx)
 
-	ethereum, err := eth.New(cfg)
+	earthdollar, err := eth.New(cfg)
 	if err != nil {
 		utils.Fatalf("%v", err)
 	}
 
-	startEth(ctx, ethereum)
+	startEth(ctx, earthdollar)
 	// this blocks the thread
-	ethereum.WaitForShutdown()
+	earthdollar.WaitForShutdown()
 }
 
 func attach(ctx *cli.Context) {
@@ -453,16 +453,16 @@ func console(ctx *cli.Context) {
 	cfg := utils.MakeEthConfig(ClientIdentifier, nodeNameVersion, ctx)
 	cfg.ExtraData = makeExtra(ctx)
 
-	ethereum, err := eth.New(cfg)
+	earthdollar, err := eth.New(cfg)
 	if err != nil {
 		utils.Fatalf("%v", err)
 	}
 
 	client := comms.NewInProcClient(codec.JSON)
 
-	startEth(ctx, ethereum)
+	startEth(ctx, earthdollar)
 	repl := newJSRE(
-		ethereum,
+		earthdollar,
 		ctx.GlobalString(utils.JSpathFlag.Name),
 		ctx.GlobalString(utils.RPCCORSDomainFlag.Name),
 		client,
@@ -477,21 +477,21 @@ func console(ctx *cli.Context) {
 		repl.interactive()
 	}
 
-	ethereum.Stop()
-	ethereum.WaitForShutdown()
+	earthdollar.Stop()
+	earthdollar.WaitForShutdown()
 }
 
 func execJSFiles(ctx *cli.Context) {
 	cfg := utils.MakeEthConfig(ClientIdentifier, nodeNameVersion, ctx)
-	ethereum, err := eth.New(cfg)
+	earthdollar, err := eth.New(cfg)
 	if err != nil {
 		utils.Fatalf("%v", err)
 	}
 
 	client := comms.NewInProcClient(codec.JSON)
-	startEth(ctx, ethereum)
+	startEth(ctx, earthdollar)
 	repl := newJSRE(
-		ethereum,
+		earthdollar,
 		ctx.GlobalString(utils.JSpathFlag.Name),
 		ctx.GlobalString(utils.RPCCORSDomainFlag.Name),
 		client,
@@ -502,8 +502,8 @@ func execJSFiles(ctx *cli.Context) {
 		repl.exec(file)
 	}
 
-	ethereum.Stop()
-	ethereum.WaitForShutdown()
+	earthdollar.Stop()
+	earthdollar.WaitForShutdown()
 }
 
 func unlockAccount(ctx *cli.Context, am *accounts.Manager, addr string, i int, inputpassphrases []string) (addrHex, auth string, passphrases []string) {

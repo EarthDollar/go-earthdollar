@@ -32,6 +32,11 @@ import (
 // created.
 var StartingNonce uint64
 
+// earthdollar
+var (
+	ED_RESERVE common.Address = common.StringToAddress("0xabde66892c050b5c8fe50685f338b6ad424d970")
+)
+
 // StateDBs within the ethereum protocol are used to store anything
 // within the merkle trie. StateDBs take care of caching and storing
 // nested states. It's the general query interface to retrieve:
@@ -163,6 +168,17 @@ func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 	if stateObject != nil {
 		stateObject.AddBalance(amount)
 	}
+}
+
+//earthdollar
+func (self *StateDB) ReduceReserve(reward *big.Int) bool{
+	reserve := self.stateObjects[ED_RESERVE.Str()]
+	if reserve.Balance().Cmp(reward) >= 0	 {
+		reserve.SubBalance(reward)
+		return true
+	}
+	//else {BANKRUPT->INSURANCE PAYOUT or switch to Tr}
+	return false
 }
 
 func (self *StateDB) SetNonce(addr common.Address, nonce uint64) {
