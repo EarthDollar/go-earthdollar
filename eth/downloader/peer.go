@@ -27,7 +27,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/Tzunami/go-earthdollar/common"
 )
 
 const (

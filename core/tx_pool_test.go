@@ -21,12 +21,12 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/core/state"
+	"github.com/Tzunami/go-earthdollar/core/types"
+	"github.com/Tzunami/go-earthdollar/crypto"
+	"github.com/Tzunami/go-earthdollar/ethdb"
+	"github.com/Tzunami/go-earthdollar/event"
 )
 
 func transaction(nonce uint64, gaslimit *big.Int, key *ecdsa.PrivateKey) *types.Transaction {

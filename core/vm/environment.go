@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/Tzunami/go-earthdollar/common"
 )
 
 // Environment is is required by the virtual machine to get information from

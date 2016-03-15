@@ -24,13 +24,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/sha3"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/core/types"
+	"github.com/Tzunami/go-earthdollar/core/vm"
+	"github.com/Tzunami/go-earthdollar/crypto"
+	"github.com/Tzunami/go-earthdollar/crypto/sha3"
+	"github.com/Tzunami/go-earthdollar/ethdb"
+	"github.com/Tzunami/go-earthdollar/rlp"
 )
 
 type diffTest struct {

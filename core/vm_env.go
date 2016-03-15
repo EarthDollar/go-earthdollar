@@ -19,10 +19,10 @@ package core
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/core/state"
+	"github.com/Tzunami/go-earthdollar/core/types"
+	"github.com/Tzunami/go-earthdollar/core/vm"
 )
 
 type VMEnv struct {

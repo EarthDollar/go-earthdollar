@@ -26,15 +26,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/httpclient"
-	"github.com/ethereum/go-ethereum/common/registrar"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/ethdb"
-	xe "github.com/ethereum/go-ethereum/xeth"
+	"github.com/Tzunami/go-earthdollar/accounts"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/common/httpclient"
+	"github.com/Tzunami/go-earthdollar/common/registrar"
+	"github.com/Tzunami/go-earthdollar/core"
+	"github.com/Tzunami/go-earthdollar/crypto"
+	"github.com/Tzunami/go-earthdollar/eth"
+	"github.com/Tzunami/go-earthdollar/ethdb"
+	xe "github.com/Tzunami/go-earthdollar/xeth"
 )
 
 const (

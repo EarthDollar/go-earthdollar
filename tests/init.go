@@ -26,7 +26,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ethereum/go-ethereum/core"
+	"github.com/Tzunami/go-earthdollar/core"
 )
 
 var (

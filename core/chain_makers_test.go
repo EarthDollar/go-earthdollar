@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/Tzunami/go-earthdollar/core/types"
+	"github.com/Tzunami/go-earthdollar/crypto"
+	"github.com/Tzunami/go-earthdollar/ethdb"
+	"github.com/Tzunami/go-earthdollar/event"
+	"github.com/Tzunami/go-earthdollar/params"
 )
 
 func ExampleGenerateChain() {

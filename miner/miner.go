@@ -22,16 +22,16 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/pow"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/core"
+	"github.com/Tzunami/go-earthdollar/core/state"
+	"github.com/Tzunami/go-earthdollar/core/types"
+	"github.com/Tzunami/go-earthdollar/eth/downloader"
+	"github.com/Tzunami/go-earthdollar/event"
+	"github.com/Tzunami/go-earthdollar/logger"
+	"github.com/Tzunami/go-earthdollar/logger/glog"
+	"github.com/Tzunami/go-earthdollar/params"
+	"github.com/Tzunami/go-earthdollar/pow"
 )
 
 type Miner struct {

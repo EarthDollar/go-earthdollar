@@ -7,15 +7,15 @@ import (
   "strings"
   "testing"
 
-  "github.com/ethereum/go-ethereum/accounts"
-  "github.com/ethereum/go-ethereum/common"
-  "github.com/ethereum/go-ethereum/common/docserver"
-  "github.com/ethereum/go-ethereum/common/registrar"
-  "github.com/ethereum/go-ethereum/core"
-  "github.com/ethereum/go-ethereum/core/state"
-  "github.com/ethereum/go-ethereum/crypto"
-  "github.com/ethereum/go-ethereum/eth"
-  xe "github.com/ethereum/go-ethereum/xeth"
+  "github.com/Tzunami/go-earthdollar/accounts"
+  "github.com/Tzunami/go-earthdollar/common"
+  "github.com/Tzunami/go-earthdollar/common/docserver"
+  "github.com/Tzunami/go-earthdollar/common/registrar"
+  "github.com/Tzunami/go-earthdollar/core"
+  "github.com/Tzunami/go-earthdollar/core/state"
+  "github.com/Tzunami/go-earthdollar/crypto"
+  "github.com/Tzunami/go-earthdollar/eth"
+  xe "github.com/Tzunami/go-earthdollar/xeth"
 )
 
 const (

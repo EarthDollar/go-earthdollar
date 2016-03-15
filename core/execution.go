@@ -20,10 +20,10 @@ import (
 	"math/big"
 
 	//"github.com/Tzunami/go-earthdollar/common" //earthdollar
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/core/vm"
+	"github.com/Tzunami/go-earthdollar/crypto"
+	"github.com/Tzunami/go-earthdollar/params"
 )
 
 // Call executes within the given contract

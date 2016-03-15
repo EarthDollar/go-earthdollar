@@ -18,10 +18,10 @@ package api
 
 import (
 	"github.com/ethereum/ethash"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/rpc/codec"
-	"github.com/ethereum/go-ethereum/rpc/shared"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/eth"
+	"github.com/Tzunami/go-earthdollar/rpc/codec"
+	"github.com/Tzunami/go-earthdollar/rpc/shared"
 )
 
 const (

@@ -22,9 +22,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto/sha3"
-	"github.com/ethereum/go-ethereum/logger"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/crypto/sha3"
+	"github.com/Tzunami/go-earthdollar/logger"
 )
 
 var powlogger = logger.NewLogger("POW")

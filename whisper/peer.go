@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/logger"
+	"github.com/Tzunami/go-earthdollar/logger/glog"
+	"github.com/Tzunami/go-earthdollar/p2p"
+	"github.com/Tzunami/go-earthdollar/rlp"
 	"gopkg.in/fatih/set.v0"
 )
 

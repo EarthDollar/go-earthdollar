@@ -23,9 +23,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/Tzunami/go-earthdollar/logger"
+	"github.com/Tzunami/go-earthdollar/logger/glog"
+	"github.com/Tzunami/go-earthdollar/metrics"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/iterator"

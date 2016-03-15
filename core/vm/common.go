@@ -20,9 +20,9 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/logger/glog"
+	"github.com/Tzunami/go-earthdollar/params"
 )
 
 // Global Debug flag indicating Debug VM (full logging)

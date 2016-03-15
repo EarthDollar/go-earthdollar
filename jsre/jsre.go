@@ -23,7 +23,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/Tzunami/go-earthdollar/common"
 	"github.com/robertkrimen/otto"
 )
 

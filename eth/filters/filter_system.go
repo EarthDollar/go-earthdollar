@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/Tzunami/go-earthdollar/core"
+	"github.com/Tzunami/go-earthdollar/core/vm"
+	"github.com/Tzunami/go-earthdollar/event"
 )
 
 // FilterSystem manages filters that filter specific events such as

@@ -28,9 +28,9 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/ethereum/go-ethereum/rpc/codec"
-	"github.com/ethereum/go-ethereum/rpc/shared"
-	"github.com/ethereum/go-ethereum/rpc/useragent"
+	"github.com/Tzunami/go-earthdollar/rpc/codec"
+	"github.com/Tzunami/go-earthdollar/rpc/shared"
+	"github.com/Tzunami/go-earthdollar/rpc/useragent"
 )
 
 var (

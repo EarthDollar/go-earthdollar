@@ -23,7 +23,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/rpc/shared"
+	"github.com/Tzunami/go-earthdollar/rpc/shared"
 )
 
 func TestBlockheightInvalidString(t *testing.T) {

@@ -23,13 +23,13 @@ import (
 
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/natspec"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc/codec"
-	"github.com/ethereum/go-ethereum/rpc/shared"
-	"github.com/ethereum/go-ethereum/xeth"
+	"github.com/Tzunami/go-earthdollar/common"
+	"github.com/Tzunami/go-earthdollar/common/natspec"
+	"github.com/Tzunami/go-earthdollar/eth"
+	"github.com/Tzunami/go-earthdollar/rlp"
+	"github.com/Tzunami/go-earthdollar/rpc/codec"
+	"github.com/Tzunami/go-earthdollar/rpc/shared"
+	"github.com/Tzunami/go-earthdollar/xeth"
 	"gopkg.in/fatih/set.v0"
 )
 

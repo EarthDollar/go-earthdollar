@@ -24,10 +24,10 @@ import (
 
 	"encoding/json"
 
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/rpc/codec"
-	"github.com/ethereum/go-ethereum/rpc/shared"
+	"github.com/Tzunami/go-earthdollar/logger"
+	"github.com/Tzunami/go-earthdollar/logger/glog"
+	"github.com/Tzunami/go-earthdollar/rpc/codec"
+	"github.com/Tzunami/go-earthdollar/rpc/shared"
 )
 
 type Stopper interface {

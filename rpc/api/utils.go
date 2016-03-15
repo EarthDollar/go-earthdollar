@@ -21,10 +21,10 @@ import (
 
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/rpc/codec"
-	"github.com/ethereum/go-ethereum/rpc/shared"
-	"github.com/ethereum/go-ethereum/xeth"
+	"github.com/Tzunami/go-earthdollar/eth"
+	"github.com/Tzunami/go-earthdollar/rpc/codec"
+	"github.com/Tzunami/go-earthdollar/rpc/shared"
+	"github.com/Tzunami/go-earthdollar/xeth"
 )
 
 var (
