@@ -178,6 +178,7 @@ func (self *StateDB) ReduceReserve(reward *big.Int) bool{
 		return true
 	}
 	//else {BANKRUPT->INSURANCE PAYOUT or switch to Tr}
+	// or iou variable
 	return false
 }
 
