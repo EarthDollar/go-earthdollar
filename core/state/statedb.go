@@ -173,12 +173,11 @@ func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 //earthdollar
 func (self *StateDB) ReduceReserve(reward *big.Int) bool{
 	reserve := self.stateObjects[ED_RESERVE.Str()]
-	if reserve.Balance().Cmp(reward) >= 0	 {
-		reserve.SubBalance(reward)
+	//if reserve.Balance().Cmp(reward) >= 0 {
+	if reserve == self.stateObjects[ED_RESERVE.Str()] {
+		//reserve.SubBalance(reward)
 		return true
 	}
-	//else {BANKRUPT->INSURANCE PAYOUT or switch to Tr}
-	// or iou variable
 	return false
 }
 
