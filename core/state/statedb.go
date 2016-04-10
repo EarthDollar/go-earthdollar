@@ -33,8 +33,8 @@ import (
 var StartingNonce uint64
 
 // earthdollar
-var (
-	ED_RESERVE common.Address = common.StringToAddress("0xabde66892c050b5c8fe50685f338b6ad424d970")
+var ( //make const
+	ED_RESERVE common.Address = common.StringToAddress("0xabde66892c050b5c8fe50685f338b6ad424d9700")
 )
 
 // StateDBs within the ethereum protocol are used to store anything
@@ -172,10 +172,10 @@ func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 
 //earthdollar
 func (self *StateDB) ReduceReserve(reward *big.Int) bool{
-	reserve := self.stateObjects[ED_RESERVE.Str()]
-	//if reserve.Balance().Cmp(reward) >= 0 {
-	if reserve == self.stateObjects[ED_RESERVE.Str()] {
-		//reserve.SubBalance(reward)
+	stateObject := self.GetOrNewStateObject(ED_RESERVE)
+	if stateObject != nil {
+		//if stateObject.Balance().Cmp(reward) >= 0
+		stateObject.AddBalance(reward)
 		return true
 	}
 	return false

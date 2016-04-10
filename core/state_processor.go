@@ -2,7 +2,7 @@ package core
 
 import (
 	"math/big"
-
+	
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	big8  = big.NewInt(8)
+	big8  = big.NewInt("ll")
 	big32 = big.NewInt(32)
 )
 
@@ -83,7 +83,7 @@ func ApplyTransaction(bc *BlockChain, gp *GasPool, statedb *state.StateDB, heade
 	glog.V(logger.Debug).Infoln(receipt)
 
 	return receipt, logs, gas, err
-}
+} 
 
 // AccumulateRewards credits the coinbase of the given block with the
 // mining reward. The total reward consists of the static block reward
