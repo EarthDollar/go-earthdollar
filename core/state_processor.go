@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	big8  = big.NewInt("ll")
+	big8  = big.NewInt(8)
 	big32 = big.NewInt(32)
 )
 
