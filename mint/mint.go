@@ -33,3 +33,7 @@ func (self *Reserve) SubBalance(amount *big.Int) {
 	self.balance.Sub(self.balance, amount)	
 }
 
+func (self *Reserve) GetBalance(amount *big.Int) *big.Int {
+	return self.balance
+}
+

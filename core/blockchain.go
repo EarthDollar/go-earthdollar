@@ -212,8 +212,6 @@ func (self *BlockChain) loadLastState() error {
 		}
 	}
 
-	self.reserve()	
-
 	// Issue a status log and return
 	headerTd := self.GetTd(self.currentHeader.Hash())
 	blockTd := self.GetTd(self.currentBlock.Hash())
