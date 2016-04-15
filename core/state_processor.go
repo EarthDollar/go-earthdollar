@@ -39,6 +39,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB) (ty
 		header       = block.Header()
 		allLogs      vm.Logs
 		gp           = new(GasPool).AddGas(block.GasLimit())
+		events       = p.bc.eventMux.Subscribe(ReserveEvent{}) //earthdollar
 	)
 
 	for i, tx := range block.Transactions() {
@@ -50,7 +51,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB) (ty
 		receipts = append(receipts, receipt)
 		allLogs = append(allLogs, logs...)
 	}
-	//events := p.bc.eventMux.Subscribe(Reserve{}) //earthdollar
+	//events.balance = 100
 	AccumulateRewards(statedb, header, block.Uncles())
 
 	return receipts, allLogs, totalUsedGas, err
