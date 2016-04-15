@@ -22,7 +22,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/common"
 	"github.com/Earthdollar/go-earthdollar/core/types"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/reserve"
+	"github.com/Earthdollar/go-earthdollar/mint"
 )
 
 // Earthdollar
