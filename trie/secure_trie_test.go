@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/Earthdollar/go-earthdollar/crypto"
+	"github.com/Earthdollar/go-earthdollar/ethdb"
 )
 
 func newEmptySecure() *SecureTrie {

@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/Earthdollar/go-earthdollar/crypto"
 )
 
 var testSigData = make([]byte, 32)

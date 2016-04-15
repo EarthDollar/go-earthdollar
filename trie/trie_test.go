@@ -25,8 +25,8 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/Earthdollar/go-earthdollar/ethdb"
 )
 
 func init() {

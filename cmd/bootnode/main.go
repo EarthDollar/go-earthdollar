@@ -26,10 +26,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/p2p/nat"
+	"github.com/Earthdollar/go-earthdollar/crypto"
+	"github.com/Earthdollar/go-earthdollar/logger"
+	"github.com/Earthdollar/go-earthdollar/p2p/discover"
+	"github.com/Earthdollar/go-earthdollar/p2p/nat"
 )
 
 func main() {

@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/Earthdollar/go-earthdollar/params"
 )
 
 func TestBcValidBlockTests(t *testing.T) {

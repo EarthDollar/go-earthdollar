@@ -24,11 +24,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/Earthdollar/go-earthdollar/core/state"
+	"github.com/Earthdollar/go-earthdollar/core/vm"
+	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/logger/glog"
 )
 
 func RunVmTestWithReader(r io.Reader, skipTests []string) error {

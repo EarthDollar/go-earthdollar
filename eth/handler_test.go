@@ -6,15 +6,15 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/Earthdollar/go-earthdollar/core"
+	"github.com/Earthdollar/go-earthdollar/core/state"
+	"github.com/Earthdollar/go-earthdollar/core/types"
+	"github.com/Earthdollar/go-earthdollar/crypto"
+	"github.com/Earthdollar/go-earthdollar/eth/downloader"
+	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/p2p"
+	"github.com/Earthdollar/go-earthdollar/params"
 )
 
 // Tests that protocol versions and modes of operations are matched up properly.

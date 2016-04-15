@@ -24,11 +24,11 @@ import (
 	"math/big"
 	"runtime"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/Earthdollar/go-earthdollar/core/types"
+	"github.com/Earthdollar/go-earthdollar/logger/glog"
+	"github.com/Earthdollar/go-earthdollar/params"
+	"github.com/Earthdollar/go-earthdollar/rlp"
 )
 
 // Transaction Test JSON Format

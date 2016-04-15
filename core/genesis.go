@@ -24,13 +24,13 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/Earthdollar/go-earthdollar/core/state"
+	"github.com/Earthdollar/go-earthdollar/core/types"
+	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/logger"
+	"github.com/Earthdollar/go-earthdollar/logger/glog"
+	"github.com/Earthdollar/go-earthdollar/params"
 )
 
 // WriteGenesisBlock writes the genesis block to the database as block number 0

@@ -22,13 +22,13 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/Earthdollar/go-earthdollar/core"
+	"github.com/Earthdollar/go-earthdollar/core/state"
+	"github.com/Earthdollar/go-earthdollar/core/types"
+	"github.com/Earthdollar/go-earthdollar/crypto"
+	"github.com/Earthdollar/go-earthdollar/p2p"
+	"github.com/Earthdollar/go-earthdollar/rlp"
 )
 
 type Object struct {

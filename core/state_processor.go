@@ -3,12 +3,12 @@ package core
 import (
 	"math/big"
 	
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/Earthdollar/go-earthdollar/core/state"
+	"github.com/Earthdollar/go-earthdollar/core/types"
+	"github.com/Earthdollar/go-earthdollar/core/vm"
+	"github.com/Earthdollar/go-earthdollar/crypto"
+	"github.com/Earthdollar/go-earthdollar/logger"
+	"github.com/Earthdollar/go-earthdollar/logger/glog"
 )
 
 var (
@@ -50,6 +50,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB) (ty
 		receipts = append(receipts, receipt)
 		allLogs = append(allLogs, logs...)
 	}
+	//events := p.bc.eventMux.Subscribe(Reserve{}) //earthdollar
 	AccumulateRewards(statedb, header, block.Uncles())
 
 	return receipts, allLogs, totalUsedGas, err

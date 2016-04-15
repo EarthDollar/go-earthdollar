@@ -26,11 +26,11 @@ import (
 	"time"
 
 	"github.com/codegangsta/cli"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/rpc/codec"
-	"github.com/ethereum/go-ethereum/rpc/comms"
+	"github.com/Earthdollar/go-earthdollar/cmd/utils"
+	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/Earthdollar/go-earthdollar/rpc"
+	"github.com/Earthdollar/go-earthdollar/rpc/codec"
+	"github.com/Earthdollar/go-earthdollar/rpc/comms"
 	"github.com/gizak/termui"
 )
 

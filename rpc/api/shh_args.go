@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/rpc/shared"
+	"github.com/Earthdollar/go-earthdollar/rpc/shared"
 )
 
 type WhisperMessageArgs struct {

@@ -25,11 +25,11 @@ import (
 	"net"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/Earthdollar/go-earthdollar/crypto"
+	"github.com/Earthdollar/go-earthdollar/logger"
+	"github.com/Earthdollar/go-earthdollar/logger/glog"
+	"github.com/Earthdollar/go-earthdollar/p2p/nat"
+	"github.com/Earthdollar/go-earthdollar/rlp"
 )
 
 const Version = 4

@@ -20,14 +20,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/jsre"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/rpc/comms"
-	"github.com/ethereum/go-ethereum/rpc/shared"
-	"github.com/ethereum/go-ethereum/rpc/useragent"
-	"github.com/ethereum/go-ethereum/xeth"
+	"github.com/Earthdollar/go-earthdollar/cmd/utils"
+	"github.com/Earthdollar/go-earthdollar/jsre"
+	"github.com/Earthdollar/go-earthdollar/logger"
+	"github.com/Earthdollar/go-earthdollar/logger/glog"
+	"github.com/Earthdollar/go-earthdollar/rpc/comms"
+	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/Earthdollar/go-earthdollar/rpc/useragent"
+	"github.com/Earthdollar/go-earthdollar/xeth"
 
 	"github.com/robertkrimen/otto"
 )

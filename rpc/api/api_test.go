@@ -22,11 +22,11 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/ethereum/go-ethereum/common/compiler"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/rpc/codec"
-	"github.com/ethereum/go-ethereum/rpc/shared"
-	"github.com/ethereum/go-ethereum/xeth"
+	"github.com/Earthdollar/go-earthdollar/common/compiler"
+	"github.com/Earthdollar/go-earthdollar/eth"
+	"github.com/Earthdollar/go-earthdollar/rpc/codec"
+	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/Earthdollar/go-earthdollar/xeth"
 )
 
 func TestParseApiString(t *testing.T) {

@@ -19,10 +19,10 @@ package core
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/Earthdollar/go-earthdollar/core/vm"
+	"github.com/Earthdollar/go-earthdollar/crypto"
+	"github.com/Earthdollar/go-earthdollar/params"
 )
 
 // Call executes within the given contract
@@ -167,15 +167,17 @@ func execDelegateCall(env vm.Environment, caller vm.ContractRef, originAddr, toA
 
 	return ret, addr, err
 }
-//earthdollar
-// generic transfer method
+
 func Transfer(from, to vm.Account, amount *big.Int) {
-	// if(from.token(ED_SECURED_ACCOUNT && to.token(ED_SECURED_ACCOUNT) {
 	from.SubBalance(amount)
 	to.AddBalance(amount)
-	//}
 }
 
+/*func Mint(minter vm.Account, amount *big.Int) {
+	if vm.Account == common.StringToAddress("0xabde66892c050b5c8fe50685f338b6ad424d9700") {
+		ED_RESERVE += amount
+	}
+}*/
 // generic secured transfer method
 /*func SecureTransfer(from, amount *big.Int) {
 	// if(from.token(ED_SECURED_ACCOUNT && to.token(ED_SECURED_ACCOUNT) {
