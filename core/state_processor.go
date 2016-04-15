@@ -39,7 +39,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB) (ty
 		header       = block.Header()
 		allLogs      vm.Logs
 		gp           = new(GasPool).AddGas(block.GasLimit())
-		events       = p.bc.eventMux.Subscribe(ReserveEvent{}) //earthdollar
+		//events       = p.bc.eventMux.Subscribe(ReserveEvent{}) //earthdollar
 	)
 
 	for i, tx := range block.Transactions() {

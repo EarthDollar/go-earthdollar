@@ -26,7 +26,7 @@ import (
 )
 
 // Earthdollar
-type ReserveEvent struct{ r *reserve.Reserve }
+type ReserveEvent struct{ r *mint.Reserve }
 
 // TxPreEvent is posted when a transaction enters the transaction pool.
 type TxPreEvent struct{ Tx *types.Transaction }
