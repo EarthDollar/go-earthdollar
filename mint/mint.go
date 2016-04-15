@@ -22,15 +22,14 @@ import (
 
 
 type Reserve struct {
-	balance *big.Int
+	balance *big.Int	
 }
 
-func (r *Reserve) AddBalance(amount *big.Int) {
-	r.balance.Add(r.balance, amount)
+func (self *Reserve) AddBalance(amount *big.Int) {
+	self.balance.Add(self.balance, amount)	
 }
 
-func (r *Reserve) SubBalance(amount *big.Int) {
-	r.balance.Sub(r.balance, amount)
+func (self *Reserve) SubBalance(amount *big.Int) {
+	self.balance.Sub(self.balance, amount)	
 }
 
-//?.eventMux.Post(core.ChainEvent{ReserveEvent{}) //earthdollar

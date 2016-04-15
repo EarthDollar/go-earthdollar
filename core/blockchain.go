@@ -44,6 +44,8 @@ import (
 	"github.com/Earthdollar/go-earthdollar/rlp"
 	"github.com/Earthdollar/go-earthdollar/trie"
 	"github.com/hashicorp/golang-lru"
+
+	"github.com/Earthdollar/go-earthdollar/mint" //earthdollar
 )
 
 var (
@@ -113,6 +115,8 @@ type BlockChain struct {
 	rand      *mrand.Rand
 	processor Processor
 	validator Validator
+
+	reserve   *mint.Reserve //earthdollar
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -138,6 +142,7 @@ func NewBlockChain(chainDb ethdb.Database, pow pow.PoW, mux *event.TypeMux) (*Bl
 		futureBlocks: futureBlocks,
 		pow:          pow,
 	}
+
 	// Seed a fast but crypto originating random generator
 	seed, err := crand.Int(crand.Reader, big.NewInt(math.MaxInt64))
 	if err != nil {
@@ -206,6 +211,9 @@ func (self *BlockChain) loadLastState() error {
 			self.currentFastBlock = block
 		}
 	}
+
+	self.reserve()	
+
 	// Issue a status log and return
 	headerTd := self.GetTd(self.currentHeader.Hash())
 	blockTd := self.GetTd(self.currentBlock.Hash())
