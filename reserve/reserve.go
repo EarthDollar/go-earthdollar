@@ -22,5 +22,5 @@ import (
 
 
 type Reserve struct {
-	balance *big.Int = big.NewInt(5e+18)zzz
+	balance *big.Int
 }
