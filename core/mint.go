@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package mint
+package core
 
 import (
 	"math/big"
@@ -36,6 +36,7 @@ func (self *Reserve) SubBalance(amount *big.Int) {
 }
 
 func (self *Reserve) GetBalance() *big.Int {
-	return self.balance
+	test := big.NewInt(30)
+	return test//self.balance
 }
 

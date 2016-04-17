@@ -53,7 +53,9 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB) (ty
 
 	//earthdollar
 	rewards := AccumulateRewards(statedb, header, block.Uncles())
-	PayRewards(statedb, header, block.Uncles(), rewards)
+	if p.bc.reserve.GetBalance().Cmp(rewards[len(rewards)-1]) >= 0 {
+		PayRewards(statedb, header, block.Uncles(), rewards)
+	}
 
 	return receipts, allLogs, totalUsedGas, err
 }
@@ -101,13 +103,13 @@ func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*t
 		r.Sub(r, header.Number)
 		r.Mul(r, BlockReward)
 		r.Div(r, big8)
-		//statedb.AddBalance(uncle.Coinbase, r)
+		statedb.AddBalance(uncle.Coinbase, r)
 		rewards = append(rewards,r)
 		
 		r.Div(BlockReward, big32)
 		miner_reward.Add(miner_reward, r)
 	}
-	//statedb.AddBalance(header.Coinbase, miner_reward)
+	statedb.AddBalance(header.Coinbase, miner_reward)
 	rewards = append(rewards, miner_reward)
 	return rewards
 }
@@ -115,10 +117,11 @@ func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*t
 //earthdollar
 func PayRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header, rewards []*big.Int) {
 	i := 0
+	miner_reward := big.NewInt(22)
 	for _, uncle := range uncles {
-		statedb.AddBalance(uncle.Coinbase, rewards[i])
+		statedb.AddBalance(uncle.Coinbase, miner_reward)
 		i++
 	}
-	statedb.AddBalance(header.Coinbase, rewards[i])
+	statedb.AddBalance(header.Coinbase, miner_reward)
 }
 

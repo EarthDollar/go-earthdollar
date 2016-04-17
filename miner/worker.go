@@ -557,9 +557,12 @@ func (self *worker) commitNewWork() {
 
 	if atomic.LoadInt32(&self.mining) == 1 {
 		// commit state root after all state transitions.
+
 		//earthdollar
 		rewards := core.AccumulateRewards(work.state, header, uncles)
-		core.PayRewards(work.state, header, uncles, rewards)
+		if chain.reserve.GetBalance().Cmp(rewards[len(rewards)-1]) >= 0 {
+			core.PayRewards(work.state, header, uncles, rewards)
+		}
 		header.Root = work.state.IntermediateRoot()
 	}
 

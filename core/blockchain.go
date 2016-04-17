@@ -45,7 +45,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/trie"
 	"github.com/hashicorp/golang-lru"
 
-	"github.com/Earthdollar/go-earthdollar/mint" //earthdollar
+	//"github.com/Earthdollar/go-earthdollar/mint" //earthdollar
 )
 
 var (
