@@ -22,8 +22,10 @@ import (
 
 
 type Reserve struct {
-	balance *big.Int	
+	balance *big.Int
+	//p.bc.eventMux.Subscribe(ReserveEvent{}) //earthdollar
 }
+
 
 func (self *Reserve) AddBalance(amount *big.Int) {
 	self.balance.Add(self.balance, amount)	
@@ -33,7 +35,7 @@ func (self *Reserve) SubBalance(amount *big.Int) {
 	self.balance.Sub(self.balance, amount)	
 }
 
-func (self *Reserve) GetBalance(amount *big.Int) *big.Int {
+func (self *Reserve) GetBalance() *big.Int {
 	return self.balance
 }
 

@@ -174,7 +174,9 @@ func GenerateChain(parent *types.Block, db ethdb.Database, n int, gen func(int, 
 		if gen != nil {
 			gen(i, b)
 		}
-		AccumulateRewards(statedb, h, b.uncles)
+		//earthdollar
+		rewards := AccumulateRewards(statedb, h, b.uncles)
+		PayRewards(statedb, h, b.uncles, rewards)
 		root, err := statedb.Commit()
 		if err != nil {
 			panic(fmt.Sprintf("state write error: %v", err))
@@ -229,6 +231,7 @@ func newCanonical(n int, full bool) (ethdb.Database, *BlockChain, error) {
 	}
 	if full {
 		// Full block-chain requested
+		//reserve := evmux.reserve.getBalance() //earthdollar
 		blocks := makeBlockChain(genesis, n, db, canonicalSeed)
 		_, err := blockchain.InsertChain(blocks)
 		return db, blockchain, err

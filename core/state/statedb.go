@@ -18,10 +18,6 @@
 package state
 
 import (
-	//"github.com/Earthdollar/go-earthdollar/core"
-	//"github.com/Earthdollar/go-earthdollar/core/types"
-	//earthdollar
-
 	"math/big"
 
 	"github.com/Earthdollar/go-earthdollar/common"
@@ -35,15 +31,6 @@ import (
 // The starting nonce determines the default nonce when new accounts are being
 // created.
 var StartingNonce uint64
-
-// earthdollar
-var ( //make const
-	//ED_RESERVE common.Address = common.StringToAddress("0xabde66892c050b5c8fe50685f338b6ad424d9700")
-	ED_RESERVE *big.Int = big.NewInt(5e+18)
-	//ed_token, err = NewToken(common.HexToAddress("0xabde66892c050b5c8fe50685f338b6ad424d9700"), backends.NewRPCBackend(conn))
-)
-// earthdollar
-type Reserve int
 
 // StateDBs within the ethereum protocol are used to store anything
 // within the merkle trie. StateDBs take care of caching and storing
@@ -176,15 +163,6 @@ func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 	if stateObject != nil {
 		stateObject.AddBalance(amount)
 	}
-}
-
-//earthdollar
-func (self *StateDB) ReduceReserve(amount *big.Int) bool{
-	if ED_RESERVE.Cmp(amount) > 0 {
-		ED_RESERVE.Sub(ED_RESERVE,amount)
-		return true
-	}
-	return false
 }
 
 func (self *StateDB) SetNonce(addr common.Address, nonce uint64) {

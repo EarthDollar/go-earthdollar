@@ -175,8 +175,11 @@ func NewBlockChain(chainDb ethdb.Database, pow pow.PoW, mux *event.TypeMux) (*Bl
 			glog.V(logger.Error).Infoln("Chain rewind was successful, resuming normal operation")
 		}
 	}
+
+	bc.eventMux.Subscribe(mint.Reserve{}) //earthdollar
+
 	// Take ownership of this particular state
-	go bc.update()
+	go bc.update()	
 	return bc, nil
 }
 
