@@ -214,7 +214,11 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 			b.uncles[i] = CopyHeader(uncles[i])
 		}
 	}
-
+	
+	//earthdollar
+	/*if b.mint.GetBalance().Cmp(big.NewInt(0))==0 {
+		b.mint.SetBalance(big.NewInt(20)) //first time only 
+	} */
 	return b
 }
 

@@ -21,24 +21,24 @@ import (
 
 
 type Mint struct {
-	Balance *big.Int
+	balance *big.Int
 	//p.bc.eventMux.Subscribe(ReserveEvent{}) //earthdollar // mux.Post also needed //ToDo
 }
 
 func (self *Mint) SetBalance(amount *big.Int) {
-	self.Balance.Set(amount)
+	self.balance.Set(amount)
 }
 
 func (self *Mint) AddBalance(amount *big.Int) {
-	self.Balance.Add(self.Balance, amount)	
+	self.balance.Add(self.balance, amount)	
 }
 
 func (self *Mint) SubBalance(amount *big.Int) {
-	self.Balance.Sub(self.Balance, amount)
+	self.balance.Sub(self.balance, amount)
 }
 
 func (self *Mint) GetBalance() *big.Int {
-	return self.Balance
+	return self.balance
 }
 
 

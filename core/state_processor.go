@@ -3,6 +3,8 @@ package core
 import (
 	"math/big"
 	
+	"github.com/Earthdollar/go-earthdollar/common" //earthdollar
+
 	"github.com/Earthdollar/go-earthdollar/core/state"
 	"github.com/Earthdollar/go-earthdollar/core/types"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
@@ -51,7 +53,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB) (ty
 		allLogs = append(allLogs, logs...)
 	}
 
-	AccumulateRewards(statedb, header, block.Uncles())	
+	AccumulateRewards(statedb, header, block.Uncles(), block.Mint() )	
 	return receipts, allLogs, totalUsedGas, err
 }
 
@@ -89,7 +91,7 @@ func ApplyTransaction(bc *BlockChain, gp *GasPool, statedb *state.StateDB, heade
 // mining reward. The total reward consists of the static block reward
 // and rewards for included uncles. The coinbase of each uncle block is
 // also rewarded.
-func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header) {
+func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header, mint *common.Mint) {
 	reward := new(big.Int).Set(BlockReward)
 	r := new(big.Int)
 	for _, uncle := range uncles {
