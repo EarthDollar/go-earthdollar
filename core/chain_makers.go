@@ -55,6 +55,7 @@ type BlockGen struct {
 	statedb *state.StateDB
 
 	gasPool  *GasPool
+	mint     *common.Mint
 	txs      []*types.Transaction
 	receipts []*types.Receipt
 	uncles   []*types.Header
@@ -181,7 +182,7 @@ func GenerateChain(parent *types.Block, db ethdb.Database, n int, gen func(int, 
 			panic(fmt.Sprintf("state write error: %v", err))
 		}
 		h.Root = root
-		return types.NewBlock(h, b.txs, b.uncles, b.receipts), b.receipts
+		return types.NewBlock(h, b.txs, b.uncles, b.receipts, b.mint), b.receipts
 	}
 	for i := 0; i < n; i++ {
 		header := makeHeader(parent, statedb)

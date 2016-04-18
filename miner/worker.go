@@ -168,6 +168,7 @@ func (self *worker) pendingBlock() *types.Block {
 			self.current.txs,
 			nil,
 			self.current.receipts,
+			nil,
 		)
 	}
 	return self.current.Block
@@ -459,7 +460,7 @@ func (self *worker) commitNewWork() {
 	defer self.currentMu.Unlock()
 
 	tstart := time.Now()
-	parent := self.chain.CurrentBlock()
+	parent := self.chain.CurrentBlock()	
 	tstamp := tstart.Unix()
 	if parent.Time().Cmp(new(big.Int).SetInt64(tstamp)) >= 0 {
 		tstamp = parent.Time().Int64() + 1
@@ -563,7 +564,7 @@ func (self *worker) commitNewWork() {
 	}
 
 	// create the new block whose nonce will be mined.
-	work.Block = types.NewBlock(header, work.txs, uncles, work.receipts)
+	work.Block = types.NewBlock(header, work.txs, uncles, work.receipts, parent.Mint() )
 
 	// We only care about logging if we're actually mining.
 	if atomic.LoadInt32(&self.mining) == 1 {

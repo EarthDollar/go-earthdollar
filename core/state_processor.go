@@ -97,26 +97,12 @@ func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*t
 		r.Sub(r, header.Number)
 		r.Mul(r, BlockReward)
 		r.Div(r, big8)
-		if statedb.ReduceReserve(r) {
-			statedb.AddBalance(uncle.Coinbase, r)
-		}
+		statedb.AddBalance(uncle.Coinbase, r)
 				
 		r.Div(BlockReward, big32)
 		reward.Add(reward, r)
 	}
-	if statedb.ReduceReserve(r) {
-		statedb.AddBalance(header.Coinbase, reward)
-	}
-}
-
-//earthdollar
-func PayRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header, rewards []*big.Int) {
-	i := 0
-	miner_reward := big.NewInt(22)
-	for _, uncle := range uncles {
-		statedb.AddBalance(uncle.Coinbase, miner_reward)
-		i++
-	}
-	statedb.AddBalance(header.Coinbase, miner_reward)
+	statedb.AddBalance(header.Coinbase, reward)
+	
 }
 

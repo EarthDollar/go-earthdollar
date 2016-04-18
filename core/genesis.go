@@ -46,6 +46,7 @@ func WriteGenesisBlock(chainDb ethdb.Database, reader io.Reader) (*types.Block, 
 		ParentHash string
 		ExtraData  string
 		GasLimit   string
+		Mint       string
 		Difficulty string
 		Mixhash    string
 		Coinbase   string
@@ -83,7 +84,7 @@ func WriteGenesisBlock(chainDb ethdb.Database, reader io.Reader) (*types.Block, 
 		MixDigest:  common.HexToHash(genesis.Mixhash),
 		Coinbase:   common.HexToAddress(genesis.Coinbase),
 		Root:       root,
-	}, nil, nil, nil)
+	}, nil, nil, nil, nil)
 
 	if block := GetBlock(chainDb, block.Hash()); block != nil {
 		glog.V(logger.Info).Infoln("Genesis block already in chain. Writing canonical number")
@@ -129,7 +130,7 @@ func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big
 		Difficulty: params.GenesisDifficulty,
 		GasLimit:   params.GenesisGasLimit,
 		Root:       root,
-	}, nil, nil, nil)
+	}, nil, nil, nil, nil)
 	return block
 }
 

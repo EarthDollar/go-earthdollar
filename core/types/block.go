@@ -127,7 +127,8 @@ type Body struct {
 type Block struct {
 	header       *Header
 	uncles       []*Header
-	transactions Transactions
+	transactions Transactions	
+	mint         *common.Mint  //earthdollar
 
 	// caches
 	hash atomic.Value
@@ -137,8 +138,7 @@ type Block struct {
 	// of the chain up to and including the block.
 	td *big.Int
 
-	//earthdollar
-	mint *big.Int
+	
 
 	// ReceivedAt is used by package eth to track block propagation time.
 	ReceivedAt time.Time
@@ -171,6 +171,7 @@ type storageblock struct {
 	Txs    []*Transaction
 	Uncles []*Header
 	TD     *big.Int
+	Mint   *common.Mint
 }
 
 var (
@@ -185,8 +186,8 @@ var (
 // The values of TxHash, UncleHash, ReceiptHash and Bloom in header
 // are ignored and set to values derived from the given txs, uncles
 // and receipts.
-func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt) *Block {
-	b := &Block{header: CopyHeader(header), td: new(big.Int)}
+func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt, mint *common.Mint) *Block {
+	b := &Block{header: CopyHeader(header), td: new(big.Int), mint: mint}
 
 	// TODO: panic if len(txs) != len(receipts)
 	if len(txs) == 0 {
@@ -314,6 +315,7 @@ func (b *Block) GasLimit() *big.Int   { return new(big.Int).Set(b.header.GasLimi
 func (b *Block) GasUsed() *big.Int    { return new(big.Int).Set(b.header.GasUsed) }
 func (b *Block) Difficulty() *big.Int { return new(big.Int).Set(b.header.Difficulty) }
 func (b *Block) Time() *big.Int       { return new(big.Int).Set(b.header.Time) }
+func (b *Block) Mint() *common.Mint   { return b.mint } // earthdollar
 
 func (b *Block) NumberU64() uint64        { return b.header.Number.Uint64() }
 func (b *Block) MixDigest() common.Hash   { return b.header.MixDigest }
@@ -326,6 +328,7 @@ func (b *Block) TxHash() common.Hash      { return b.header.TxHash }
 func (b *Block) ReceiptHash() common.Hash { return b.header.ReceiptHash }
 func (b *Block) UncleHash() common.Hash   { return b.header.UncleHash }
 func (b *Block) Extra() []byte            { return common.CopyBytes(b.header.Extra) }
+
 
 func (b *Block) Header() *Header { return CopyHeader(b.header) }
 
