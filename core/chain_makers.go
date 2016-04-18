@@ -163,7 +163,7 @@ func (b *BlockGen) OffsetTime(seconds int64) {
 // Blocks created by GenerateChain do not contain valid proof of work
 // values. Inserting them into BlockChain requires use of FakePow or
 // a similar non-validating proof of work implementation.
-func GenerateChain(parent *types.Block, db ethdb.Database, n int, gen func(int, *BlockGen), reserve *big.Int) ([]*types.Block, []types.Receipts) {
+func GenerateChain(parent *types.Block, db ethdb.Database, n int, gen func(int, *BlockGen)) ([]*types.Block, []types.Receipts) {
 	statedb, err := state.New(parent.Root(), db)
 	if err != nil {
 		panic(err)
@@ -174,12 +174,9 @@ func GenerateChain(parent *types.Block, db ethdb.Database, n int, gen func(int, 
 		if gen != nil {
 			gen(i, b)
 		}
-		//earthdollar
-		rewards := AccumulateRewards(statedb, h, b.uncles)
-		if reserve.Cmp(rewards[len(rewards)-1]) >= 0 {
-			PayRewards(statedb, h, b.uncles, rewards)
-		}
+		AccumulateRewards(statedb, h, b.uncles)
 		root, err := statedb.Commit()
+
 		if err != nil {
 			panic(fmt.Sprintf("state write error: %v", err))
 		}
@@ -222,8 +219,7 @@ func newCanonical(n int, full bool) (ethdb.Database, *BlockChain, error) {
 	// Create te new chain database
 	db, _ := ethdb.NewMemDatabase()
 	evmux := &event.TypeMux{}
-	reserve := big.NewInt(22) //evmux.ReserveEvent() //earthdollar
-
+	
 	// Initialize a fresh chain with only a genesis block
 	genesis, _ := WriteTestNetGenesisBlock(db, 0)
 
@@ -234,19 +230,19 @@ func newCanonical(n int, full bool) (ethdb.Database, *BlockChain, error) {
 	}
 	if full {
 		// Full block-chain requested
-		blocks := makeBlockChain(genesis, n, db, canonicalSeed, reserve) //earthdollar
+		blocks := makeBlockChain(genesis, n, db, canonicalSeed)
 		_, err := blockchain.InsertChain(blocks)
 		return db, blockchain, err
 	}
 	// Header-only chain	 requested
-	headers := makeHeaderChain(genesis.Header(), n, db, canonicalSeed, reserve)
+	headers := makeHeaderChain(genesis.Header(), n, db, canonicalSeed)
 	_, err := blockchain.InsertHeaderChain(headers,1)
 	return db, blockchain, err
 }
 
 // makeHeaderChain creates a deterministic chain of headers rooted at parent.
-func makeHeaderChain(parent *types.Header, n int, db ethdb.Database, seed int, reserve *big.Int) []*types.Header { //earthdollar
-	blocks := makeBlockChain(types.NewBlockWithHeader(parent), n, db, seed, reserve)
+func makeHeaderChain(parent *types.Header, n int, db ethdb.Database, seed int) []*types.Header { 
+	blocks := makeBlockChain(types.NewBlockWithHeader(parent), n, db, seed)
 	headers := make([]*types.Header, len(blocks))
 	for i, block := range blocks {
 		headers[i] = block.Header()
@@ -256,9 +252,9 @@ func makeHeaderChain(parent *types.Header, n int, db ethdb.Database, seed int, r
 
 
 // makeBlockChain creates a deterministic chain of blocks rooted at parent.
-func makeBlockChain(parent *types.Block, n int, db ethdb.Database, seed int, reserve *big.Int) []*types.Block {
+func makeBlockChain(parent *types.Block, n int, db ethdb.Database, seed int) []*types.Block {
 	blocks, _ := GenerateChain(parent, db, n, func(i int, b *BlockGen) {
 		b.SetCoinbase(common.Address{0: byte(seed), 19: byte(i)})
-	}, reserve)
+	})
 	return blocks
 }

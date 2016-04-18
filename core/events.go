@@ -22,11 +22,10 @@ import (
 	"github.com/Earthdollar/go-earthdollar/common"
 	"github.com/Earthdollar/go-earthdollar/core/types"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/mint"
 )
 
 // Earthdollar
-type ReserveEvent struct{ r *mint.Reserve }
+//type ReserveEvent struct{ r *Reserve }
 
 // TxPreEvent is posted when a transaction enters the transaction pool.
 type TxPreEvent struct{ Tx *types.Transaction }

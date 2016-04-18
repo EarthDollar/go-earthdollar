@@ -51,12 +51,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB) (ty
 		allLogs = append(allLogs, logs...)
 	}
 
-	//earthdollar
-	rewards := AccumulateRewards(statedb, header, block.Uncles())
-	if p.bc.reserve.GetBalance().Cmp(rewards[len(rewards)-1]) >= 0 {
-		PayRewards(statedb, header, block.Uncles(), rewards)
-	}
-
+	AccumulateRewards(statedb, header, block.Uncles())	
 	return receipts, allLogs, totalUsedGas, err
 }
 
@@ -94,24 +89,24 @@ func ApplyTransaction(bc *BlockChain, gp *GasPool, statedb *state.StateDB, heade
 // mining reward. The total reward consists of the static block reward
 // and rewards for included uncles. The coinbase of each uncle block is
 // also rewarded.
-func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header) []*big.Int {
-	miner_reward := new(big.Int).Set(BlockReward)
+func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header) {
+	reward := new(big.Int).Set(BlockReward)
 	r := new(big.Int)
-	rewards := []*big.Int {}
 	for _, uncle := range uncles {
 		r.Add(uncle.Number, big8)
 		r.Sub(r, header.Number)
 		r.Mul(r, BlockReward)
 		r.Div(r, big8)
-		statedb.AddBalance(uncle.Coinbase, r)
-		rewards = append(rewards,r)
-		
+		if statedb.ReduceReserve(r) {
+			statedb.AddBalance(uncle.Coinbase, r)
+		}
+				
 		r.Div(BlockReward, big32)
-		miner_reward.Add(miner_reward, r)
+		reward.Add(reward, r)
 	}
-	statedb.AddBalance(header.Coinbase, miner_reward)
-	rewards = append(rewards, miner_reward)
-	return rewards
+	if statedb.ReduceReserve(r) {
+		statedb.AddBalance(header.Coinbase, reward)
+	}
 }
 
 //earthdollar

@@ -44,8 +44,6 @@ import (
 	"github.com/Earthdollar/go-earthdollar/rlp"
 	"github.com/Earthdollar/go-earthdollar/trie"
 	"github.com/hashicorp/golang-lru"
-
-	//"github.com/Earthdollar/go-earthdollar/mint" //earthdollar
 )
 
 var (
@@ -115,8 +113,6 @@ type BlockChain struct {
 	rand      *mrand.Rand
 	processor Processor
 	validator Validator
-
-	reserve   *mint.Reserve //earthdollar
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -176,9 +172,7 @@ func NewBlockChain(chainDb ethdb.Database, pow pow.PoW, mux *event.TypeMux) (*Bl
 		}
 	}
 
-	bc.eventMux.Subscribe(mint.Reserve{}) //earthdollar
-
-	// Take ownership of this particular state
+		// Take ownership of this particular state
 	go bc.update()	
 	return bc, nil
 }

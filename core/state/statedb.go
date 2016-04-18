@@ -49,6 +49,7 @@ type StateDB struct {
 	txIndex      int
 	logs         map[common.Hash]vm.Logs
 	logSize      uint
+	mint	     *common.Mint
 }
 
 // Create a new state from a given trie
@@ -57,12 +58,18 @@ func New(root common.Hash, db ethdb.Database) (*StateDB, error) {
 	if err != nil {
 		return nil, err
 	}
+	//for testing only
+	reserve_init := big.NewInt(20)
+	tmp_mint := new(common.Mint) 
+	tmp_mint.AddBalance(reserve_init)
+
 	return &StateDB{
 		db:           db,
 		trie:         tr,
 		stateObjects: make(map[string]*StateObject),
 		refund:       new(big.Int),
 		logs:         make(map[common.Hash]vm.Logs),
+		mint:  	      tmp_mint,
 	}, nil
 }
 
@@ -163,6 +170,15 @@ func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 	if stateObject != nil {
 		stateObject.AddBalance(amount)
 	}
+}
+
+//earthdollar
+func (self *StateDB) ReduceReserve(amount *big.Int) bool {
+	if self.mint.GetBalance().Cmp(amount) >= 0 {
+		self.mint.SubBalance(amount)
+		return true
+	}
+	return false
 }
 
 func (self *StateDB) SetNonce(addr common.Address, nonce uint64) {

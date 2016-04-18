@@ -14,29 +14,27 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package core
-
+package common
 import (
 	"math/big"
 )
 
 
-type Reserve struct {
+type Mint struct {
 	balance *big.Int
-	//p.bc.eventMux.Subscribe(ReserveEvent{}) //earthdollar
+	//p.bc.eventMux.Subscribe(ReserveEvent{}) //earthdollar // mux.Post also needed
 }
 
 
-func (self *Reserve) AddBalance(amount *big.Int) {
+func (self *Mint) AddBalance(amount *big.Int) {
 	self.balance.Add(self.balance, amount)	
 }
 
-func (self *Reserve) SubBalance(amount *big.Int) {
+func (self *Mint) SubBalance(amount *big.Int) {
 	self.balance.Sub(self.balance, amount)	
 }
 
-func (self *Reserve) GetBalance() *big.Int {
-	test := big.NewInt(30)
-	return test//self.balance
+func (self *Mint) GetBalance() *big.Int {
+	return self.balance
 }
 

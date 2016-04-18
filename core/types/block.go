@@ -137,6 +137,9 @@ type Block struct {
 	// of the chain up to and including the block.
 	td *big.Int
 
+	//earthdollar
+	mint *big.Int
+
 	// ReceivedAt is used by package eth to track block propagation time.
 	ReceivedAt time.Time
 }
