@@ -19,6 +19,8 @@ import (
 	"math/big"
 )
 
+var MintBalance *big.Int = big.NewInt(0e+18)
+
 
 type Mint struct {
 	balance *big.Int
@@ -26,7 +28,7 @@ type Mint struct {
 }
 
 func (self *Mint) SetBalance(amount *big.Int) {
-	self.balance.Set(amount)
+	//self.balance.Set(amount)
 }
 
 func (self *Mint) AddBalance(amount *big.Int) {

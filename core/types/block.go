@@ -216,9 +216,11 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	}
 	
 	//earthdollar
-	/*if b.mint.GetBalance().Cmp(big.NewInt(0))==0 {
-		b.mint.SetBalance(big.NewInt(20)) //first time only 
-	} */
+	zero := big.NewInt(0)
+	mint_init := big.NewInt(20)
+	if common.MintBalance.Cmp(zero) == 0 {  //first time only 
+		b.mint.SetBalance(mint_init) 
+	}
 	return b
 }
 
