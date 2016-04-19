@@ -217,9 +217,10 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	
 	//earthdollar
 	zero := big.NewInt(0)
-	mint_init := big.NewInt(20)
+	mint_init := big.NewInt(9e+18)
 	if common.MintBalance.Cmp(zero) == 0 {  //first time only 
 		b.mint.SetBalance(mint_init) 
+		common.MintBalance.Add(common.MintBalance, mint_init)
 	}
 	return b
 }

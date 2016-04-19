@@ -28,7 +28,8 @@ type Mint struct {
 }
 
 func (self *Mint) SetBalance(amount *big.Int) {
-	//self.balance.Set(amount)
+	MintBalance.Set(amount)
+	//self.balance = new(big.Int)
 }
 
 func (self *Mint) AddBalance(amount *big.Int) {
@@ -36,11 +37,11 @@ func (self *Mint) AddBalance(amount *big.Int) {
 }
 
 func (self *Mint) SubBalance(amount *big.Int) {
-	self.balance.Sub(self.balance, amount)
+	MintBalance.Sub(self.balance, amount)
 }
 
 func (self *Mint) GetBalance() *big.Int {
-	return self.balance
+	return MintBalance
 }
 
 
