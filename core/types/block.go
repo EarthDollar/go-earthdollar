@@ -61,6 +61,7 @@ type Header struct {
 	GasLimit    *big.Int       // Gas limit
 	GasUsed     *big.Int       // Gas used
 	Time        *big.Int       // Creation time
+	Mint	    *big.Int	   //Earthdollar- Mint balance 
 	Extra       []byte         // Extra data
 	MixDigest   common.Hash    // for quick difficulty verification
 	Nonce       BlockNonce
@@ -84,6 +85,7 @@ func (h *Header) HashNoNonce() common.Hash {
 		h.GasLimit,
 		h.GasUsed,
 		h.Time,
+		h.Mint,  //Earthdollar
 		h.Extra,
 	})
 }
@@ -106,6 +108,7 @@ func (h *Header) UnmarshalJSON(data []byte) error {
 	h.Coinbase = common.HexToAddress(ext.Coinbase)
 	h.Difficulty = common.String2Big(ext.Difficulty)
 	h.Time = ext.Time
+	h.Mint = common.MintBalance //earthdollar
 	h.Extra = []byte(ext.Extra)
 	return nil
 }
@@ -213,12 +216,6 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		}
 	}
 	
-	//earthdollar
-	zero := big.NewInt(0)
-	if common.MintBalance.Cmp(zero) == 0 {  //first time only, tmp till 
-		init := big.NewInt(20)
-		common.MintBalance.Set(init)
-	}
 	return b
 }
 
