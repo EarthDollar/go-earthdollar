@@ -20,4 +20,4 @@ import (
 	"math/big"
 )
 
-var MintBalance *big.Int = String2Big("2000000000000000000") // 20 ED; Eighteen zeros make an ED
+var MintBalance *big.Int = big.NewInt(7e+18) // 20 ED; Eighteen zeros make an ED    
