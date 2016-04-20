@@ -128,8 +128,7 @@ type Block struct {
 	header       *Header
 	uncles       []*Header
 	transactions Transactions	
-	mint         *common.Mint  //earthdollar
-
+	
 	// caches
 	hash atomic.Value
 	size atomic.Value
@@ -171,7 +170,6 @@ type storageblock struct {
 	Txs    []*Transaction
 	Uncles []*Header
 	TD     *big.Int
-	Mint   *common.Mint
 }
 
 var (
@@ -186,8 +184,8 @@ var (
 // The values of TxHash, UncleHash, ReceiptHash and Bloom in header
 // are ignored and set to values derived from the given txs, uncles
 // and receipts.
-func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt, mint *common.Mint) *Block {
-	b := &Block{header: CopyHeader(header), td: new(big.Int), mint: mint}
+func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt) *Block {
+	b := &Block{header: CopyHeader(header), td: new(big.Int)}
 
 	// TODO: panic if len(txs) != len(receipts)
 	if len(txs) == 0 {
@@ -217,12 +215,9 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	
 	//earthdollar
 	zero := big.NewInt(0)
-	init := big.NewInt(20)
-	
-	if common.MintBalance.Cmp(zero) == 0 {  //first time only 
-		mint_init := new(big.Int).Set(init)
-		b.mint.SetBalance(mint_init) 
-		common.MintBalance.Add(common.MintBalance, mint_init)
+	if common.MintBalance.Cmp(zero) == 0 {  //first time only, tmp till 
+		init := big.NewInt(20)
+		common.MintBalance.Set(init)
 	}
 	return b
 }
@@ -324,7 +319,6 @@ func (b *Block) GasLimit() *big.Int   { return new(big.Int).Set(b.header.GasLimi
 func (b *Block) GasUsed() *big.Int    { return new(big.Int).Set(b.header.GasUsed) }
 func (b *Block) Difficulty() *big.Int { return new(big.Int).Set(b.header.Difficulty) }
 func (b *Block) Time() *big.Int       { return new(big.Int).Set(b.header.Time) }
-func (b *Block) Mint() *common.Mint   { return b.mint } // earthdollar
 
 func (b *Block) NumberU64() uint64        { return b.header.Number.Uint64() }
 func (b *Block) MixDigest() common.Hash   { return b.header.MixDigest }

@@ -15,34 +15,9 @@
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package common
+
 import (
 	"math/big"
 )
 
 var MintBalance *big.Int = big.NewInt(0e+18)
-
-
-type Mint struct {
-	balance *big.Int
-	//p.bc.eventMux.Subscribe(ReserveEvent{}) //earthdollar // mux.Post also needed //ToDo
-}
-
-func (self *Mint) SetBalance(amount *big.Int) {
-
-	MintBalance.Set(amount)
-	//self.balance.Set(amount)
-}
-
-func (self *Mint) AddBalance(amount *big.Int) {
-	self.balance.Add(self.balance, amount)	
-}
-
-func (self *Mint) SubBalance(amount *big.Int) {
-	MintBalance.Sub(self.balance, amount)
-}
-
-func (self *Mint) GetBalance() *big.Int {
-	return MintBalance
-}
-
-

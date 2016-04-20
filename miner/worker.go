@@ -168,7 +168,6 @@ func (self *worker) pendingBlock() *types.Block {
 			self.current.txs,
 			nil,
 			self.current.receipts,
-			nil,
 		)
 	}
 	return self.current.Block
@@ -564,7 +563,7 @@ func (self *worker) commitNewWork() {
 	}
 
 	// create the new block whose nonce will be mined.
-	work.Block = types.NewBlock(header, work.txs, uncles, work.receipts, parent.Mint() )
+	work.Block = types.NewBlock(header, work.txs, uncles, work.receipts)
 
 	// We only care about logging if we're actually mining.
 	if atomic.LoadInt32(&self.mining) == 1 {
