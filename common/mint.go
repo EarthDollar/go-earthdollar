@@ -28,8 +28,9 @@ type Mint struct {
 }
 
 func (self *Mint) SetBalance(amount *big.Int) {
+
 	MintBalance.Set(amount)
-	//self.balance = new(big.Int)
+	//self.balance.Set(amount)
 }
 
 func (self *Mint) AddBalance(amount *big.Int) {

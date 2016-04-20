@@ -72,7 +72,7 @@ type ProtocolManager struct {
 	eventMux      *event.TypeMux
 	txSub         event.Subscription
 	minedBlockSub event.Subscription
-
+	
 	// channels for fetcher, syncer, txsyncLoop
 	newPeerCh chan *peer
 	txsyncCh  chan *txsync
@@ -180,7 +180,7 @@ func (pm *ProtocolManager) Start() {
 	// broadcast mined blocks
 	pm.minedBlockSub = pm.eventMux.Subscribe(core.NewMinedBlockEvent{})
 	go pm.minedBroadcastLoop()
-
+	
 	// start sync handlers
 	go pm.syncer()
 	go pm.txsyncLoop()
@@ -737,7 +737,9 @@ func (self *ProtocolManager) minedBroadcastLoop() {
 		case core.NewMinedBlockEvent:
 			self.BroadcastBlock(ev.Block, true)  // First propagate block to peers
 			self.BroadcastBlock(ev.Block, false) // Only then announce to the rest
-		}
+		//case core.MintEvent: //Earthdollar
+			//ev.SetBalance()
+		}//end switch
 	}
 }
 

@@ -24,8 +24,8 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core/vm"
 )
 
-// Earthdollar
-//type ReserveEvent struct{ r *Reserve }
+// MintEvent is posted when the mint changes value.
+type MintEvent struct{ Block *types.Block }  // Earthdollar
 
 // TxPreEvent is posted when a transaction enters the transaction pool.
 type TxPreEvent struct{ Tx *types.Transaction }
