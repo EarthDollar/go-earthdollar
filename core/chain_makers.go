@@ -209,6 +209,7 @@ func makeHeader(parent *types.Block, state *state.StateDB) *types.Header {
 		GasUsed:    new(big.Int),
 		Number:     new(big.Int).Add(parent.Number(), common.Big1),
 		Time:       time,
+		Mint:		new(big.Int).Set(parent.Mint()),
 	}
 }
 

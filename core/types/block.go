@@ -61,7 +61,7 @@ type Header struct {
 	GasLimit    *big.Int       // Gas limit
 	GasUsed     *big.Int       // Gas used
 	Time        *big.Int       // Creation time
-	Mint	    *big.Int	   //Earthdollar- Mint balance 
+	Mint	    *big.Int	   // Earthdollar- Mint balance 
 	Extra       []byte         // Extra data
 	MixDigest   common.Hash    // for quick difficulty verification
 	Nonce       BlockNonce
@@ -97,6 +97,7 @@ func (h *Header) UnmarshalJSON(data []byte) error {
 		Difficulty string
 		GasLimit   string
 		Time       *big.Int
+		Mint       string
 		Extra      string
 	}
 	dec := json.NewDecoder(bytes.NewReader(data))
@@ -108,7 +109,7 @@ func (h *Header) UnmarshalJSON(data []byte) error {
 	h.Coinbase = common.HexToAddress(ext.Coinbase)
 	h.Difficulty = common.String2Big(ext.Difficulty)
 	h.Time = ext.Time
-	h.Mint = common.MintBalance //earthdollar
+	h.Mint = common.String2Big(ext.Mint) //earthdollar
 	h.Extra = []byte(ext.Extra)
 	return nil
 }

@@ -94,7 +94,7 @@ func ApplyTransaction(bc *BlockChain, gp *GasPool, statedb *state.StateDB, heade
 func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header) {
 	reward := new(big.Int).Set(BlockReward)
 	r := new(big.Int)
-	MintBalance.Set(header.Mint)
+	MintBalance.Set(r)
 
 	for _, uncle := range uncles {
 		r.Add(uncle.Number, big8)
