@@ -101,17 +101,19 @@ func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*t
 		r.Sub(r, header.Number)
 		r.Mul(r, BlockReward)
 		r.Div(r, big8)
+
 		if MintBalance.Cmp(r) >= 0 { 
-			statedb.AddBalance(uncle.Coinbase, r)
 			MintBalance.Sub(MintBalance, r)
+			statedb.AddBalance(uncle.Coinbase, r)			
 		}
-				
+
 		r.Div(BlockReward, big32)
 		reward.Add(reward, r)
 	}
+
 	if MintBalance.Cmp(reward) >= 0 { 
-		statedb.AddBalance(header.Coinbase, reward)
 		MintBalance.Sub(MintBalance, reward)
+		statedb.AddBalance(header.Coinbase, reward)
 	}
 }
 
