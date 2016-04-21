@@ -3,7 +3,7 @@ package core
 import (
 	"math/big"
 	
-	"github.com/Earthdollar/go-earthdollar/common" //earthdollar
+	//"github.com/Earthdollar/go-earthdollar/common" //earthdollar
 
 	"github.com/Earthdollar/go-earthdollar/core/state"
 	"github.com/Earthdollar/go-earthdollar/core/types"
@@ -93,24 +93,25 @@ func ApplyTransaction(bc *BlockChain, gp *GasPool, statedb *state.StateDB, heade
 // also rewarded.
 func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header) {
 	reward := new(big.Int).Set(BlockReward)
-	mint := new(big.Int).Set(common.MintBalance)
 	r := new(big.Int)
+	MintBalance.Set(header.Mint)
+
 	for _, uncle := range uncles {
 		r.Add(uncle.Number, big8)
 		r.Sub(r, header.Number)
 		r.Mul(r, BlockReward)
 		r.Div(r, big8)
-		if mint.Cmp(r) >= 0 { 
+		if MintBalance.Cmp(r) >= 0 { 
 			statedb.AddBalance(uncle.Coinbase, r)
-			common.MintBalance.Sub(common.MintBalance, r)
+			MintBalance.Sub(MintBalance, r)
 		}
 				
 		r.Div(BlockReward, big32)
 		reward.Add(reward, r)
 	}
-	if mint.Cmp(r) >= 0 { 
+	if MintBalance.Cmp(reward) >= 0 { 
 		statedb.AddBalance(header.Coinbase, reward)
-		common.MintBalance.Sub(common.MintBalance, reward)
+		MintBalance.Sub(MintBalance, reward)
 	}
 }
 

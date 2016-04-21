@@ -233,6 +233,9 @@ func CopyHeader(h *Header) *Header {
 	if cpy.Time = new(big.Int); h.Time != nil {
 		cpy.Time.Set(h.Time)
 	}
+	if cpy.Mint = new(big.Int); h.Mint != nil {
+		cpy.Mint.Set(h.Mint)
+	}
 	if cpy.Difficulty = new(big.Int); h.Difficulty != nil {
 		cpy.Difficulty.Set(h.Difficulty)
 	}
@@ -316,6 +319,7 @@ func (b *Block) GasLimit() *big.Int   { return new(big.Int).Set(b.header.GasLimi
 func (b *Block) GasUsed() *big.Int    { return new(big.Int).Set(b.header.GasUsed) }
 func (b *Block) Difficulty() *big.Int { return new(big.Int).Set(b.header.Difficulty) }
 func (b *Block) Time() *big.Int       { return new(big.Int).Set(b.header.Time) }
+func (b *Block) Mint() *big.Int       { return new(big.Int).Set(b.header.Mint) } //earthdollar
 
 func (b *Block) NumberU64() uint64        { return b.header.Number.Uint64() }
 func (b *Block) MixDigest() common.Hash   { return b.header.MixDigest }
@@ -423,10 +427,11 @@ func (h *Header) String() string {
 	GasLimit:	    %v
 	GasUsed:	    %v
 	Time:		    %v
+	Mint:           %v
 	Extra:		    %s
 	MixDigest:      %x
 	Nonce:		    %x
-]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce)
+]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Mint, h.Extra, h.MixDigest, h.Nonce)
 }
 
 type Blocks []*Block
