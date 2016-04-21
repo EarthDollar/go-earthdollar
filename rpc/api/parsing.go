@@ -171,6 +171,7 @@ type BlockRes struct {
 	StateRoot       *hexdata          `json:"stateRoot"`
 	ReceiptRoot     *hexdata          `json:"receiptRoot"`
 	Miner           *hexdata          `json:"miner"`
+	Mint            *hexnum           `json:"mint"`	//earthdollar
 	Difficulty      *hexnum           `json:"difficulty"`
 	TotalDifficulty *hexnum           `json:"totalDifficulty"`
 	Size            *hexnum           `json:"size"`
@@ -195,6 +196,7 @@ func (b *BlockRes) MarshalJSON() ([]byte, error) {
 			StateRoot       *hexdata          `json:"stateRoot"`
 			ReceiptRoot     *hexdata          `json:"receiptRoot"`
 			Miner           *hexdata          `json:"miner"`
+			Mint            *hexnum           `json:"mint"`	//earthdollar
 			Difficulty      *hexnum           `json:"difficulty"`
 			TotalDifficulty *hexnum           `json:"totalDifficulty"`
 			Size            *hexnum           `json:"size"`
@@ -216,6 +218,7 @@ func (b *BlockRes) MarshalJSON() ([]byte, error) {
 		ext.StateRoot = b.StateRoot
 		ext.ReceiptRoot = b.ReceiptRoot
 		ext.Miner = b.Miner
+		ext.Mint = b.Mint //earthdollar
 		ext.Difficulty = b.Difficulty
 		ext.TotalDifficulty = b.TotalDifficulty
 		ext.Size = b.Size
@@ -241,6 +244,7 @@ func (b *BlockRes) MarshalJSON() ([]byte, error) {
 			StateRoot       *hexdata   `json:"stateRoot"`
 			ReceiptRoot     *hexdata   `json:"receiptRoot"`
 			Miner           *hexdata   `json:"miner"`
+			Mint            *hexnum    `json:"mint"`  //earthdollar
 			Difficulty      *hexnum    `json:"difficulty"`
 			TotalDifficulty *hexnum    `json:"totalDifficulty"`
 			Size            *hexnum    `json:"size"`
@@ -262,6 +266,7 @@ func (b *BlockRes) MarshalJSON() ([]byte, error) {
 		ext.StateRoot = b.StateRoot
 		ext.ReceiptRoot = b.ReceiptRoot
 		ext.Miner = b.Miner
+		ext.Mint = b.Mint
 		ext.Difficulty = b.Difficulty
 		ext.TotalDifficulty = b.TotalDifficulty
 		ext.Size = b.Size
@@ -298,6 +303,7 @@ func NewBlockRes(block *types.Block, td *big.Int, fullTx bool) *BlockRes {
 	res.StateRoot = newHexData(block.Root())
 	res.ReceiptRoot = newHexData(block.ReceiptHash())
 	res.Miner = newHexData(block.Coinbase())
+	res.Mint = newHexNum(block.Mint()) //earthdollar
 	res.Difficulty = newHexNum(block.Difficulty())
 	res.TotalDifficulty = newHexNum(td)
 	res.Size = newHexNum(block.Size().Int64())
@@ -392,6 +398,7 @@ func NewUncleRes(h *types.Header) *UncleRes {
 	v.TransactionRoot = newHexData(h.TxHash)
 	v.StateRoot = newHexData(h.Root)
 	v.Miner = newHexData(h.Coinbase)
+	v.Mint = newHexNum(h.Mint)
 	v.Difficulty = newHexNum(h.Difficulty)
 	v.ExtraData = newHexData(h.Extra)
 	v.GasLimit = newHexNum(h.GasLimit)

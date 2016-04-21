@@ -455,6 +455,11 @@ func (self *XEth) Coinbase() string {
 	return eb.Hex()
 }
 
+//earthdollar
+func (self *XEth) MintAdd() string {
+	return "Working Update xeth.go"
+}
+
 func (self *XEth) NumberToHuman(balance string) string {
 	b := common.Big(balance)
 

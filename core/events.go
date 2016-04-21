@@ -25,7 +25,7 @@ import (
 )
 
 // MintEvent is posted when the mint changes value.
-//type MintEvent struct{ Block *types.Block }  // Earthdollar
+type MintEvent struct{ Mt *big.Int }  // Earthdollar
 
 // TxPreEvent is posted when a transaction enters the transaction pool.
 type TxPreEvent struct{ Tx *types.Transaction }

@@ -78,6 +78,7 @@ type Block struct {
 	Transactions *common.List `json:"transactions"`
 	Uncles       *common.List `json:"uncles"`
 	Time         *big.Int     `json:"time"`
+	Mint         *big.Int     `json:"mint"`
 	Coinbase     string       `json:"coinbase"`
 	Name         string       `json:"name"`
 	GasLimit     string       `json:"gasLimit"`
@@ -115,6 +116,7 @@ func NewBlock(block *types.Block) *Block {
 		GasLimit: block.GasLimit().String(), Hash: block.Hash().Hex(),
 		Transactions: txlist, Uncles: ulist,
 		Time:     block.Time(),
+		Mint:     block.Mint(),
 		Coinbase: block.Coinbase().Hex(),
 		PrevHash: block.ParentHash().Hex(),
 		Bloom:    common.ToHex(block.Bloom().Bytes()),
