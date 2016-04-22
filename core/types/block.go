@@ -109,7 +109,7 @@ func (h *Header) UnmarshalJSON(data []byte) error {
 	h.Coinbase = common.HexToAddress(ext.Coinbase)
 	h.Difficulty = common.String2Big(ext.Difficulty)
 	h.Time = ext.Time
-	h.Mint = common.String2Big(ext.Mint) //earthdollar
+	//h.Mint = common.String2Big(ext.Mint) //earthdollar
 	h.Extra = []byte(ext.Extra)
 	return nil
 }
@@ -428,9 +428,9 @@ func (h *Header) String() string {
 	GasLimit:	    %v
 	GasUsed:	    %v
 	Time:		    %v
-	Mint:           %v
+	Mint:          	    %v
 	Extra:		    %s
-	MixDigest:      %x
+	MixDigest:          %x
 	Nonce:		    %x
 ]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Mint, h.Extra, h.MixDigest, h.Nonce)
 }
