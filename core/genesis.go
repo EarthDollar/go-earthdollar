@@ -117,7 +117,7 @@ func WriteGenesisBlock(chainDb ethdb.Database, reader io.Reader) (*types.Block, 
 	if err := WriteHeadBlockHash(chainDb, block.Hash()); err != nil {
 		return nil, err
 	}
-	return WriteOlympicGenesisBlock(chainDb, common.String2Big(genesis.Nonce).Uint64() )
+	return block, nil
 }
 
 // GenesisBlockForTesting creates a block in which addr has the given wei balance.
@@ -161,8 +161,8 @@ func WriteGenesisBlockForTesting(db ethdb.Database, accounts ...GenesisAccount) 
 		"0000000000000000000000000000000000000001": {"balance": "1"},
 		"0000000000000000000000000000000000000002": {"balance": "1"},
 		"0000000000000000000000000000000000000003": {"balance": "1"},
-		"0000000000000000000000000000000000000004": {"balance": "1"},
-		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "0000000000000000000000000000000000001000000000000000000000000"}
+		"2b88ff71ad679b91a2d8f255e61777b45bc83f6f": {"balance": "1"},
+		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "10000"}
 	}
 }`, types.EncodeNonce(0), params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes(), accountJson)
 	block, _ := WriteGenesisBlock(db, strings.NewReader(testGenesis))
@@ -199,9 +199,26 @@ func WriteOlympicGenesisBlock(chainDb ethdb.Database, nonce uint64) (*types.Bloc
 		"0000000000000000000000000000000000000001": {"balance": "1"},
 		"0000000000000000000000000000000000000002": {"balance": "1"},
 		"0000000000000000000000000000000000000003": {"balance": "1"},
-		"0000000000000000000000000000000000000004": {"balance": "1"},
-		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "0000000000000000000000000000000000001000000000000000000000000"}
+		"2b88ff71ad679b91a2d8f255e61777b45bc83f6f": {"balance": "1"},
+		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "10000"}
 	}
 }`, types.EncodeNonce(nonce), params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes())
 	return WriteGenesisBlock(chainDb, strings.NewReader(testGenesis))
+}
+
+func EDGenesisBlockString() *strings.Reader {
+	nonce := common.Hex2Bytes("0x0000000000000042")
+	testGenesis := fmt.Sprintf(`{
+	"nonce":"0x%x",
+	"gasLimit":"0x%x",
+	"difficulty":"0x%x",
+	"alloc": {
+		"0000000000000000000000000000000000000001": {"balance": "1"},
+		"0000000000000000000000000000000000000002": {"balance": "1"},
+		"0000000000000000000000000000000000000003": {"balance": "1"},
+		"2b88ff71ad679b91a2d8f255e61777b45bc83f6f": {"balance": "1"},
+		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "10000"}
+	}
+}`, nonce, params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes())
+	return strings.NewReader(testGenesis)
 }
