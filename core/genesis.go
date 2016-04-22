@@ -57,10 +57,12 @@ func WriteGenesisBlock(chainDb ethdb.Database, reader io.Reader) (*types.Block, 
 		}
 	}
 
+
+
 	if err := json.Unmarshal(contents, &genesis); err != nil {
 		return nil, err
 	}
-
+	
 	// creating with empty hash always works
 	statedb, _ := state.New(common.Hash{}, chainDb)
 	for addr, account := range genesis.Alloc {
@@ -95,6 +97,7 @@ func WriteGenesisBlock(chainDb ethdb.Database, reader io.Reader) (*types.Block, 
 		}
 		return block, nil
 	}
+	
 
 	if err := stateBatch.Write(); err != nil {
 		return nil, fmt.Errorf("cannot write state: %v", err)
@@ -114,7 +117,7 @@ func WriteGenesisBlock(chainDb ethdb.Database, reader io.Reader) (*types.Block, 
 	if err := WriteHeadBlockHash(chainDb, block.Hash()); err != nil {
 		return nil, err
 	}
-	return block, nil
+	return WriteOlympicGenesisBlock(chainDb, common.String2Big(genesis.Nonce).Uint64() )
 }
 
 // GenesisBlockForTesting creates a block in which addr has the given wei balance.
@@ -181,7 +184,7 @@ func WriteTestNetGenesisBlock(chainDb ethdb.Database, nonce uint64) (*types.Bloc
                 "0000000000000000000000000000000000000002": { "balance": "1" },
                 "0000000000000000000000000000000000000003": { "balance": "1" },
                 "0000000000000000000000000000000000000004": { "balance": "1" },
-		"102e61f5d8f9bc71d0ad4a084df4e65e05ce0e1c": { "balance": "1606938044258990275541962092341162602522202993782792835301376" }
+		        "102e61f5d8f9bc71d0ad4a084df4e65e05ce0e1c": { "balance": "1606938044258990275541962092341162602522202993782792835301376" }
         }
 }`, types.EncodeNonce(nonce))
 	return WriteGenesisBlock(chainDb, strings.NewReader(testGenesis))
