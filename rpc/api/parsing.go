@@ -398,7 +398,6 @@ func NewUncleRes(h *types.Header) *UncleRes {
 	v.TransactionRoot = newHexData(h.TxHash)
 	v.StateRoot = newHexData(h.Root)
 	v.Miner = newHexData(h.Coinbase)
-	v.Mint = newHexNum(h.Mint)
 	v.Difficulty = newHexNum(h.Difficulty)
 	v.ExtraData = newHexData(h.Extra)
 	v.GasLimit = newHexNum(h.GasLimit)

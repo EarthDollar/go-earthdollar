@@ -102,7 +102,7 @@ var (
 		"eth_resend":                              (*ethApi).Resend,
 		"eth_pendingTransactions":                 (*ethApi).PendingTransactions,
 		"eth_getTransactionReceipt":               (*ethApi).GetTransactionReceipt,
-		"eth_getMint":				   (*ethApi).Mint,
+		//"eth_getMint":				   (*ethApi).GetMint, //earthdollar
 	}
 )
 

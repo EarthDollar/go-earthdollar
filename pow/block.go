@@ -28,6 +28,7 @@ type Block interface {
 	HashNoNonce() common.Hash
 	Nonce() uint64
 	MixDigest() common.Hash
+	Mint() *big.Int //earthdollar
 	NumberU64() uint64
 }
 

@@ -98,6 +98,7 @@ var (
 			"getTransactionFromBlock",
 			"getTransactionReceipt",
 			"getUncle",
+			"getMint",
 			"hashrate",
 			"mining",
 			"namereg",
