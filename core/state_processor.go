@@ -94,8 +94,8 @@ func ApplyTransaction(bc *BlockChain, gp *GasPool, statedb *state.StateDB, heade
 func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header) {
 	reward := new(big.Int).Set(BlockReward)
 	r := new(big.Int)
-	mint := new(big.Int).Set(header.Mint)
-	MintBalance.Set(mint)
+	//mint := new(big.Int).Set(header.Mint)
+	//MintBalance.Set(mint)
 
 	for _, uncle := range uncles {
 		r.Add(uncle.Number, big8)
@@ -103,18 +103,18 @@ func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*t
 		r.Mul(r, BlockReward)
 		r.Div(r, big8)
 
-		if MintBalance.Cmp(r) >= 0 { 
-			MintBalance.Sub(MintBalance, r)
+		//if MintBalance.Cmp(r) >= 0 { 
+			//MintBalance.Sub(MintBalance, r)
 			statedb.AddBalance(uncle.Coinbase, r)			
-		}
+		//}
 
 		r.Div(BlockReward, big32)
 		reward.Add(reward, r)
 	}
 
-	if MintBalance.Cmp(reward) >= 0 { 
-		MintBalance.Sub(MintBalance, reward)
+	//if MintBalance.Cmp(reward) >= 0 { 
+		//MintBalance.Sub(MintBalance, reward)
 		statedb.AddBalance(header.Coinbase, reward)
-	}
+	//}
 }
 
