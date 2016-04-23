@@ -190,26 +190,9 @@ func WriteTestNetGenesisBlock(chainDb ethdb.Database, nonce uint64) (*types.Bloc
 	return WriteGenesisBlock(chainDb, strings.NewReader(testGenesis))
 }
 
-func WriteOlympicGenesisBlock(chainDb ethdb.Database, nonce uint64) (*types.Block, error) {
+func WriteOlympicGenesisBlock(chainDb ethdb.Database , nonce uint64) (*types.Block, error) {
 	testGenesis := fmt.Sprintf(`{
-	"nonce":"0x%x",
-	"gasLimit":"0x%x",
-	"difficulty":"0x%x",
-	"alloc": {
-		"0000000000000000000000000000000000000001": {"balance": "1"},
-		"0000000000000000000000000000000000000002": {"balance": "1"},
-		"0000000000000000000000000000000000000003": {"balance": "1"},
-		"2b88ff71ad679b91a2d8f255e61777b45bc83f6f": {"balance": "1"},
-		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "10000"}
-	}
-}`, types.EncodeNonce(nonce), params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes())
-	return WriteGenesisBlock(chainDb, strings.NewReader(testGenesis))
-}
-
-func EDGenesisBlockString() *strings.Reader {
-	nonce := common.Hex2Bytes("0x0000000000000042")
-	testGenesis := fmt.Sprintf(`{
-	"nonce":"0x%x",
+	"nonce": "0x%x",
 	"gasLimit":"0x%x",
 	"difficulty":"0x%x",
 	"alloc": {
@@ -219,6 +202,22 @@ func EDGenesisBlockString() *strings.Reader {
 		"2b88ff71ad679b91a2d8f255e61777b45bc83f6f": {"balance": "1"},
 		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "10000"}
 	}
-}`, nonce, params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes())
+}`, types.EncodeNonce(nonce), params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes())
+	return WriteGenesisBlock(chainDb, strings.NewReader(testGenesis))
+}
+
+func EDGenesisBlockString() *strings.Reader {	
+	testGenesis := fmt.Sprintf(`{
+	"nonce":"0x0000000000000042",
+	"gasLimit":"0x%x",
+	"difficulty":"0x%x",
+	"alloc": {
+		"0000000000000000000000000000000000000001": {"balance": "1"},
+		"0000000000000000000000000000000000000002": {"balance": "1"},
+		"d1c30456071d97c3abbd48874a0ed0868f2ac859": {"balance": "100"},
+		"2b88ff71ad679b91a2d8f255e61777b45bc83f6f": {"balance": "1"},
+		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "10000"}
+	}
+}`, params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes())
 	return strings.NewReader(testGenesis)
 }

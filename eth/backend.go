@@ -356,7 +356,7 @@ func New(config *Config) (*Ethereum, error) {
 		b, _ := chainDb.Get([]byte("BlockchainVersion"))
 		bcVersion := int(common.NewValue(b).Uint())
 		if bcVersion != config.BlockChainVersion && bcVersion != 0 {
-			return nil, fmt.Errorf("Blockchain DB version mismatch (%d / %d). Run geth upgradedb.\n", bcVersion, config.BlockChainVersion)
+			return nil, fmt.Errorf("Blockchain DB version mismatch (%d / %d). Run ged upgradedb.\n", bcVersion, config.BlockChainVersion)
 		}
 		saveBlockchainVersion(chainDb, config.BlockChainVersion)
 	}
