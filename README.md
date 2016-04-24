@@ -85,7 +85,9 @@ Units of the Earth Dollar
  - 1 ED = 1000 000 000 Luck 
  - 1 ED = 10 000 000 000 Tien
  - 1 ED = 100 000 000 000 Jack
- - 1 ED = 1000 000 000 000 Maes
+ - 1 ED = 1000 000 000 000 Nottaway
+ - 1 ED = 10 000 000 000 000 Skydancer
+ - 1 ED = 100 000 000 000 000 Maes
 
  - 1 ED = 10^18 Seed
 
