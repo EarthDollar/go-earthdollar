@@ -47,7 +47,7 @@ The world is getting more interconnected, and global problems such as climate in
 We hope to use the Earth Dollar to redefine wealth, success and prosperity by creating a monetary system and economic system centered around the preservation life. We believe the Earth Dollar will also be central in the creation of the world’s largest climate action fund. Unlike other traditional currencies that are created by issuing debt, the Earth Dollar is debt free because it is created via assets.
 
 
-Specifications
+#Specifications
 
 
  - Name: EarthDollar - Version 0.8.1 BETA
