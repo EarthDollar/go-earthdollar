@@ -16,6 +16,6 @@ RUN apt-get update
 RUN apt-get install -q -y geth
 
 EXPOSE 8545
-EXPOSE 30303
+EXPOSE 20203
 
 ENTRYPOINT ["/usr/bin/geth"]
