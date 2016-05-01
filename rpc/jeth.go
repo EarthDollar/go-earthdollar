@@ -132,7 +132,7 @@ func (self *Jeth) Send(call otto.FunctionCall) (response otto.Value) {
 }
 
 // handleRequest will handle user agent requests by interacting with the user and sending
-// the user response back to the geth service
+// the user response back to the ged service
 func (self *Jeth) handleRequest(req *shared.Request) bool {
 	var err error
 	var args []interface{}

@@ -90,7 +90,7 @@ func DefaultDataDir() string {
 
 func DefaultIpcPath() string {
 	if runtime.GOOS == "windows" {
-		return `\\.\pipe\geth.ipc`
+		return `\\.\pipe\ged.ipc`
 	}
-	return filepath.Join(DefaultDataDir(), "geth.ipc")
+	return filepath.Join(DefaultDataDir(), "ged.ipc")
 }

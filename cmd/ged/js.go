@@ -240,7 +240,7 @@ func (self *jsre) batch(statement string) {
 	self.re.Stop(false)
 }
 
-// show summary of current geth instance
+// show summary of current ged instance
 func (self *jsre) welcome() {
 	self.re.Run(`
     (function () {
