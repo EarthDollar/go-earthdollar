@@ -1,6 +1,6 @@
-#Earth Dollar - Beta Version Testnet of the Mother Earth Network
+#Earth Dollar - Beta Version of the Mother Earth Network
 
-#During the Beta phase from April 22, 2016 to the full launch in the Fall of 2016, the genesis block may be reset if necessary and the coins have to be exchanged within a limited specify time-frame; after the reset the remaining coins have NO value except for test purposes.
+#During the Beta phase from April 22, 2016 to the full launch in the Fall of 2016, the genesis block may be updated if necessary and the coins may have to be exchanged within a limited specify time-frame prior to the update if necessary.
 
 
 
