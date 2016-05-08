@@ -11,6 +11,28 @@ THE NEW CODES FOR THE EARTH DOLLAR WILL BE RELEASED REGULARLY, AS TESTING IS FIN
 
 http://www.EarthDollar.org
 
+Our goal is as follows:
+
+1. Clone Ethereum (completed)
+2. Change Ethreum to the Mother Earth Network (Software Platform) and to cleanup code (doing now)
+3. Create the wallets and block explorer (doing now)
+4. Add the mint protocol and the Smart Assets protocol (not done)
+5. Add Secured Accounts (not done)
+6. Add in Dynamic Reserve (not done)
+6. Add Asset registration module (not donw)
+7. Add in carbon credits module (not done)
+7. Rebuild the engine (not done)
+8. Add in medical research module (not done)
+8. Add in distributed hard drive module (IPFS) (not done)
+9. Add in distributed computing module (not done)
+10. Add in Earth Index module (not done)
+11. Other modules to be announced
+
+
+
+
+
+
 Copyright (c) 2014 EarthDollar Developers
 
 # What is Earth Dollar?
