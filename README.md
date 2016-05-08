@@ -19,14 +19,15 @@ Our goal is as follows:
 4. Add the mint protocol and the Smart Assets protocol (not done)
 5. Add Secured Accounts (not done)
 6. Add in Dynamic Reserve (not done)
-6. Add Asset registration module (not donw)
-7. Add in carbon credits module (not done)
-7. Rebuild the engine (not done)
-8. Add in medical research module (not done)
-8. Add in distributed hard drive module (IPFS) (not done)
-9. Add in distributed computing module (not done)
-10. Add in Earth Index module (not done)
-11. Other modules to be announced
+7. Add Asset registration module (not done)
+8. Add in charity module (not done)
+9. Add in carbon credits module (not done)
+10. Rebuild the engine (not done)
+11. Add in medical research module (not done)
+12. Add in distributed hard drive module (IPFS) (not done)
+13. Add in distributed computing module (not done)
+14. Add in Earth Index module (not done)
+15. Other modules to be announced
 
 
 
@@ -123,13 +124,6 @@ License
 
 EarthDollar is released under the terms of the MIT license. See `COPYING` for more
 information or see http://opensource.org/licenses/MIT.
-
-
-
-EarthDollar integration/staging tree
-=======================================
-
-THE NEW CODES FOR THE EARTH DOLLAR UNDER HEAVY DEVELOPMENT.
 
 http://www.EarthDollar.org
 
