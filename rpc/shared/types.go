@@ -24,7 +24,7 @@ import (
 )
 
 // Ethereum RPC API interface
-type EthereumApi interface {
+type EarthdollarApi interface {
 	// API identifier
 	Name() string
 

@@ -24,7 +24,7 @@ import (
 )
 
 type InProcClient struct {
-	api         shared.EthereumApi
+	api         shared.EarthdollarApi
 	codec       codec.Codec
 	lastId      interface{}
 	lastJsonrpc string
@@ -44,7 +44,7 @@ func (self *InProcClient) Close() {
 }
 
 // Need to setup api support
-func (self *InProcClient) Initialize(offeredApi shared.EthereumApi) {
+func (self *InProcClient) Initialize(offeredApi shared.EarthdollarApi) {
 	self.api = offeredApi
 }
 

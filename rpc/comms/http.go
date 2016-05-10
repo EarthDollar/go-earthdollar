@@ -66,11 +66,11 @@ type stopServer struct {
 
 type handler struct {
 	codec codec.Codec
-	api   shared.EthereumApi
+	api   shared.EarthdollarApi
 }
 
 // StartHTTP starts listening for RPC requests sent via HTTP.
-func StartHttp(cfg HttpConfig, codec codec.Codec, api shared.EthereumApi) error {
+func StartHttp(cfg HttpConfig, codec codec.Codec, api shared.EarthdollarApi) error {
 	httpServerMu.Lock()
 	defer httpServerMu.Unlock()
 

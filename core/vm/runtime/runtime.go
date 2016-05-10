@@ -24,7 +24,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core/state"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
 	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 )
 
 // Config is a basic type specifing certain configuration flags for running
@@ -95,7 +95,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 	vm.Debug = cfg.Debug
 
 	var (
-		db, _      = ethdb.NewMemDatabase()
+		db, _      = eddb.NewMemDatabase()
 		statedb, _ = state.New(common.Hash{}, db)
 		vmenv      = NewEnv(cfg, statedb)
 		sender     = statedb.CreateAccount(cfg.Origin)

@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-earthdollar Authors
+// This file is part of the go-earthdollar library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-earthdollar library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-earthdollar library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
 
 package api
 
@@ -21,10 +21,10 @@ import (
 	"time"
 
 	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/eth"
+	"github.com/Earthdollar/go-earthdollar/ed"
 	"github.com/Earthdollar/go-earthdollar/rpc/codec"
 	"github.com/Earthdollar/go-earthdollar/rpc/shared"
-	"github.com/Earthdollar/go-earthdollar/xeth"
+	"github.com/Earthdollar/go-earthdollar/xed"
 )
 
 const (
@@ -45,17 +45,17 @@ type personalhandler func(*personalApi, *shared.Request) (interface{}, error)
 
 // net api provider
 type personalApi struct {
-	xeth     *xeth.XEth
-	ethereum *eth.Ethereum
+	xed     *xed.XEd
+	earthdollar *ed.Earthdollar
 	methods  map[string]personalhandler
 	codec    codec.ApiCoder
 }
 
 // create a new net api instance
-func NewPersonalApi(xeth *xeth.XEth, eth *eth.Ethereum, coder codec.Codec) *personalApi {
+func NewPersonalApi(xed *xed.XEd, ed *ed.Earthdollar, coder codec.Codec) *personalApi {
 	return &personalApi{
-		xeth:     xeth,
-		ethereum: eth,
+		xed:     xed,
+		earthdollar: ed,
 		methods:  personalMapping,
 		codec:    coder.New(nil),
 	}
@@ -90,7 +90,7 @@ func (self *personalApi) ApiVersion() string {
 }
 
 func (self *personalApi) ListAccounts(req *shared.Request) (interface{}, error) {
-	return self.xeth.Accounts(), nil
+	return self.xed.Accounts(), nil
 }
 
 func (self *personalApi) NewAccount(req *shared.Request) (interface{}, error) {
@@ -100,7 +100,7 @@ func (self *personalApi) NewAccount(req *shared.Request) (interface{}, error) {
 	}
 	var passwd string
 	if args.Passphrase == nil {
-		fe := self.xeth.Frontend()
+		fe := self.xed.Frontend()
 		if fe == nil {
 			return false, fmt.Errorf("unable to create account: unable to interact with user")
 		}
@@ -112,7 +112,7 @@ func (self *personalApi) NewAccount(req *shared.Request) (interface{}, error) {
 	} else {
 		passwd = *args.Passphrase
 	}
-	am := self.ethereum.AccountManager()
+	am := self.earthdollar.AccountManager()
 	acc, err := am.NewAccount(passwd)
 	return acc.Address.Hex(), err
 }
@@ -124,14 +124,14 @@ func (self *personalApi) UnlockAccount(req *shared.Request) (interface{}, error)
 	}
 
 	if args.Passphrase == nil {
-		fe := self.xeth.Frontend()
+		fe := self.xed.Frontend()
 		if fe == nil {
 			return false, fmt.Errorf("No password provided")
 		}
 		return fe.UnlockAccount(common.HexToAddress(args.Address).Bytes()), nil
 	}
 
-	am := self.ethereum.AccountManager()
+	am := self.earthdollar.AccountManager()
 	addr := common.HexToAddress(args.Address)
 
 	err := am.TimedUnlock(addr, *args.Passphrase, time.Duration(args.Duration)*time.Second)

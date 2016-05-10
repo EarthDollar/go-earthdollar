@@ -21,6 +21,6 @@ import (
 )
 
 // Merge multiple API's to a single API instance
-func Merge(apis ...shared.EthereumApi) shared.EthereumApi {
+func Merge(apis ...shared.EarthdollarApi) shared.EarthdollarApi {
 	return newMergedApi(apis...)
 }

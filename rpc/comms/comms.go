@@ -44,7 +44,7 @@ var (
 
 	// List with API's which are offered over thr HTTP/RPC interface by default
 	DefaultHttpRpcApis = strings.Join([]string{
-		shared.DbApiName, shared.EthApiName, shared.NetApiName, shared.Web3ApiName,
+		shared.DbApiName, shared.EdApiName, shared.NetApiName, shared.Web3ApiName,
 	}, ",")
 )
 
@@ -59,7 +59,7 @@ type EthereumClient interface {
 	SupportedModules() (map[string]string, error)
 }
 
-func handle(id int, conn net.Conn, api shared.EthereumApi, c codec.Codec) {
+func handle(id int, conn net.Conn, api shared.EarthdollarApi, c codec.Codec) {
 	codec := c.New(conn)
 
 	defer func() {

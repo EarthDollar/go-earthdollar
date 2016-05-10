@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.

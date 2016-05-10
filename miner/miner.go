@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package miner implements Ethereum block creation and mining.
+// Package miner implements Earthdollar block creation and mining.
 package miner
 
 import (
@@ -26,7 +26,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core"
 	"github.com/Earthdollar/go-earthdollar/core/state"
 	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/eth/downloader"
+	"github.com/Earthdollar/go-earthdollar/ed/downloader"
 	"github.com/Earthdollar/go-earthdollar/event"
 	"github.com/Earthdollar/go-earthdollar/logger"
 	"github.com/Earthdollar/go-earthdollar/logger/glog"
@@ -44,15 +44,15 @@ type Miner struct {
 	threads  int
 	coinbase common.Address
 	mining   int32
-	eth      core.Backend
+	ed      core.Backend
 	pow      pow.PoW
 
 	canStart    int32 // can start indicates whether we can start the mining operation
 	shouldStart int32 // should start indicates whether we should start after sync
 }
 
-func New(eth core.Backend, mux *event.TypeMux, pow pow.PoW) *Miner {
-	miner := &Miner{eth: eth, mux: mux, pow: pow, worker: newWorker(common.Address{}, eth), canStart: 1}
+func New(ed core.Backend, mux *event.TypeMux, pow pow.PoW) *Miner {
+	miner := &Miner{ed: ed, mux: mux, pow: pow, worker: newWorker(common.Address{}, ed), canStart: 1}
 	go miner.update()
 
 	return miner
@@ -172,7 +172,7 @@ func (self *Miner) PendingBlock() *types.Block {
 	return self.worker.pendingBlock()
 }
 
-func (self *Miner) SetEtherbase(addr common.Address) {
+func (self *Miner) SetEarthbase(addr common.Address) {
 	self.coinbase = addr
-	self.worker.setEtherbase(addr)
+	self.worker.setEarthbase(addr)
 }

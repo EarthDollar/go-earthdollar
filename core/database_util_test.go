@@ -29,7 +29,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core/vm"
 	"github.com/Earthdollar/go-earthdollar/crypto"
 	"github.com/Earthdollar/go-earthdollar/crypto/sha3"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/rlp"
 )
 
@@ -86,7 +86,7 @@ func TestDifficultyFrontier(t *testing.T) {
 
 // Tests block header storage and retrieval operations.
 func TestHeaderStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	// Create a test header to move around the database and make sure it's really new
 	header := &types.Header{Extra: []byte("test header")}
@@ -121,7 +121,7 @@ func TestHeaderStorage(t *testing.T) {
 
 // Tests block body storage and retrieval operations.
 func TestBodyStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	// Create a test body to move around the database and make sure it's really new
 	body := &types.Body{Uncles: []*types.Header{{Extra: []byte("test header")}}}
@@ -161,7 +161,7 @@ func TestBodyStorage(t *testing.T) {
 
 // Tests block storage and retrieval operations.
 func TestBlockStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	// Create a test block to move around the database and make sure it's really new
 	block := types.NewBlockWithHeader(&types.Header{
@@ -213,7 +213,7 @@ func TestBlockStorage(t *testing.T) {
 
 // Tests that partial block contents don't get reassembled into full blocks.
 func TestPartialBlockStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	block := types.NewBlockWithHeader(&types.Header{
 		Extra:       []byte("test block"),
 		UncleHash:   types.EmptyUncleHash,
@@ -254,7 +254,7 @@ func TestPartialBlockStorage(t *testing.T) {
 
 // Tests block total difficulty storage and retrieval operations.
 func TestTdStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	// Create a test TD to move around the database and make sure it's really new
 	hash, td := common.Hash{}, big.NewInt(314)
@@ -279,7 +279,7 @@ func TestTdStorage(t *testing.T) {
 
 // Tests that canonical numbers can be mapped to hashes and retrieved.
 func TestCanonicalMappingStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	// Create a test canonical number and assinged hash to move around
 	hash, number := common.Hash{0: 0xff}, uint64(314)
@@ -304,7 +304,7 @@ func TestCanonicalMappingStorage(t *testing.T) {
 
 // Tests that head headers and head blocks can be assigned, individually.
 func TestHeadStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	blockHead := types.NewBlockWithHeader(&types.Header{Extra: []byte("test block header")})
 	blockFull := types.NewBlockWithHeader(&types.Header{Extra: []byte("test block full")})
@@ -344,7 +344,7 @@ func TestHeadStorage(t *testing.T) {
 
 // Tests that transactions and associated metadata can be stored and retrieved.
 func TestTransactionStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	tx1 := types.NewTransaction(1, common.BytesToAddress([]byte{0x11}), big.NewInt(111), big.NewInt(1111), big.NewInt(11111), []byte{0x11, 0x11, 0x11})
 	tx2 := types.NewTransaction(2, common.BytesToAddress([]byte{0x22}), big.NewInt(222), big.NewInt(2222), big.NewInt(22222), []byte{0x22, 0x22, 0x22})
@@ -386,7 +386,7 @@ func TestTransactionStorage(t *testing.T) {
 
 // Tests that receipts can be stored and retrieved.
 func TestReceiptStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	receipt1 := &types.Receipt{
 		PostState:         []byte{0x01},
@@ -445,7 +445,7 @@ func TestReceiptStorage(t *testing.T) {
 
 // Tests that receipts associated with a single block can be stored and retrieved.
 func TestBlockReceiptStorage(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	receipt1 := &types.Receipt{
 		PostState:         []byte{0x01},
@@ -500,7 +500,7 @@ func TestBlockReceiptStorage(t *testing.T) {
 }
 
 func TestMipmapBloom(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	receipt1 := new(types.Receipt)
 	receipt1.Logs = vm.Logs{
@@ -524,7 +524,7 @@ func TestMipmapBloom(t *testing.T) {
 	}
 
 	// reset
-	db, _ = ethdb.NewMemDatabase()
+	db, _ = eddb.NewMemDatabase()
 	receipt := new(types.Receipt)
 	receipt.Logs = vm.Logs{
 		&vm.Log{Address: common.BytesToAddress([]byte("test"))},
@@ -551,7 +551,7 @@ func TestMipmapChain(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	var (
-		db, _   = ethdb.NewLDBDatabase(dir, 16)
+		db, _   = eddb.NewLDBDatabase(dir, 16)
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		addr    = crypto.PubkeyToAddress(key1.PublicKey)
 		addr2   = common.BytesToAddress([]byte("jeff"))

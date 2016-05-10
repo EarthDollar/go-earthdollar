@@ -35,7 +35,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core/types"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
 	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/event"
 	"github.com/Earthdollar/go-earthdollar/logger"
 	"github.com/Earthdollar/go-earthdollar/logger/glog"
@@ -82,7 +82,7 @@ const (
 // included in the canonical one where as GetBlockByNumber always represents the
 // canonical chain.
 type BlockChain struct {
-	chainDb      ethdb.Database
+	chainDb      eddb.Database
 	eventMux     *event.TypeMux
 	genesisBlock *types.Block
 	// Last known total difficulty
@@ -116,9 +116,9 @@ type BlockChain struct {
 }
 
 // NewBlockChain returns a fully initialised block chain using information
-// available in the database. It initialiser the default Ethereum Validator and
+// available in the database. It initialiser the default Earthdollar Validator and
 // Processor.
-func NewBlockChain(chainDb ethdb.Database, pow pow.PoW, mux *event.TypeMux) (*BlockChain, error) {
+func NewBlockChain(chainDb eddb.Database, pow pow.PoW, mux *event.TypeMux) (*BlockChain, error) {
 	headerCache, _ := lru.New(headerCacheLimit)
 	bodyCache, _ := lru.New(bodyCacheLimit)
 	bodyRLPCache, _ := lru.New(bodyCacheLimit)
@@ -654,7 +654,7 @@ func (self *BlockChain) GetBlockHashesFromHash(hash common.Hash, max uint64) []c
 	return chain
 }
 
-// [deprecated by eth/62]
+// [deprecated by ed/62]
 // GetBlocksFromHash returns the block corresponding to hash and up to n-1 ancestors.
 func (self *BlockChain) GetBlocksFromHash(hash common.Hash, n int) (blocks []*types.Block) {
 	for i := 0; i < n; i++ {

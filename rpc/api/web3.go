@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-earthdollar Authors
+// This file is part of the go-earthdollar library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-earthdollar library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-earthdollar library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
 
 package api
 
@@ -21,7 +21,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/crypto"
 	"github.com/Earthdollar/go-earthdollar/rpc/codec"
 	"github.com/Earthdollar/go-earthdollar/rpc/shared"
-	"github.com/Earthdollar/go-earthdollar/xeth"
+	"github.com/Earthdollar/go-earthdollar/xed"
 )
 
 const (
@@ -41,15 +41,15 @@ type web3handler func(*web3Api, *shared.Request) (interface{}, error)
 
 // web3 api provider
 type web3Api struct {
-	xeth    *xeth.XEth
+	xed    *xed.XEd
 	methods map[string]web3handler
 	codec   codec.ApiCoder
 }
 
-// create a new web3 api instance
-func NewWeb3Api(xeth *xeth.XEth, coder codec.Codec) *web3Api {
+// create a new web3 api instance	
+func NewWeb3Api(xEd *xEd.XEd, coder codec.Codec) *web3Api {
 	return &web3Api{
-		xeth:    xeth,
+		xEd:    xEd,
 		methods: Web3Mapping,
 		codec:   coder.New(nil),
 	}
@@ -93,7 +93,7 @@ func (self *web3Api) Sha3(req *shared.Request) (interface{}, error) {
 	return common.ToHex(crypto.Sha3(common.FromHex(args.Data))), nil
 }
 
-// returns the xeth client vrsion
+// returns the xEd client vrsion
 func (self *web3Api) ClientVersion(req *shared.Request) (interface{}, error) {
-	return self.xeth.ClientVersion(), nil
+	return self.xEd.ClientVersion(), nil
 }

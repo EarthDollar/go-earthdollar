@@ -29,7 +29,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core/state"
 	"github.com/Earthdollar/go-earthdollar/core/types"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/event"
 	"github.com/Earthdollar/go-earthdollar/logger"
 	"github.com/Earthdollar/go-earthdollar/logger/glog"
@@ -97,10 +97,10 @@ type worker struct {
 	quit   chan struct{}
 	pow    pow.PoW
 
-	eth     core.Backend
+	ed     core.Backend
 	chain   *core.BlockChain
 	proc    core.Validator
-	chainDb ethdb.Database
+	chainDb eddb.Database
 
 	coinbase common.Address
 	gasPrice *big.Int
@@ -122,15 +122,15 @@ type worker struct {
 	fullValidation bool
 }
 
-func newWorker(coinbase common.Address, eth core.Backend) *worker {
+func newWorker(coinbase common.Address, ed core.Backend) *worker {
 	worker := &worker{
-		eth:            eth,
-		mux:            eth.EventMux(),
-		chainDb:        eth.ChainDb(),
+		ed:            ed,
+		mux:            ed.EventMux(),
+		chainDb:        ed.ChainDb(),
 		recv:           make(chan *Result, resultQueueSize),
 		gasPrice:       new(big.Int),
-		chain:          eth.BlockChain(),
-		proc:           eth.BlockChain().Validator(),
+		chain:          ed.BlockChain(),
+		proc:           ed.BlockChain().Validator(),
 		possibleUncles: make(map[common.Hash]*types.Block),
 		coinbase:       coinbase,
 		txQueue:        make(map[common.Hash]*types.Transaction),
@@ -146,7 +146,7 @@ func newWorker(coinbase common.Address, eth core.Backend) *worker {
 	return worker
 }
 
-func (self *worker) setEtherbase(addr common.Address) {
+func (self *worker) setEarthbase(addr common.Address) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.coinbase = addr
@@ -290,7 +290,7 @@ func (self *worker) wait() {
 					continue
 				}
 
-				auxValidator := self.eth.BlockChain().AuxValidator()
+				auxValidator := self.ed.BlockChain().AuxValidator()
 				if err := core.ValidateHeader(auxValidator, block.Header(), parent.Header(), true, false); err != nil && err != core.BlockFutureErr {
 					glog.V(logger.Error).Infoln("Invalid header on mined block:", err)
 					continue
@@ -371,7 +371,7 @@ func (self *worker) push(work *Work) {
 
 // makeCurrent creates a new environment for the current cycle.
 func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error {
-	state, err := state.New(parent.Root(), self.eth.ChainDb())
+	state, err := state.New(parent.Root(), self.ed.ChainDb())
 	if err != nil {
 		return err
 	}
@@ -392,7 +392,7 @@ func (self *worker) makeCurrent(parent *types.Block, header *types.Header) error
 		work.family.Add(ancestor.Hash())
 		work.ancestors.Add(ancestor.Hash())
 	}
-	accounts, _ := self.eth.AccountManager().Accounts()
+	accounts, _ := self.ed.AccountManager().Accounts()
 
 	// Keep track of transactions which return errors so they can be removed
 	work.remove = set.New()
@@ -493,19 +493,19 @@ func (self *worker) commitNewWork() {
 	work := self.current
 
 	/* //approach 1
-	transactions := self.eth.TxPool().GetTransactions()
+	transactions := self.ed.TxPool().GetTransactions()
 	sort.Sort(types.TxByNonce(transactions))
 	*/
 
 	//approach 2
-	transactions := self.eth.TxPool().GetTransactions()
+	transactions := self.ed.TxPool().GetTransactions()
 	types.SortByPriceAndNonce(transactions)
 
 	/* // approach 3
 	// commit transactions for this run.
 	txPerOwner := make(map[common.Address]types.Transactions)
 	// Sort transactions by owner
-	for _, tx := range self.eth.TxPool().GetTransactions() {
+	for _, tx := range self.ed.TxPool().GetTransactions() {
 		from, _ := tx.From() // we can ignore the sender error
 		txPerOwner[from] = append(txPerOwner[from], tx)
 	}
@@ -529,7 +529,7 @@ func (self *worker) commitNewWork() {
 	*/
 
 	work.commitTransactions(transactions, self.gasPrice, self.chain)
-	self.eth.TxPool().RemoveTransactions(work.lowGasTxs)
+	self.ed.TxPool().RemoveTransactions(work.lowGasTxs)
 
 	// compute uncles for the new block.
 	var (

@@ -29,7 +29,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/common"
 	"github.com/Earthdollar/go-earthdollar/core"
 	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/eth"
+	"github.com/Earthdollar/go-earthdollar/ed"
 	"github.com/Earthdollar/go-earthdollar/logger"
 	"github.com/Earthdollar/go-earthdollar/logger/glog"
 	"github.com/Earthdollar/go-earthdollar/rlp"

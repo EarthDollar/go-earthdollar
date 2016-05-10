@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-earthdollar Authors
+// This file is part of the go-earthdollar library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-earthdollar library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-earthdollar library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
 
 package api
 
@@ -21,10 +21,10 @@ import (
 
 	"fmt"
 
-	"github.com/Earthdollar/go-earthdollar/eth"
+	"github.com/Earthdollar/go-earthdollar/ed"
 	"github.com/Earthdollar/go-earthdollar/rpc/codec"
 	"github.com/Earthdollar/go-earthdollar/rpc/shared"
-	"github.com/Earthdollar/go-earthdollar/xeth"
+	"github.com/Earthdollar/go-earthdollar/xed"
 )
 
 var (
@@ -70,7 +70,7 @@ var (
 			"seedHash",
 			"setHead",
 		},
-		"eth": []string{
+		"ed": []string{
 			"accounts",
 			"blockNumber",
 			"call",
@@ -112,7 +112,7 @@ var (
 		"miner": []string{
 			"hashrate",
 			"makeDAG",
-			"setEtherbase",
+			"setEarthbase",
 			"setExtra",
 			"setGasPrice",
 			"startAutoDAG",
@@ -155,36 +155,36 @@ var (
 )
 
 // Parse a comma separated API string to individual api's
-func ParseApiString(apistr string, codec codec.Codec, xeth *xeth.XEth, eth *eth.Ethereum) ([]shared.EthereumApi, error) {
+func ParseApiString(apistr string, codec codec.Codec, xed *xed.XEd, ed *ed.Earthdollar) ([]shared.EarthdollarApi, error) {
 	if len(strings.TrimSpace(apistr)) == 0 {
 		return nil, fmt.Errorf("Empty apistr provided")
 	}
 
 	names := strings.Split(apistr, ",")
-	apis := make([]shared.EthereumApi, len(names))
+	apis := make([]shared.EarthdollarApi, len(names))
 
 	for i, name := range names {
 		switch strings.ToLower(strings.TrimSpace(name)) {
 		case shared.AdminApiName:
-			apis[i] = NewAdminApi(xeth, eth, codec)
+			apis[i] = NewAdminApi(xed, ed, codec)
 		case shared.DebugApiName:
-			apis[i] = NewDebugApi(xeth, eth, codec)
+			apis[i] = NewDebugApi(xed, ed, codec)
 		case shared.DbApiName:
-			apis[i] = NewDbApi(xeth, eth, codec)
-		case shared.EthApiName:
-			apis[i] = NewEthApi(xeth, eth, codec)
+			apis[i] = NewDbApi(xed, ed, codec)
+		case shared.EdApiName:
+			apis[i] = NewEdApi(xed, ed, codec)
 		case shared.MinerApiName:
-			apis[i] = NewMinerApi(eth, codec)
+			apis[i] = NewMinerApi(ed, codec)
 		case shared.NetApiName:
-			apis[i] = NewNetApi(xeth, eth, codec)
+			apis[i] = NewNetApi(xed, ed, codec)
 		case shared.ShhApiName:
-			apis[i] = NewShhApi(xeth, eth, codec)
+			apis[i] = NewShhApi(xed, ed, codec)
 		case shared.TxPoolApiName:
-			apis[i] = NewTxPoolApi(xeth, eth, codec)
+			apis[i] = NewTxPoolApi(xed, ed, codec)
 		case shared.PersonalApiName:
-			apis[i] = NewPersonalApi(xeth, eth, codec)
+			apis[i] = NewPersonalApi(xed, ed, codec)
 		case shared.Web3ApiName:
-			apis[i] = NewWeb3Api(xeth, codec)
+			apis[i] = NewWeb3Api(xed, codec)
 		default:
 			return nil, fmt.Errorf("Unknown API '%s'", name)
 		}
@@ -201,8 +201,8 @@ func Javascript(name string) string {
 		return Debug_JS
 	case shared.DbApiName:
 		return Db_JS
-	case shared.EthApiName:
-		return Eth_JS
+	case shared.EdApiName:
+		return Ed_JS
 	case shared.MinerApiName:
 		return Miner_JS
 	case shared.NetApiName:

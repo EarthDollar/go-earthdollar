@@ -22,7 +22,7 @@ import (
 
 	"github.com/Earthdollar/go-earthdollar/common"
 	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 )
 
 func newEmptySecure() *SecureTrie {

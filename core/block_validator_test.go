@@ -25,13 +25,13 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core/state"
 	"github.com/Earthdollar/go-earthdollar/core/types"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/event"
 	"github.com/Earthdollar/go-earthdollar/pow/ezp"
 )
 
 func proc() (Validator, *BlockChain) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	var mux event.TypeMux
 
 	WriteTestNetGenesisBlock(db, 0)
@@ -62,7 +62,7 @@ func TestNumber(t *testing.T) {
 }
 
 func TestPutReceipt(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 
 	var addr common.Address
 	addr[0] = 1

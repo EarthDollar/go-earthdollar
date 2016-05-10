@@ -23,7 +23,7 @@ import (
 
 	"github.com/Earthdollar/go-earthdollar/common"
 	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/logger"
 	"github.com/Earthdollar/go-earthdollar/logger/glog"
 	"github.com/Earthdollar/go-earthdollar/rlp"
@@ -57,7 +57,7 @@ func (self Storage) Copy() Storage {
 
 type StateObject struct {
 	// State database for storing state changes
-	db   ethdb.Database
+	db   eddb.Database
 	trie *trie.SecureTrie
 
 	// Address belonging to this account
@@ -83,14 +83,14 @@ type StateObject struct {
 	dirty   bool
 }
 
-func NewStateObject(address common.Address, db ethdb.Database) *StateObject {
+func NewStateObject(address common.Address, db eddb.Database) *StateObject {
 	object := &StateObject{db: db, address: address, balance: new(big.Int), dirty: true}
 	object.trie, _ = trie.NewSecure(common.Hash{}, db)
 	object.storage = make(Storage)
 	return object
 }
 
-func NewStateObjectFromBytes(address common.Address, data []byte, db ethdb.Database) *StateObject {
+func NewStateObjectFromBytes(address common.Address, data []byte, db eddb.Database) *StateObject {
 	var extobject struct {
 		Nonce    uint64
 		Balance  *big.Int

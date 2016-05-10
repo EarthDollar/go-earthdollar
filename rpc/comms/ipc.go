@@ -34,7 +34,7 @@ type Stopper interface {
 	Stop()
 }
 
-type InitFunc func(conn net.Conn) (Stopper, shared.EthereumApi, error)
+type InitFunc func(conn net.Conn) (Stopper, shared.EarthdollarApi, error)
 
 type IpcConfig struct {
 	Endpoint string

@@ -29,14 +29,14 @@ const (
 // combines multiple API's
 type MergedApi struct {
 	apis    map[string]string
-	methods map[string]shared.EthereumApi
+	methods map[string]shared.EarthdollarApi
 }
 
 // create new merged api instance
-func newMergedApi(apis ...shared.EthereumApi) *MergedApi {
+func newMergedApi(apis ...shared.EarthdollarApi) *MergedApi {
 	mergedApi := new(MergedApi)
 	mergedApi.apis = make(map[string]string, len(apis))
-	mergedApi.methods = make(map[string]shared.EthereumApi)
+	mergedApi.methods = make(map[string]shared.EarthdollarApi)
 
 	for _, api := range apis {
 		mergedApi.apis[api.Name()] = api.ApiVersion()

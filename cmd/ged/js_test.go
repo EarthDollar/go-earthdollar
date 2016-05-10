@@ -36,8 +36,8 @@ import (
 	"github.com/Earthdollar/go-earthdollar/common/registrar"
 	"github.com/Earthdollar/go-earthdollar/core"
 	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/eth"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/ed"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/rpc/codec"
 	"github.com/Earthdollar/go-earthdollar/rpc/comms"
 )

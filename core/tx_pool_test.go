@@ -25,7 +25,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core/state"
 	"github.com/Earthdollar/go-earthdollar/core/types"
 	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/event"
 )
 
@@ -35,7 +35,7 @@ func transaction(nonce uint64, gaslimit *big.Int, key *ecdsa.PrivateKey) *types.
 }
 
 func setupTxPool() (*TxPool, *ecdsa.PrivateKey) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, db)
 
 	var m event.TypeMux
@@ -164,7 +164,7 @@ func TestTransactionChainFork(t *testing.T) {
 	pool, key := setupTxPool()
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 	resetState := func() {
-		db, _ := ethdb.NewMemDatabase()
+		db, _ := eddb.NewMemDatabase()
 		statedb, _ := state.New(common.Hash{}, db)
 		pool.currentState = func() (*state.StateDB, error) { return statedb, nil }
 		currentState, _ := pool.currentState()
@@ -190,7 +190,7 @@ func TestTransactionDoubleNonce(t *testing.T) {
 	pool, key := setupTxPool()
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 	resetState := func() {
-		db, _ := ethdb.NewMemDatabase()
+		db, _ := eddb.NewMemDatabase()
 		statedb, _ := state.New(common.Hash{}, db)
 		pool.currentState = func() (*state.StateDB, error) { return statedb, nil }
 		currentState, _ := pool.currentState()

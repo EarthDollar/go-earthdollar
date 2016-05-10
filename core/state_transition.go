@@ -174,7 +174,7 @@ func (self *StateTransition) buyGas() error {
 		return err
 	}
 	if sender.Balance().Cmp(mgval) < 0 {
-		return fmt.Errorf("insufficient ETH for gas (%x). Req %v, has %v", sender.Address().Bytes()[:4], mgval, sender.Balance())
+		return fmt.Errorf("insufficient ED for gas (%x). Req %v, has %v", sender.Address().Bytes()[:4], mgval, sender.Balance())
 	}
 	if err = self.gp.SubGas(mgas); err != nil {
 		return err
@@ -264,7 +264,7 @@ func (self *StateTransition) transitionDb() (ret []byte, usedGas *big.Int, err e
 }
 
 func (self *StateTransition) refundGas() {
-	// Return eth for remaining gas to the sender account,
+	// Return ed for remaining gas to the sender account,
 	// exchanged at the original rate.
 	sender, _ := self.from() // err already checked
 	remaining := new(big.Int).Mul(self.gas, self.gasPrice)

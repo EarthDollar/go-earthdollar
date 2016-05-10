@@ -27,7 +27,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/common"
 	"github.com/Earthdollar/go-earthdollar/core/state"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/logger/glog"
 )
 
@@ -107,7 +107,7 @@ func BenchVmTest(p string, conf bconf, b *testing.B) error {
 
 func benchVmTest(test VmTest, env map[string]string, b *testing.B) {
 	b.StopTimer()
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, db)
 	for addr, account := range test.Pre {
 		obj := StateObjectFromAccount(db, addr, account)
@@ -158,7 +158,7 @@ func runVmTests(tests map[string]VmTest, skipTests []string) error {
 }
 
 func runVmTest(test VmTest) error {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, db)
 	for addr, account := range test.Pre {
 		obj := StateObjectFromAccount(db, addr, account)

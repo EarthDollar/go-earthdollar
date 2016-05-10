@@ -36,8 +36,8 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
 	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/eth"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/ed"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/event"
 	"github.com/Earthdollar/go-earthdollar/logger"
 	"github.com/Earthdollar/go-earthdollar/logger/glog"
@@ -49,7 +49,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/rpc/comms"
 	"github.com/Earthdollar/go-earthdollar/rpc/shared"
 	"github.com/Earthdollar/go-earthdollar/rpc/useragent"
-	"github.com/Earthdollar/go-earthdollar/xeth"
+	"github.com/Earthdollar/go-earthdollar/xed"
 )
 
 func init() {
@@ -612,7 +612,7 @@ func StartIPC(eth *eth.Ethereum, ctx *cli.Context) error {
 		Endpoint: IpcSocketPath(ctx),
 	}
 
-	initializer := func(conn net.Conn) (comms.Stopper, shared.EthereumApi, error) {
+	initializer := func(conn net.Conn) (comms.Stopper, shared.EarthdollarApi, error) {
 		fe := useragent.NewRemoteFrontend(conn, eth.AccountManager())
 		xeth := xeth.New(eth, fe)
 		apis, err := api.ParseApiString(ctx.GlobalString(IPCApiFlag.Name), codec.JSON, xeth, eth)

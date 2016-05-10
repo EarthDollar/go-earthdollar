@@ -33,13 +33,13 @@ import (
 var DisableBadBlockReporting = true
 
 // ReportBlock reports the block to the block reporting tool found at
-// badblocks.ethdev.com
+// badblocks.eddev.com
 func ReportBlock(block *types.Block, err error) {
 	if DisableBadBlockReporting {
 		return
 	}
 
-	const url = "https://badblocks.ethdev.com"
+	const url = "https://badblocks.eddev.com"
 
 	blockRlp, _ := rlp.EncodeToBytes(block)
 	data := map[string]interface{}{
@@ -50,7 +50,7 @@ func ReportBlock(block *types.Block, err error) {
 			"vmtrace":  "NYI",
 		},
 	}
-	jsonStr, _ := json.Marshal(map[string]interface{}{"method": "eth_badBlock", "params": []interface{}{data}, "id": "1", "jsonrpc": "2.0"})
+	jsonStr, _ := json.Marshal(map[string]interface{}{"method": "ed_badBlock", "params": []interface{}{data}, "id": "1", "jsonrpc": "2.0"})
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")

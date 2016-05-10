@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
 )
 
@@ -53,13 +53,13 @@ type TrieSyncLeafCallback func(leaf []byte, parent common.Hash) error
 // unknown trie hashes to retrieve, accepts node data associated with said hashes
 // and reconstructs the trie step by step until all is done.
 type TrieSync struct {
-	database ethdb.Database           // State database for storing all the assembled node data
+	database eddb.Database           // State database for storing all the assembled node data
 	requests map[common.Hash]*request // Pending requests pertaining to a key hash
 	queue    *prque.Prque             // Priority queue with the pending requests
 }
 
 // NewTrieSync creates a new trie data download scheduler.
-func NewTrieSync(root common.Hash, database ethdb.Database, callback TrieSyncLeafCallback) *TrieSync {
+func NewTrieSync(root common.Hash, database eddb.Database, callback TrieSyncLeafCallback) *TrieSync {
 	ts := &TrieSync{
 		database: database,
 		requests: make(map[common.Hash]*request),
@@ -258,7 +258,7 @@ func (s *TrieSync) children(req *request) ([]*request, error) {
 // commit finalizes a retrieval request and stores it into the database. If any
 // of the referencing parent requests complete due to this commit, they are also
 // committed themselves.
-func (s *TrieSync) commit(req *request, batch ethdb.Batch) (err error) {
+func (s *TrieSync) commit(req *request, batch eddb.Batch) (err error) {
 	// Create a new batch if none was specified
 	if batch == nil {
 		batch = s.database.NewBatch()

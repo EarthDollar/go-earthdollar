@@ -132,7 +132,7 @@ func (v *BlockValidator) ValidateState(block, parent *types.Block, statedb *stat
 	return nil
 }
 
-// VerifyUncles verifies the given block's uncles and applies the Ethereum
+// VerifyUncles verifies the given block's uncles and applies the Earthdollar
 // consensus rules to the various block headers included; it will return an
 // error if any of the included uncle headers were invalid. It returns an error
 // if the validation failed.

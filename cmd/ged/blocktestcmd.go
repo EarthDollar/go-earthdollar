@@ -22,8 +22,8 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/Earthdollar/go-earthdollar/cmd/utils"
-	"github.com/Earthdollar/go-earthdollar/eth"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/ed"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/tests"
 )
 

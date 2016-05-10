@@ -14,8 +14,8 @@ import (
   "github.com/Earthdollar/go-earthdollar/core"
   "github.com/Earthdollar/go-earthdollar/core/state"
   "github.com/Earthdollar/go-earthdollar/crypto"
-  "github.com/Earthdollar/go-earthdollar/eth"
-  xe "github.com/Earthdollar/go-earthdollar/xeth"
+  "github.com/Earthdollar/go-earthdollar/ed"
+  xe "github.com/Earthdollar/go-earthdollar/xed"
 )
 
 const (
@@ -74,8 +74,8 @@ const (
 
 type testFrontend struct {
   t           *testing.T
-  ethereum    *eth.Ethereum
-  xeth        *xe.XEth
+  earthdollar    *ed.Earthdollar
+  xed        *xe.XEd
   coinbase    common.Address
   stateDb     *state.StateDB
   txc         uint64
@@ -84,29 +84,29 @@ type testFrontend struct {
 }
 
 func (self *testFrontend) UnlockAccount(acc []byte) bool {
-  self.ethereum.AccountManager().Unlock(common.BytesToAddress(acc), "password")
+  self.earthdollar.AccountManager().Unlock(common.BytesToAddress(acc), "password")
   return true
 }
 
 func (self *testFrontend) ConfirmTransaction(tx string) bool {
   if self.wantNatSpec {
     ds := docserver.New("/tmp/")
-    self.lastConfirm = GetNotice(self.xeth, tx, ds)
+    self.lastConfirm = GetNotice(self.xed, tx, ds)
   }
   return true
 }
 
-func testEth(t *testing.T) (ethereum *eth.Ethereum, err error) {
+func testEd(t *testing.T) (earthdollar *ed.Earthdollar, err error) {
 
-  os.RemoveAll("/tmp/eth-natspec/")
+  os.RemoveAll("/tmp/ed-natspec/")
 
-  err = os.MkdirAll("/tmp/eth-natspec/keystore", os.ModePerm)
+  err = os.MkdirAll("/tmp/ed-natspec/keystore", os.ModePerm)
   if err != nil {
     panic(err)
   }
 
   // create a testAddress
-  ks := crypto.NewKeyStorePassphrase("/tmp/eth-natspec/keystore", crypto.LightScryptN, crypto.LightScryptP)
+  ks := crypto.NewKeyStorePassphrase("/tmp/ed-natspec/keystore", crypto.LightScryptN, crypto.LightScryptP)
   am := accounts.NewManager(ks)
   testAccount, err := am.NewAccount("password")
   if err != nil {
@@ -120,8 +120,8 @@ func testEth(t *testing.T) (ethereum *eth.Ethereum, err error) {
   }`)
 
   // only use minimalistic stack with no networking
-  ethereum, err = eth.New(&eth.Config{
-    DataDir:        "/tmp/eth-natspec",
+  earthdollar, err = ed.New(&ed.Config{
+    DataDir:        "/tmp/ed-natspec",
     AccountManager: am,
     MaxPeers:       0,
   })
@@ -134,28 +134,28 @@ func testEth(t *testing.T) (ethereum *eth.Ethereum, err error) {
 }
 
 func testInit(t *testing.T) (self *testFrontend) {
-  // initialise and start minimal ethereum stack
-  ethereum, err := testEth(t)
+  // initialise and start minimal earthdollar stack
+  earthdollar, err := testEd(t)
   if err != nil {
-    t.Errorf("error creating ethereum: %v", err)
+    t.Errorf("error creating earthdollar: %v", err)
     return
   }
-  err = ethereum.Start()
+  err = earthdollar.Start()
   if err != nil {
-    t.Errorf("error starting ethereum: %v", err)
+    t.Errorf("error starting earthdollar: %v", err)
     return
   }
 
   // mock frontend
-  self = &testFrontend{t: t, ethereum: ethereum}
-  self.xeth = xe.New(ethereum, self)
+  self = &testFrontend{t: t, earthdollar: earthdollar}
+  self.xed = xe.New(earthdollar, self)
 
-  addr, _ := ethereum.Etherbase()
+  addr, _ := earthdollar.Earthbase()
   self.coinbase = addr
-  self.stateDb = self.ethereum.ChainManager().State().Copy()
+  self.stateDb = self.earthdollar.ChainManager().State().Copy()
 
   // initialise the registry contracts
-  reg := registrar.New(self.xeth)
+  reg := registrar.New(self.xed)
   err = reg.SetHashReg("", addr)
   if err != nil {
     t.Errorf("error creating HashReg: %v", err)
@@ -171,12 +171,12 @@ func testInit(t *testing.T) (self *testFrontend) {
 }
 
 // this is needed for transaction to be applied to the state in testing
-// the heavy lifing is done in XEth.ApplyTestTxs
+// the heavy lifing is done in XEd.ApplyTestTxs
 // this is fragile,
-// and does process leaking since xeth loops cannot quit safely
+// and does process leaking since xed loops cannot quit safely
 // should be replaced by proper mining with testDAG for easy full integration tests
 func (self *testFrontend) applyTxs() {
-  self.txc, self.xeth = self.xeth.ApplyTestTxs(self.stateDb, self.coinbase, self.txc)
+  self.txc, self.xed = self.xed.ApplyTestTxs(self.stateDb, self.coinbase, self.txc)
   return
 }
 
@@ -185,7 +185,7 @@ func TestNatspecE2E(t *testing.T) {
   t.Skip()
 
   tf := testInit(t)
-  defer tf.ethereum.Stop()
+  defer tf.earthdollar.Stop()
 
   // create a contractInfo file (mock cloud-deployed contract metadocs)
   // incidentally this is the info for the registry contract itself
@@ -193,15 +193,15 @@ func TestNatspecE2E(t *testing.T) {
   dochash := common.BytesToHash(crypto.Sha3([]byte(testContractInfo)))
 
   // take the codehash for the contract we wanna test
-  // codehex := tf.xeth.CodeAt(registar.HashRegAddr)
-  codeb := tf.xeth.CodeAtBytes(registrar.HashRegAddr)
+  // codehex := tf.xed.CodeAt(registar.HashRegAddr)
+  codeb := tf.xed.CodeAtBytes(registrar.HashRegAddr)
   codehash := common.BytesToHash(crypto.Sha3(codeb))
 
   // use resolver to register codehash->dochash->url
   // test if globalregistry works
   // registrar.HashRefAddr = "0x0"
   // registrar.UrlHintAddr = "0x0"
-  reg := registrar.New(tf.xeth)
+  reg := registrar.New(tf.xed)
   _, err := reg.SetHashToHash(tf.coinbase, codehash, dochash)
   if err != nil {
     t.Errorf("error registering: %v", err)

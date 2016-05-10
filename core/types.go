@@ -23,7 +23,7 @@ import (
 	"github.com/Earthdollar/go-earthdollar/core/state"
 	"github.com/Earthdollar/go-earthdollar/core/types"
 	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/ethdb"
+	"github.com/Earthdollar/go-earthdollar/eddb"
 	"github.com/Earthdollar/go-earthdollar/event"
 )
 
@@ -57,14 +57,14 @@ type Processor interface {
 }
 
 // Backend is an interface defining the basic functionality for an operable node
-// with all the functionality to be a functional, valid Ethereum operator.
+// with all the functionality to be a functional, valid Earthdollar operator.
 //
 // TODO Remove this
 type Backend interface {
 	AccountManager() *accounts.Manager
 	BlockChain() *BlockChain
 	TxPool() *TxPool
-	ChainDb() ethdb.Database
-	DappDb() ethdb.Database
+	ChainDb() eddb.Database
+	DappDb() eddb.Database
 	EventMux() *event.TypeMux
 }
