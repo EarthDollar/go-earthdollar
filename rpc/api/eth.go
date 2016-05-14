@@ -84,6 +84,7 @@ var (
 		"eth_getTransactionByHash":                (*ethApi).GetTransactionByHash,
 		"eth_getTransactionByBlockNumberAndIndex": (*ethApi).GetTransactionByBlockNumberAndIndex,
 		"eth_getTransactionByBlockHashAndIndex":   (*ethApi).GetTransactionByBlockHashAndIndex,
+		"eth_getTransactionHistory":   		   (*ethApi).GetTransactionHistory, //earthdollar
 		"eth_getUncleByBlockHashAndIndex":         (*ethApi).GetUncleByBlockHashAndIndex,
 		"eth_getUncleByBlockNumberAndIndex":       (*ethApi).GetUncleByBlockNumberAndIndex,
 		"eth_getCompilers":                        (*ethApi).GetCompilers,
@@ -240,6 +241,15 @@ func (self *ethApi) GetBlockTransactionCountByNumber(req *shared.Request) (inter
 		return nil, nil
 	}
 	return fmt.Sprintf("%#x", len(block.Transactions())), nil
+}
+
+//earthdollar
+func (self *ethApi) GetTransactionHistory(req *shared.Request) (interface{}, error) {
+	var output string
+      	for i=0; i<BlockNumber; i++ {
+		output += GetBlockTransactionCountByNumber
+	}
+	return output, nil
 }
 
 func (self *ethApi) GetUncleCountByBlockHash(req *shared.Request) (interface{}, error) {
