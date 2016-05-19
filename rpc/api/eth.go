@@ -245,9 +245,23 @@ func (self *ethApi) GetBlockTransactionCountByNumber(req *shared.Request) (inter
 
 //earthdollar
 func (self *ethApi) GetTransactionHistory(req *shared.Request) (interface{}, error) {
-	var output string
-      	for i=0; i<BlockNumber; i++ {
-		output += GetBlockTransactionCountByNumber
+	args := new(BlockNumIndexArgs)
+	var output [] *TransactionRes
+	if err := self.codec.Decode(req.Params, &args); err != nil {
+		return nil, shared.NewDecodeParamError(err.Error())
+	}
+	current := self.xeth.CurrentBlock().Number().Int64()
+	var i int64
+	for ; i<current; i++ {
+		raw := self.xeth.EthBlockByNumber(i)
+		if raw == nil {
+			return nil, nil
+		}
+		block := NewBlockRes(raw, self.xeth.Td(raw.Hash()), true)
+		if !(args.Index >= int64(len(block.Transactions)) || args.Index < 0) {
+			// return NewValidationError("Index", "does not exist")
+			output = append(output, block.Transactions[args.Index])
+		}
 	}
 	return output, nil
 }

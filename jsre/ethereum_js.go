@@ -5127,7 +5127,7 @@ var getTransaction = new Method({
 
 var getTransactionHistory = new Method({
     name: 'getTransactionHistory',
-    call: transactionFromBlockCall,
+    call: 'eth_getTransactionHistory',
     params: 2,
     inputFormatter: [formatters.inputBlockNumberFormatter, utils.toHex],
     outputFormatter: formatters.outputTransactionFormatter
