@@ -1,6 +1,6 @@
 #Earth Dollar - Beta Version of the Mother Earth Network
 
-#During the Beta phase from April 22, 2016 to the full launch in the Fall of 2016, the genesis block may be updated if necessary and the coins may have to be exchanged within a limited specify time-frame prior to the update if necessary.
+#The Beta phase is from April 22, 2016 to the full launch in the Fall of 2016. The code is under heavy development.
 
 
 
