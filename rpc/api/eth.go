@@ -246,7 +246,7 @@ func (self *ethApi) GetBlockTransactionCountByNumber(req *shared.Request) (inter
 //earthdollar
 func (self *ethApi) GetTransactionHistory(req *shared.Request) (interface{}, error) {
 	args := new(BlockNumIndexArgs)
-	var output [] *TransactionRes
+	var output string
 	if err := self.codec.Decode(req.Params, &args); err != nil {
 		return nil, shared.NewDecodeParamError(err.Error())
 	}
@@ -260,7 +260,28 @@ func (self *ethApi) GetTransactionHistory(req *shared.Request) (interface{}, err
 		block := NewBlockRes(raw, self.xeth.Td(raw.Hash()), true)
 		if !(args.Index >= int64(len(block.Transactions)) || args.Index < 0) {
 			// return NewValidationError("Index", "does not exist")
-			output = append(output, block.Transactions[args.Index])
+			//output = append(output, block.Transactions[args.Index])
+			for i:=0; i<len(block.Transactions); i++ {
+				fmt.Printf("{\n")
+				fmt.Printf("  blockHash: \"")
+				fmt.Printf("%v\",\n", block.Transactions[0].BlockHash)
+				fmt.Printf("  blockNumber: ")
+				fmt.Printf("%v,\n", block.Transactions[0].BlockNumber)
+				fmt.Printf("  from: \"")
+				fmt.Printf("%v\",\n", block.Transactions[0].From)
+				fmt.Printf("  gas: %v,\n", block.Transactions[0].Gas)
+				fmt.Printf("  gasPrice: %v,\n", block.Transactions[0].GasPrice)
+				fmt.Printf("  hash: \"")
+				fmt.Printf("%v\",\n", block.Transactions[0].Hash)
+				fmt.Printf("  input: \"")
+				fmt.Printf("%v\",\n", block.Transactions[0].Input)
+				fmt.Printf("  nonce: %v,\n", block.Transactions[0].Nonce)
+				fmt.Printf("  to: \"")
+				fmt.Printf("%v\",\n", block.Transactions[0].To)
+				fmt.Printf("  transactionIndex: %v,\n", block.Transactions[0].TxIndex)			
+				fmt.Printf("  value: %v,\n", block.Transactions[0].Value)			
+				fmt.Printf("}\n")
+			}
 		}
 	}
 	return output, nil
