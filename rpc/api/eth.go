@@ -251,7 +251,8 @@ func (self *ethApi) GetTransactionHistory(req *shared.Request) (interface{}, err
 		return nil, shared.NewDecodeParamError(err.Error())
 	}
 	current := self.xeth.CurrentBlock().Number().Int64()
-	var i int64
+	var i int64 = args.BlockNumber
+
 	for ; i<current; i++ {
 		raw := self.xeth.EthBlockByNumber(i)
 		if raw == nil {
@@ -261,26 +262,26 @@ func (self *ethApi) GetTransactionHistory(req *shared.Request) (interface{}, err
 		if !(args.Index >= int64(len(block.Transactions)) || args.Index < 0) {
 			// return NewValidationError("Index", "does not exist")
 			//output = append(output, block.Transactions[args.Index])
-			for i:=0; i<len(block.Transactions); i++ {
-				fmt.Printf("{\n")
-				fmt.Printf("  blockHash: \"")
-				fmt.Printf("%v\",\n", block.Transactions[0].BlockHash)
-				fmt.Printf("  blockNumber: ")
-				fmt.Printf("%v,\n", block.Transactions[0].BlockNumber)
-				fmt.Printf("  from: \"")
-				fmt.Printf("%v\",\n", block.Transactions[0].From)
-				fmt.Printf("  gas: %v,\n", block.Transactions[0].Gas)
-				fmt.Printf("  gasPrice: %v,\n", block.Transactions[0].GasPrice)
-				fmt.Printf("  hash: \"")
-				fmt.Printf("%v\",\n", block.Transactions[0].Hash)
-				fmt.Printf("  input: \"")
-				fmt.Printf("%v\",\n", block.Transactions[0].Input)
-				fmt.Printf("  nonce: %v,\n", block.Transactions[0].Nonce)
-				fmt.Printf("  to: \"")
-				fmt.Printf("%v\",\n", block.Transactions[0].To)
-				fmt.Printf("  transactionIndex: %v,\n", block.Transactions[0].TxIndex)			
-				fmt.Printf("  value: %v,\n", block.Transactions[0].Value)			
-				fmt.Printf("}\n")
+			for j:=0; j<len(block.Transactions); j++ {
+				fmt.Printf("\x1b[37;1m{\n")
+				fmt.Printf("  blockHash: \x1b[32;1m\"")
+				fmt.Printf("%v\",\n", block.Transactions[j].BlockHash)
+				fmt.Printf("  \x1b[37;1mblockNumber: ")
+				fmt.Printf("\x1b[31;1m%v,\n", block.Transactions[j].BlockNumber)
+				fmt.Printf("  \x1b[37;1mfrom: \x1b[32;1m\"")
+				fmt.Printf("%v\",\n", block.Transactions[j].From)
+				fmt.Printf("  \x1b[37;1mgas: \x1b[31;1m%v,\n", block.Transactions[j].Gas)
+				fmt.Printf("  \x1b[37;1mgasPrice: \x1b[31;1m%v,\n", block.Transactions[j].GasPrice)
+				fmt.Printf("  \x1b[37;1mhash: \x1b[32;1m\"")
+				fmt.Printf("%v\",\n", block.Transactions[j].Hash)
+				fmt.Printf("  \x1b[37;1minput: \x1b[32;1m\"")
+				fmt.Printf("%v\",\n", block.Transactions[j].Input)
+				fmt.Printf("  \x1b[37;1mnonce: \x1b[31;1m%v,\n", block.Transactions[j].Nonce)
+				fmt.Printf("  \x1b[37;1mto: \x1b[32;1m\"")
+				fmt.Printf("%v\",\n", block.Transactions[j].To)
+				fmt.Printf("  \x1b[37;1mtransactionIndex: \x1b[31;1m%v,\n", block.Transactions[j].TxIndex)			
+				fmt.Printf("  \x1b[37;1mvalue: \x1b[31;1m%v,\n", block.Transactions[j].Value)			
+				fmt.Printf("\x1b[37;1m}\n")
 			}
 		}
 	}
