@@ -1,18 +1,18 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2014 The go-earthdollar Authors
+// This file is part of go-earthdollar.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-earthdollar is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-earthdollar is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-earthdollar. If not, see <http://www.gnu.org/licenses/>.
 
 // ged is the official command-line client for Earthdollar.
 package main
@@ -140,7 +140,7 @@ The output of this command is supposed to be machine-readable.
 
     get wallet import /path/to/my/presale.wallet
 
-will prompt for your password and imports your ether presale account.
+will prompt for your password and imports your ed presale account.
 It can be used non-interactively with the --password option taking a
 passwordfile as argument containing the wallet password in plaintext.
 
@@ -408,7 +408,7 @@ func run(ctx *cli.Context) {
 	cfg := utils.MakeEthConfig(ClientIdentifier, nodeNameVersion, ctx)
 	cfg.ExtraData = makeExtra(ctx)
 
-	earthdollar, err := eth.New(cfg)
+	earthdollar, err := ed.New(cfg)
 	if err != nil {
 		utils.Fatalf("%v", err)
 	}
@@ -419,7 +419,7 @@ func run(ctx *cli.Context) {
 }
 
 func attach(ctx *cli.Context) {
-	var client comms.EthereumClient
+	var client comms.EarthdollarClient
 	var err error
 	if ctx.Args().Present() {
 		client, err = comms.ClientFromEndpoint(ctx.Args().First(), codec.JSON)
@@ -453,7 +453,7 @@ func console(ctx *cli.Context) {
 	cfg := utils.MakeEthConfig(ClientIdentifier, nodeNameVersion, ctx)
 	cfg.ExtraData = makeExtra(ctx)
 
-	earthdollar, err := eth.New(cfg)
+	earthdollar, err := ed.New(cfg)
 	if err != nil {
 		utils.Fatalf("%v", err)
 	}
@@ -483,7 +483,7 @@ func console(ctx *cli.Context) {
 
 func execJSFiles(ctx *cli.Context) {
 	cfg := utils.MakeEthConfig(ClientIdentifier, nodeNameVersion, ctx)
-	earthdollar, err := eth.New(cfg)
+	earthdollar, err := ed.New(cfg)
 	if err != nil {
 		utils.Fatalf("%v", err)
 	}
@@ -537,7 +537,7 @@ func blockRecovery(ctx *cli.Context) {
 	arg := ctx.Args().First()
 
 	cfg := utils.MakeEthConfig(ClientIdentifier, nodeNameVersion, ctx)
-	blockDb, err := ethdb.NewLDBDatabase(filepath.Join(cfg.DataDir, "blockchain"), cfg.DatabaseCache)
+	blockDb, err := eddb.NewLDBDatabase(filepath.Join(cfg.DataDir, "blockchain"), cfg.DatabaseCache)
 	if err != nil {
 		glog.Fatalln("could not open db:", err)
 	}
@@ -559,11 +559,11 @@ func blockRecovery(ctx *cli.Context) {
 	glog.Infof("Recovery succesful. New HEAD %x\n", block.Hash())
 }
 
-func startEth(ctx *cli.Context, eth *eth.Ethereum) {
-	// Start Ethereum itself
-	utils.StartEthereum(eth)
+func startEth(ctx *cli.Context, ed *ed.Earthdollar) {
+	// Start Earthdollar itself
+	utils.StartEarthdollar(ed)
 
-	am := eth.AccountManager()
+	am := ed.AccountManager()
 	account := ctx.GlobalString(utils.UnlockedAccountFlag.Name)
 	accounts := strings.Split(account, " ")
 	var passphrases []string
@@ -577,17 +577,17 @@ func startEth(ctx *cli.Context, eth *eth.Ethereum) {
 	}
 	// Start auxiliary services if enabled.
 	if !ctx.GlobalBool(utils.IPCDisabledFlag.Name) {
-		if err := utils.StartIPC(eth, ctx); err != nil {
+		if err := utils.StartIPC(ed, ctx); err != nil {
 			utils.Fatalf("Error string IPC: %v", err)
 		}
 	}
 	if ctx.GlobalBool(utils.RPCEnabledFlag.Name) {
-		if err := utils.StartRPC(eth, ctx); err != nil {
+		if err := utils.StartRPC(ed, ctx); err != nil {
 			utils.Fatalf("Error starting RPC: %v", err)
 		}
 	}
 	if ctx.GlobalBool(utils.MiningEnabledFlag.Name) {
-		err := eth.StartMining(
+		err := ed.StartMining(
 			ctx.GlobalInt(utils.MinerThreadsFlag.Name),
 			ctx.GlobalString(utils.MiningGPUFlag.Name))
 		if err != nil {
@@ -736,7 +736,7 @@ func makedag(ctx *cli.Context) {
 }
 
 func gpuinfo(ctx *cli.Context) {
-	eth.PrintOpenCLDevices()
+	ed.PrintOpenCLDevices()
 }
 
 func gpubench(ctx *cli.Context) {
@@ -750,9 +750,9 @@ func gpubench(ctx *cli.Context) {
 		if err != nil {
 			wrongArgs()
 		}
-		eth.GPUBench(n)
+		ed.GPUBench(n)
 	case len(args) == 0:
-		eth.GPUBench(0)
+		ed.GPUBench(0)
 	default:
 		wrongArgs()
 	}
@@ -764,7 +764,7 @@ func version(c *cli.Context) {
 	if gitCommit != "" {
 		fmt.Println("Git Commit:", gitCommit)
 	}
-	fmt.Println("Protocol Versions:", eth.ProtocolVersions)
+	fmt.Println("Protocol Versions:", ed.ProtocolVersions)
 	fmt.Println("Network Id:", c.GlobalInt(utils.NetworkIdFlag.Name))
 	fmt.Println("Go Version:", runtime.Version())
 	fmt.Println("OS:", runtime.GOOS)

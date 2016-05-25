@@ -1,18 +1,18 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2014 The go-earthdollar Authors
+// This file is part of go-earthdollar.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-earthdollar is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-earthdollar is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-earthdollar. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -77,18 +77,18 @@ func (r dumbterm) AppendHistory(string) {}
 
 type jsre struct {
 	re         *re.JSRE
-	ethereum   *eth.Ethereum
-	xeth       *xeth.XEth
+	earthdollar   *ed.Earthdollar
+	xed       *xed.XEd
 	wait       chan *big.Int
 	ps1        string
 	atexit     func()
 	corsDomain string
-	client     comms.EthereumClient
+	client     comms.EarthdollarClient
 	prompter
 }
 
 var (
-	loadedModulesMethods map[string][]string
+	loadedModulesMedods map[string][]string
 )
 
 func keywordCompleter(line string) []string {
@@ -146,7 +146,7 @@ func apiWordCompleter(line string, pos int) (head string, completions []string, 
 	return begin, completionWords, end
 }
 
-func newLightweightJSRE(docRoot string, client comms.EthereumClient, datadir string, interactive bool) *jsre {
+func newLightweightJSRE(docRoot string, client comms.EarthdollarClient, datadir string, interactive bool) *jsre {
 	js := &jsre{ps1: "> "}
 	js.wait = make(chan *big.Int)
 	js.client = client
@@ -176,18 +176,18 @@ func newLightweightJSRE(docRoot string, client comms.EthereumClient, datadir str
 	return js
 }
 
-func newJSRE(ethereum *eth.Ethereum, docRoot, corsDomain string, client comms.EthereumClient, interactive bool, f xeth.Frontend) *jsre {
-	js := &jsre{ethereum: ethereum, ps1: "> "}
+func newJSRE(earthdollar *ed.Earthdollar, docRoot, corsDomain string, client comms.EarthdollarClient, interactive bool, f xed.Frontend) *jsre {
+	js := &jsre{earthdollar: earthdollar, ps1: "> "}
 	// set default cors domain used by startRpc from CLI flag
 	js.corsDomain = corsDomain
 	if f == nil {
 		f = js
 	}
-	js.xeth = xeth.New(ethereum, f)
-	js.wait = js.xeth.UpdateState()
+	js.xed = xed.New(earthdollar, f)
+	js.wait = js.xed.UpdateState()
 	js.client = client
 	if clt, ok := js.client.(*comms.InProcClient); ok {
-		if offeredApis, err := api.ParseApiString(shared.AllApis, codec.JSON, js.xeth, ethereum); err == nil {
+		if offeredApis, err := api.ParseApiString(shared.AllApis, codec.JSON, js.xed, earthdollar); err == nil {
 			clt.Initialize(api.Merge(offeredApis...))
 		}
 	}
@@ -202,14 +202,14 @@ func newJSRE(ethereum *eth.Ethereum, docRoot, corsDomain string, client comms.Et
 		js.prompter = dumbterm{bufio.NewReader(os.Stdin)}
 	} else {
 		lr := liner.NewLiner()
-		js.withHistory(ethereum.DataDir, func(hist *os.File) { lr.ReadHistory(hist) })
+		js.withHistory(earthdollar.DataDir, func(hist *os.File) { lr.ReadHistory(hist) })
 		lr.SetCtrlCAborts(true)
 		js.loadAutoCompletion()
 		lr.SetWordCompleter(apiWordCompleter)
 		lr.SetTabCompletionStyle(liner.TabPrints)
 		js.prompter = lr
 		js.atexit = func() {
-			js.withHistory(ethereum.DataDir, func(hist *os.File) { hist.Truncate(0); lr.WriteHistory(hist) })
+			js.withHistory(earthdollar.DataDir, func(hist *os.File) { hist.Truncate(0); lr.WriteHistory(hist) })
 			lr.Close()
 			close(js.wait)
 		}
@@ -246,9 +246,9 @@ func (self *jsre) welcome() {
     (function () {
       console.log('instance: ' + web3.version.client);
       console.log(' datadir: ' + admin.datadir);
-      console.log("coinbase: " + eth.coinbase);
-      var ts = 1000 * eth.getBlock(eth.blockNumber).timestamp;
-      console.log("at block: " + eth.blockNumber + " (" + new Date(ts) + ")");
+      console.log("coinbase: " + ed.coinbase);
+      var ts = 1000 * ed.getBlock(ed.blockNumber).timestamp;
+      console.log("at block: " + ed.blockNumber + " (" + new Date(ts) + ")");
     })();
   `)
 	if modules, err := self.supportedApis(); err == nil {
@@ -265,7 +265,7 @@ func (self *jsre) supportedApis() (map[string]string, error) {
 	return self.client.SupportedModules()
 }
 
-func (js *jsre) apiBindings(f xeth.Frontend) error {
+func (js *jsre) apiBindings(f xed.Frontend) error {
 	apis, err := js.supportedApis()
 	if err != nil {
 		return err
@@ -276,25 +276,25 @@ func (js *jsre) apiBindings(f xeth.Frontend) error {
 		apiNames = append(apiNames, a)
 	}
 
-	apiImpl, err := api.ParseApiString(strings.Join(apiNames, ","), codec.JSON, js.xeth, js.ethereum)
+	apiImpl, err := api.ParseApiString(strings.Join(apiNames, ","), codec.JSON, js.xed, js.earthdollar)
 	if err != nil {
 		utils.Fatalf("Unable to determine supported api's: %v", err)
 	}
 
-	jeth := rpc.NewJeth(api.Merge(apiImpl...), js.re, js.client, f)
-	js.re.Set("jeth", struct{}{})
-	t, _ := js.re.Get("jeth")
-	jethObj := t.Object()
+	jed := rpc.NewJed(api.Merge(apiImpl...), js.re, js.client, f)
+	js.re.Set("jed", struct{}{})
+	t, _ := js.re.Get("jed")
+	jedObj := t.Object()
 
-	jethObj.Set("send", jeth.Send)
-	jethObj.Set("sendAsync", jeth.Send)
+	jedObj.Set("send", jed.Send)
+	jedObj.Set("sendAsync", jed.Send)
 
 	err = js.re.Compile("bignumber.js", re.BigNumber_JS)
 	if err != nil {
 		utils.Fatalf("Error loading bignumber.js: %v", err)
 	}
 
-	err = js.re.Compile("ethereum.js", re.Web3_JS)
+	err = js.re.Compile("earthdollar.js", re.Web3_JS)
 	if err != nil {
 		utils.Fatalf("Error loading web3.js: %v", err)
 	}
@@ -304,13 +304,13 @@ func (js *jsre) apiBindings(f xeth.Frontend) error {
 		utils.Fatalf("Error requiring web3: %v", err)
 	}
 
-	_, err = js.re.Run("web3.setProvider(jeth)")
+	_, err = js.re.Run("web3.setProvider(jed)")
 	if err != nil {
 		utils.Fatalf("Error setting web3 provider: %v", err)
 	}
 
 	// load only supported API's in javascript runtime
-	shortcuts := "var eth = web3.eth; "
+	shortcuts := "var ed = web3.ed; "
 	for _, apiName := range apiNames {
 		if apiName == shared.Web3ApiName {
 			continue // manually mapped
@@ -329,7 +329,7 @@ func (js *jsre) apiBindings(f xeth.Frontend) error {
 		utils.Fatalf("Error setting namespaces: %v", err)
 	}
 
-	js.re.Run(`var GlobalRegistrar = eth.contract(` + registrar.GlobalRegistrarAbi + `);   registrar = GlobalRegistrar.at("` + registrar.GlobalRegistrarAddr + `");`)
+	js.re.Run(`var GlobalRegistrar = ed.contract(` + registrar.GlobalRegistrarAbi + `);   registrar = GlobalRegistrar.at("` + registrar.GlobalRegistrarAddr + `");`)
 	return nil
 }
 
@@ -342,8 +342,8 @@ func (self *jsre) AskPassword() (string, bool) {
 }
 
 func (self *jsre) ConfirmTransaction(tx string) bool {
-	if self.ethereum.NatSpec {
-		notice := natspec.GetNotice(self.xeth, tx, self.ethereum.HTTPClient())
+	if self.earthdollar.NatSpec {
+		notice := natspec.GetNotice(self.xed, tx, self.earthdollar.HTTPClient())
 		fmt.Println(notice)
 		answer, _ := self.Prompt("Confirm Transaction [y/n]")
 		return strings.HasPrefix(strings.Trim(answer, " "), "y")
@@ -359,7 +359,7 @@ func (self *jsre) UnlockAccount(addr []byte) bool {
 		return false
 	}
 	// TODO: allow retry
-	if err := self.ethereum.AccountManager().Unlock(common.BytesToAddress(addr), pass); err != nil {
+	if err := self.earthdollar.AccountManager().Unlock(common.BytesToAddress(addr), pass); err != nil {
 		return false
 	} else {
 		fmt.Println("Account is now unlocked for this session.")

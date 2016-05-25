@@ -47,9 +47,9 @@ type web3Api struct {
 }
 
 // create a new web3 api instance	
-func NewWeb3Api(xEd *xEd.XEd, coder codec.Codec) *web3Api {
+func NewWeb3Api(xed *xed.XEd, coder codec.Codec) *web3Api {
 	return &web3Api{
-		xEd:    xEd,
+		xed:    xed,
 		methods: Web3Mapping,
 		codec:   coder.New(nil),
 	}
@@ -93,7 +93,7 @@ func (self *web3Api) Sha3(req *shared.Request) (interface{}, error) {
 	return common.ToHex(crypto.Sha3(common.FromHex(args.Data))), nil
 }
 
-// returns the xEd client vrsion
+// returns the xed client vrsion
 func (self *web3Api) ClientVersion(req *shared.Request) (interface{}, error) {
-	return self.xEd.ClientVersion(), nil
+	return self.xed.ClientVersion(), nil
 }

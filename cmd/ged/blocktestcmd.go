@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2015 The go-earthdollar Authors
+// This file is part of go-earthdollar.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-earthdollar is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-earthdollar is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-earthdollar. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -56,7 +56,7 @@ func runBlockTest(ctx *cli.Context) {
 		file, testname = args[0], args[1]
 		rpc = true
 	default:
-		utils.Fatalf(`Usage: ethereum blocktest <path-to-test-file> [ <test-name> [ "rpc" ] ]`)
+		utils.Fatalf(`Usage: earthdollar blocktest <path-to-test-file> [ <test-name> [ "rpc" ] ]`)
 	}
 	bt, err := tests.LoadBlockTests(file)
 	if err != nil {
@@ -68,15 +68,15 @@ func runBlockTest(ctx *cli.Context) {
 		ecode := 0
 		for name, test := range bt {
 			fmt.Printf("----------------- Running Block Test %q\n", name)
-			ethereum, err := runOneBlockTest(ctx, test)
+			earthdollar, err := runOneBlockTest(ctx, test)
 			if err != nil {
 				fmt.Println(err)
 				fmt.Println("FAIL")
 				ecode = 1
 			}
-			if ethereum != nil {
-				ethereum.Stop()
-				ethereum.WaitForShutdown()
+			if earthdollar != nil {
+				earthdollar.Stop()
+				earthdollar.WaitForShutdown()
 			}
 		}
 		os.Exit(ecode)
@@ -87,49 +87,49 @@ func runBlockTest(ctx *cli.Context) {
 	if !ok {
 		utils.Fatalf("Test file does not contain test named %q", testname)
 	}
-	ethereum, err := runOneBlockTest(ctx, test)
+	earthdollar, err := runOneBlockTest(ctx, test)
 	if err != nil {
 		utils.Fatalf("%v", err)
 	}
 	if rpc {
 		fmt.Println("Block Test post state validated, starting RPC interface.")
-		startEth(ctx, ethereum)
-		utils.StartRPC(ethereum, ctx)
-		ethereum.WaitForShutdown()
+		startEth(ctx, earthdollar)
+		utils.StartRPC(earthdollar, ctx)
+		earthdollar.WaitForShutdown()
 	}
 }
 
-func runOneBlockTest(ctx *cli.Context, test *tests.BlockTest) (*eth.Ethereum, error) {
+func runOneBlockTest(ctx *cli.Context, test *tests.BlockTest) (*ed.Earthdollar, error) {
 	cfg := utils.MakeEthConfig(ClientIdentifier, Version, ctx)
-	db, _ := ethdb.NewMemDatabase()
-	cfg.NewDB = func(path string) (ethdb.Database, error) { return db, nil }
+	db, _ := eddb.NewMemDatabase()
+	cfg.NewDB = func(path string) (eddb.Database, error) { return db, nil }
 	cfg.MaxPeers = 0 // disable network
 	cfg.Shh = false  // disable whisper
 	cfg.NAT = nil    // disable port mapping
-	ethereum, err := eth.New(cfg)
+	earthdollar, err := ed.New(cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	// import the genesis block
-	ethereum.ResetWithGenesisBlock(test.Genesis)
+	earthdollar.ResetWithGenesisBlock(test.Genesis)
 	// import pre accounts
 	_, err = test.InsertPreState(db, cfg.AccountManager)
 	if err != nil {
-		return ethereum, fmt.Errorf("InsertPreState: %v", err)
+		return earthdollar, fmt.Errorf("InsertPreState: %v", err)
 	}
 
-	cm := ethereum.BlockChain()
+	cm := earthdollar.BlockChain()
 	validBlocks, err := test.TryBlocksInsert(cm)
 	if err != nil {
-		return ethereum, fmt.Errorf("Block Test load error: %v", err)
+		return earthdollar, fmt.Errorf("Block Test load error: %v", err)
 	}
 	newDB, err := cm.State()
 	if err != nil {
-		return ethereum, fmt.Errorf("Block Test get state error: %v", err)
+		return earthdollar, fmt.Errorf("Block Test get state error: %v", err)
 	}
 	if err := test.ValidatePostState(newDB); err != nil {
-		return ethereum, fmt.Errorf("post state validation failed: %v", err)
+		return earthdollar, fmt.Errorf("post state validation failed: %v", err)
 	}
-	return ethereum, test.ValidateImportedHeaders(cm, validBlocks)
+	return earthdollar, test.ValidateImportedHeaders(cm, validBlocks)
 }

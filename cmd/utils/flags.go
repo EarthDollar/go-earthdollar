@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2015 The go-earthdollar Authors
+// This file is part of go-earthdollar.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-earthdollar is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-earthdollar is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-earthdollar. If not, see <http://www.gnu.org/licenses/>.
 
 package utils
 
@@ -107,7 +107,7 @@ var (
 	NetworkIdFlag = cli.IntFlag{
 		Name:  "networkid",
 		Usage: "Network identifier (integer, 0=Olympic, 1=Frontier, 2=Morden)",
-		Value: eth.NetworkId,
+		Value: ed.NetworkId,
 	}
 	OlympicFlag = cli.BoolFlag{
 		Name:  "olympic",
@@ -175,8 +175,8 @@ var (
 		Name:  "autodag",
 		Usage: "Enable automatic DAG pregeneration",
 	}
-	EtherbaseFlag = cli.StringFlag{
-		Name:  "etherbase",
+	EarthbaseFlag = cli.StringFlag{
+		Name:  "earthbase",
 		Usage: "Public address for block mining rewards (default = first account created)",
 		Value: "0",
 	}
@@ -413,19 +413,19 @@ func MakeNodeKey(ctx *cli.Context) (key *ecdsa.PrivateKey) {
 	return key
 }
 
-// MakeEthConfig creates ethereum options from set command line flags.
-func MakeEthConfig(clientID, version string, ctx *cli.Context) *eth.Config {
+// MakeEthConfig creates earthdollar options from set command line flags.
+func MakeEthConfig(clientID, version string, ctx *cli.Context) *ed.Config {
 	customName := ctx.GlobalString(IdentityFlag.Name)
 	if len(customName) > 0 {
 		clientID += "/" + customName
 	}
 	am := MakeAccountManager(ctx)
-	etherbase, err := ParamToAddress(ctx.GlobalString(EtherbaseFlag.Name), am)
+	earthbase, err := ParamToAddress(ctx.GlobalString(EarthbaseFlag.Name), am)
 	if err != nil {
-		glog.V(logger.Error).Infoln("WARNING: No etherbase set and no accounts found as default")
+		glog.V(logger.Error).Infoln("WARNING: No earthbase set and no accounts found as default")
 	}
-	// Assemble the entire eth configuration and return
-	cfg := &eth.Config{
+	// Assemble the entire ed configuration and return
+	cfg := &ed.Config{
 		Name:                    common.MakeName(clientID, version),
 		DataDir:                 MustDataDir(ctx),
 		GenesisFile:             ctx.GlobalString(GenesisFileFlag.Name),
@@ -436,7 +436,7 @@ func MakeEthConfig(clientID, version string, ctx *cli.Context) *eth.Config {
 		NetworkId:               ctx.GlobalInt(NetworkIdFlag.Name),
 		LogFile:                 ctx.GlobalString(LogFileFlag.Name),
 		Verbosity:               ctx.GlobalInt(VerbosityFlag.Name),
-		Etherbase:               common.HexToAddress(etherbase),
+		Earthbase:               common.HexToAddress(earthbase),
 		MinerThreads:            ctx.GlobalInt(MinerThreadsFlag.Name),
 		AccountManager:          am,
 		VmDebug:                 ctx.GlobalBool(VMDebugFlag.Name),
@@ -496,7 +496,7 @@ func MakeEthConfig(clientID, version string, ctx *cli.Context) *eth.Config {
 			cfg.Shh = true
 		}
 		if !ctx.GlobalIsSet(DataDirFlag.Name) {
-			cfg.DataDir = os.TempDir() + "/ethereum_dev_mode"
+			cfg.DataDir = os.TempDir() + "/earthdollar_dev_mode"
 		}
 		cfg.PowTest = true
 		cfg.DevMode = true
@@ -536,12 +536,12 @@ func SetupVM(ctx *cli.Context) {
 }
 
 // MakeChain creates a chain manager from set command line flags.
-func MakeChain(ctx *cli.Context) (chain *core.BlockChain, chainDb ethdb.Database) {
+func MakeChain(ctx *cli.Context) (chain *core.BlockChain, chainDb eddb.Database) {
 	datadir := MustDataDir(ctx)
 	cache := ctx.GlobalInt(CacheFlag.Name)
 
 	var err error
-	if chainDb, err = ethdb.NewLDBDatabase(filepath.Join(datadir, "chaindata"), cache); err != nil {
+	if chainDb, err = eddb.NewLDBDatabase(filepath.Join(datadir, "chaindata"), cache); err != nil {
 		Fatalf("Could not open database: %v", err)
 	}
 	if ctx.GlobalBool(OlympicFlag.Name) {
@@ -607,35 +607,35 @@ func IpcSocketPath(ctx *cli.Context) (ipcpath string) {
 	return
 }
 
-func StartIPC(eth *eth.Ethereum, ctx *cli.Context) error {
+func StartIPC(ed *ed.Earthdollar, ctx *cli.Context) error {
 	config := comms.IpcConfig{
 		Endpoint: IpcSocketPath(ctx),
 	}
 
 	initializer := func(conn net.Conn) (comms.Stopper, shared.EarthdollarApi, error) {
-		fe := useragent.NewRemoteFrontend(conn, eth.AccountManager())
-		xeth := xeth.New(eth, fe)
-		apis, err := api.ParseApiString(ctx.GlobalString(IPCApiFlag.Name), codec.JSON, xeth, eth)
+		fe := useragent.NewRemoteFrontend(conn, ed.AccountManager())
+		xed := xed.New(ed, fe)
+		apis, err := api.ParseApiString(ctx.GlobalString(IPCApiFlag.Name), codec.JSON, xed, ed)
 		if err != nil {
 			return nil, nil, err
 		}
-		return xeth, api.Merge(apis...), nil
+		return xed, api.Merge(apis...), nil
 	}
 
 	return comms.StartIpc(config, codec.JSON, initializer)
 }
 
-func StartRPC(eth *eth.Ethereum, ctx *cli.Context) error {
+func StartRPC(ed *ed.Earthdollar, ctx *cli.Context) error {
 	config := comms.HttpConfig{
 		ListenAddress: ctx.GlobalString(RPCListenAddrFlag.Name),
 		ListenPort:    uint(ctx.GlobalInt(RPCPortFlag.Name)),
 		CorsDomain:    ctx.GlobalString(RPCCORSDomainFlag.Name),
 	}
 
-	xeth := xeth.New(eth, nil)
+	xed := xed.New(ed, nil)
 	codec := codec.JSON
 
-	apis, err := api.ParseApiString(ctx.GlobalString(RpcApiFlag.Name), codec, xeth, eth)
+	apis, err := api.ParseApiString(ctx.GlobalString(RpcApiFlag.Name), codec, xed, ed)
 	if err != nil {
 		return err
 	}
