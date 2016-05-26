@@ -94,6 +94,7 @@ var (
 			"gasPrice",
 			"getStorageAt",
 			"getTransaction",
+	                "getTransactionHistory",
 			"getTransactionCount",
 			"getTransactionFromBlock",
 			"getTransactionReceipt",

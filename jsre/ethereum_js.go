@@ -5125,6 +5125,14 @@ var getTransaction = new Method({
     outputFormatter: formatters.outputTransactionFormatter
 });
 
+var getTransactionHistory = new Method({
+    name: 'getTransactionHistory',
+    call: 'eth_getTransactionHistory',
+    params: 2,
+    inputFormatter: [formatters.inputBlockNumberFormatter, utils.toHex],
+    outputFormatter: formatters.outputTransactionFormatter
+});
+
 var getTransactionFromBlock = new Method({
     name: 'getTransactionFromBlock',
     call: transactionFromBlockCall,
@@ -5217,6 +5225,7 @@ var methods = [
     getBlockTransactionCount,
     getBlockUncleCount,
     getTransaction,
+    getTransactionHistory,	
     getTransactionFromBlock,
     getTransactionReceipt,
     getTransactionCount,
