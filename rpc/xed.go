@@ -1,20 +1,20 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-earthdollar Authors
+// This file is part of the go-earthdollar library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-earthdollar library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-earthdollar library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package rpc implements the Ethereum JSON-RPC API.
+// Package rpc implements the Earthdollar JSON-RPC API.
 package rpc
 
 import (
@@ -29,12 +29,12 @@ import (
 
 // Xed is a native API interface to a remote node.
 type Xed struct {
-	client comms.EthereumClient
+	client comms.EarthdollarClient
 	reqId  uint32
 }
 
 // NewXed constructs a new native API interface to a remote node.
-func NewXed(client comms.EthereumClient) *Xed {
+func NewXed(client comms.EarthdollarClient) *Xed {
 	return &Xed{
 		client: client,
 	}
