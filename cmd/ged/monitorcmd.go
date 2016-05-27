@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2015 The go-earthdollar Authors
+// This file is part of go-earthdollar.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-earthdollar is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-earthdollar is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-earthdollar. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -70,20 +70,20 @@ to display multiple metrics simultaneously.
 // monitor starts a terminal UI based monitoring tool for the requested metrics.
 func monitor(ctx *cli.Context) {
 	var (
-		client comms.EthereumClient
+		client comms.EarthdollarClient
 		err    error
 	)
-	// Attach to an Ethereum node over IPC or RPC
+	// Attach to an Earthdollar node over IPC or RPC
 	endpoint := ctx.String(monitorCommandAttachFlag.Name)
 	if client, err = comms.ClientFromEndpoint(endpoint, codec.JSON); err != nil {
 		utils.Fatalf("Unable to attach to ged node: %v", err)
 	}
 	defer client.Close()
 
-	xeth := rpc.NewXeth(client)
+	xed := rpc.NewXed(client)
 
 	// Retrieve all the available metrics and resolve the user pattens
-	metrics, err := retrieveMetrics(xeth)
+	metrics, err := retrieveMetrics(xed)
 	if err != nil {
 		utils.Fatalf("Failed to retrieve system metrics: %v", err)
 	}
@@ -133,7 +133,7 @@ func monitor(ctx *cli.Context) {
 	}
 	termui.Body.AddRows(termui.NewRow(termui.NewCol(12, 0, footer)))
 
-	refreshCharts(xeth, monitored, data, units, charts, ctx, footer)
+	refreshCharts(xed, monitored, data, units, charts, ctx, footer)
 	termui.Body.Align()
 	termui.Render(termui.Body)
 
@@ -154,7 +154,7 @@ func monitor(ctx *cli.Context) {
 				termui.Render(termui.Body)
 			}
 		case <-refresh:
-			if refreshCharts(xeth, monitored, data, units, charts, ctx, footer) {
+			if refreshCharts(xed, monitored, data, units, charts, ctx, footer) {
 				termui.Body.Align()
 			}
 			termui.Render(termui.Body)
@@ -164,8 +164,8 @@ func monitor(ctx *cli.Context) {
 
 // retrieveMetrics contacts the attached ged node and retrieves the entire set
 // of collected system metrics.
-func retrieveMetrics(xeth *rpc.Xeth) (map[string]interface{}, error) {
-	return xeth.Call("debug_metrics", []interface{}{true})
+func retrieveMetrics(xed *rpc.Xed) (map[string]interface{}, error) {
+	return xed.Call("debug_metrics", []interface{}{true})
 }
 
 // resolveMetrics takes a list of input metric patterns, and resolves each to one
@@ -253,8 +253,8 @@ func fetchMetric(metrics map[string]interface{}, metric string) float64 {
 
 // refreshCharts retrieves a next batch of metrics, and inserts all the new
 // values into the active datasets and charts
-func refreshCharts(xeth *rpc.Xeth, metrics []string, data [][]float64, units []int, charts []*termui.LineChart, ctx *cli.Context, footer *termui.Par) (realign bool) {
-	values, err := retrieveMetrics(xeth)
+func refreshCharts(xed *rpc.Xed, metrics []string, data [][]float64, units []int, charts []*termui.LineChart, ctx *cli.Context, footer *termui.Par) (realign bool) {
+	values, err := retrieveMetrics(xed)
 	for i, metric := range metrics {
 		if len(data) < 512 {
 			data[i] = append([]float64{fetchMetric(values, metric)}, data[i]...)
