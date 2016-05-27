@@ -88,7 +88,7 @@ type jsre struct {
 }
 
 var (
-	loadedModulesMedods map[string][]string
+	loadedModulesMethods map[string][]string
 )
 
 func keywordCompleter(line string) []string {

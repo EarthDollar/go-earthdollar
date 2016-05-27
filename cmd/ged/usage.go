@@ -116,7 +116,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.MinerThreadsFlag,
 			utils.MiningGPUFlag,
 			utils.AutoDAGFlag,
-			utils.EtherbaseFlag,
+			utils.EarthbaseFlag,
 			utils.GasPriceFlag,
 			utils.ExtraDataFlag,
 		},
