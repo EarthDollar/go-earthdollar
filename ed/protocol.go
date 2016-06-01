@@ -43,7 +43,7 @@ var ProtocolVersions = []uint{ed63, ed62, ed61}
 var ProtocolLengths = []uint64{17, 8, 9}
 
 const (
-	NetworkId          = 1
+	NetworkId          = 88 //1 previous value, earthdollar
 	ProtocolMaxMsgSize = 10 * 1024 * 1024 // Maximum cap on the size of a protocol message
 )
 
