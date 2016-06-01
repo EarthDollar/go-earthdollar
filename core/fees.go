@@ -22,3 +22,4 @@ import (
 
 var BlockReward *big.Int = big.NewInt(5e+18)
 var MintBalance *big.Int = big.NewInt(20)
+//const ED_LocalPort uint  = 8811
