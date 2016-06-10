@@ -431,6 +431,7 @@ func attach(ctx *cli.Context) {
 	}
 
 	if err != nil {
+		fmt.Println("ctx.Args().Present():\n%v",ctx.Args().Present())
 		utils.Fatalf("Unable to attach to Ged node - %v", err)
 	}
 
