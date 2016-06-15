@@ -32,7 +32,7 @@ func newTestProtocolManager(fastSync bool, blocks int, generator func(int, *core
 	var (
 		evmux         = new(event.TypeMux)
 		pow           = new(core.FakePow)
-		db, _         = ethdb.NewMemDatabase()
+		db, _         = eddb.NewMemDatabase()
 		genesis       = core.WriteGenesisBlockForTesting(db, core.GenesisAccount{testBankAddress, testBankFunds})
 		blockchain, _ = core.NewBlockChain(db, pow, evmux)
 	)
