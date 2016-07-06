@@ -93,24 +93,26 @@ Units of the Earth Dollar
 ---------------------------
 
  - 1 ED = 1 Tree
- - 1 ED = 4 Quarters
- - 1 ED = 10 Dimes
- - 1 ED = 20 Nickles
- - 1 ED = 100 Pennies
+ - 1 ED = 4 Quarter
+ - 1 ED = 10 Dime
+ - 1 ED = 20 Nickle
+ - 1 ED = 100 Penny
 
- - 1 ED = 1000 Kam 
- - 1 ED = 10 000 Tilly
- - 1 ED = 100 000 Fish
- - 1 ED = 100 000 Rajpal
- - 1 ED = 1 000 000 Ratt
- - 1 ED = 10 000 000 Wawatie
- - 1 ED = 100 000 000 Chief
- - 1 ED = 1000 000 000 Luck 
- - 1 ED = 10 000 000 000 Tien
- - 1 ED = 100 000 000 000 Jack
- - 1 ED = 1000 000 000 000 Nottaway
- - 1 ED = 10 000 000 000 000 Skydancer
- - 1 ED = 100 000 000 000 000 Maes
+ - 1 ED = 1,000 Kam 
+ - 1 ED = 10,000 Tilly
+ - 1 ED = 100,000 Fish
+ - 1 ED = 1,000,000 Rajpal
+ - 1 ED = 10,000,000 Ratt
+ - 1 ED = 100,000,000 Wawatie
+ - 1 ED = 1,000,000,000 Chief
+ - 1 ED = 10,000,000,000 Luck 
+ - 1 ED = 100,000,000,000 Tien
+ - 1 ED = 1,000,000,000,000 Jack
+ - 1 ED = 10,000,000,000,000 Nottaway
+ - 1 ED = 100,000,000,000,000 Skydancer
+ - 1 ED = 1,000,000,000,000,000 Maes
+ - 1 ED = 10,000,000,000,000,000 So
+ - 1 Ed = 100,000,000,000,000,000 Little
 
  - 1 ED = 10^18 Seed
 

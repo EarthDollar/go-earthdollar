@@ -652,8 +652,9 @@ module.exports = SolidityTypeBytes;
 */
 /**
  * @file coder.js
- * @author Marek Kotewicz <marek@ethdev.com>
+ * @original author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
+ * @modified 2016, Earthdollar
  */
 
 var f = require('./formatters');
@@ -960,7 +961,7 @@ var SolidityParam = require('./param');
  * @returns {SolidityParam}
  */
 var formatInputInt = function (value) {
-    BigNumber.config(c.ETH_BIGNUMBER_ROUNDING_MODE);
+    BigNumber.config(c.ED_BIGNUMBER_ROUNDING_MODE);
     var result = utils.padLeft(utils.toTwosComplement(value).round().toString(16), 64);
     return new SolidityParam(result);
 };
@@ -1799,45 +1800,39 @@ if (typeof XMLHttpRequest === 'undefined') {
  */
 
 
-/// required to define ETH_BIGNUMBER_ROUNDING_MODE
+/// required to define ED_BIGNUMBER_ROUNDING_MODE
 var BigNumber = require('bignumber.js');
 
-var ETH_UNITS = [
-    'wei',
-    'kwei',
-    'Mwei',
-    'Gwei',
-    'szabo',
-    'finney',
-    'femtoether',
-    'picoether',
-    'nanoether',
-    'microether',
-    'milliether',
-    'nano',
-    'micro',
-    'milli',
-    'ether',
-    'grand',
-    'Mether',
-    'Gether',
-    'Tether',
-    'Pether',
-    'Eether',
-    'Zether',
-    'Yether',
-    'Nether',
-    'Dether',
-    'Vether',
-    'Uether'
+var ED_UNITS = [
+    'tree',
+    'quarter',
+    'dime',
+    'nickle',
+    'penny',
+    'kam',
+    'tilly',
+    'fish',
+    'rajpal',
+    'ratt',
+    'wawatie',
+    'chief',
+    'luck',
+    'tien',
+    'jack',
+    'nottaway',
+    'skydancer',
+    'maes',
+    'so',
+    'little',
+    'seed'		
 ];
 
 module.exports = {
-    ETH_PADDING: 32,
-    ETH_SIGNATURE_LENGTH: 4,
-    ETH_UNITS: ETH_UNITS,
-    ETH_BIGNUMBER_ROUNDING_MODE: { ROUNDING_MODE: BigNumber.ROUND_DOWN },
-    ETH_POLLING_TIMEOUT: 1000/2,
+    ED_PADDING: 32,
+    ED_SIGNATURE_LENGTH: 4,
+    ED_UNITS: ED_UNITS,
+    ED_BIGNUMBER_ROUNDING_MODE: { ROUNDING_MODE: BigNumber.ROUND_DOWN },
+    ED_POLLING_TIMEOUT: 1000/2,
     defaultBlock: 'latest',
     defaultAccount: undefined
 };
@@ -1926,30 +1921,27 @@ var BigNumber = require('bignumber.js');
 var utf8 = require('utf8');
 
 var unitMap = {
-    'wei':          '1',
-    'kwei':         '1000',
-    'ada':          '1000',
-    'femtoether':   '1000',
-    'mwei':         '1000000',
-    'babbage':      '1000000',
-    'picoether':    '1000000',
-    'gwei':         '1000000000',
-    'shannon':      '1000000000',
-    'nanoether':    '1000000000',
-    'nano':         '1000000000',
-    'szabo':        '1000000000000',
-    'microether':   '1000000000000',
-    'micro':        '1000000000000',
-    'finney':       '1000000000000000',
-    'milliether':    '1000000000000000',
-    'milli':         '1000000000000000',
-    'ether':        '1000000000000000000',
-    'kether':       '1000000000000000000000',
-    'grand':        '1000000000000000000000',
-    'einstein':     '1000000000000000000000',
-    'mether':       '1000000000000000000000000',
-    'gether':       '1000000000000000000000000000',
-    'tether':       '1000000000000000000000000000000'
+    'tree':                    '1',
+    'quarter':                 '4',
+    'dime':                   '10',
+    'nickle':                 '20',
+    'penny':                 '100',
+    'kam':                  '1000',
+    'tilly':               '10000',
+    'fish':               '100000',
+    'rajpal':            '1000000',
+    'ratt':             '10000000',
+    'wawatie':         '100000000',
+    'chief':          '1000000000',
+    'luck':          '10000000000',
+    'tien':         '100000000000',
+    'jack':        '1000000000000',
+    'nottaway':   '10000000000000',
+    'skydancer': '100000000000000',
+    'maes':     '1000000000000000',
+    'so':      '10000000000000000',
+    'little': '100000000000000000',
+    'seed':  '1000000000000000000'
 };
 
 /**
@@ -2155,15 +2147,15 @@ var toHex = function (val) {
 };
 
 /**
- * Returns value of unit in Wei
+ * Returns value of unit in Seed
  *
  * @method getValueOfUnit
- * @param {String} unit the unit to convert to, default ether
- * @returns {BigNumber} value of the unit (in Wei)
+ * @param {String} unit the unit to convert to, default ed
+ * @returns {BigNumber} value of the unit (in Seed)
  * @throws error if the unit is not correct:w
  */
 var getValueOfUnit = function (unit) {
-    unit = unit ? unit.toLowerCase() : 'ether';
+    unit = unit ? unit.toLowerCase() : 'tree';
     var unitValue = unitMap[unit];
     if (unitValue === undefined) {
         throw new Error('This unit doesn\'t exists, please use the one of the following units' + JSON.stringify(unitMap, null, 2));
@@ -2172,54 +2164,26 @@ var getValueOfUnit = function (unit) {
 };
 
 /**
- * Takes a number of wei and converts it to any other ether unit.
- *
- * Possible units are:
- *   SI Short   SI Full        Effigy       Other
- * - kwei       femtoether     ada
- * - mwei       picoether      babbage
- * - gwei       nanoether      shannon      nano
- * - --         microether     szabo        micro
- * - --         milliether     finney       milli
- * - ether      --             --
- * - kether                    einstein     grand
- * - mether
- * - gether
- * - tether
- *
- * @method fromWei
+ * Takes a number of seed and converts it to any other ed unit.
+ * @method fromSeed
  * @param {Number|String} number can be a number, number string or a HEX of a decimal
- * @param {String} unit the unit to convert to, default ether
+ * @param {String} unit the unit to convert to, default ed
  * @return {String|Object} When given a BigNumber object it returns one as well, otherwise a number
 */
-var fromWei = function(number, unit) {
+var fromSeed = function(number, unit) {
     var returnValue = toBigNumber(number).dividedBy(getValueOfUnit(unit));
 
     return isBigNumber(number) ? returnValue : returnValue.toString(10);
 };
 
 /**
- * Takes a number of a unit and converts it to wei.
- *
- * Possible units are:
- *   SI Short   SI Full        Effigy       Other
- * - kwei       femtoether     ada
- * - mwei       picoether      babbage
- * - gwei       nanoether      shannon      nano
- * - --         microether     szabo        micro
- * - --         milliether     finney       milli
- * - ether      --             --
- * - kether                    einstein     grand
- * - mether
- * - gether
- * - tether
- *
- * @method toWei
+ * Takes a number of a unit and converts it to seed.
+ * @method toSeed
  * @param {Number|String|BigNumber} number can be a number, number string or a HEX of a decimal
- * @param {String} unit the unit to convert from, default ether
+ * @param {String} unit the unit to convert from, default ed
  * @return {String|Object} When given a BigNumber object it returns one as well, otherwise a number
 */
-var toWei = function(number, unit) {
+var toSeed = function(number, unit) {
     var returnValue = toBigNumber(number).times(getValueOfUnit(unit));
 
     return isBigNumber(number) ? returnValue : returnValue.toString(10);
@@ -2398,8 +2362,8 @@ module.exports = {
     transformToFullName: transformToFullName,
     extractDisplayName: extractDisplayName,
     extractTypeName: extractTypeName,
-    toWei: toWei,
-    fromWei: fromWei,
+    toSeed: toSeed,
+    fromSeed: fromSeed,
     toBigNumber: toBigNumber,
     toTwosComplement: toTwosComplement,
     toAddress: toAddress,
@@ -2544,8 +2508,8 @@ web3.fromUtf8 = utils.fromUtf8;
 web3.toDecimal = utils.toDecimal;
 web3.fromDecimal = utils.fromDecimal;
 web3.toBigNumber = utils.toBigNumber;
-web3.toWei = utils.toWei;
-web3.fromWei = utils.fromWei;
+web3.toSeed = utils.toSeed;
+web3.fromSeed = utils.fromSeed;
 web3.isAddress = utils.isAddress;
 web3.isIBAN = utils.isIBAN;
 web3.sha3 = sha3;
@@ -4331,7 +4295,7 @@ Iban.fromBban = function (bban) {
  * @return {Iban} the IBAN object
  */
 Iban.createIndirect = function (options) {
-    return Iban.fromBban('ETH' + options.institution + options.identifier);
+    return Iban.fromBban('ED' + options.institution + options.identifier);
 };
 
 /**
@@ -4353,7 +4317,7 @@ Iban.isValid = function (iban) {
  * @returns {Boolean} true if it is, otherwise false
  */
 Iban.prototype.isValid = function () {
-    return /^XE[0-9]{2}(ETH[0-9A-Z]{13}|[0-9A-Z]{30,31})$/.test(this._iban) &&
+    return /^XE[0-9]{2}(ED[0-9A-Z]{13}|[0-9A-Z]{30,31})$/.test(this._iban) &&
         mod9710(iso13616Prepare(this._iban)) === 1;
 };
 
@@ -5913,7 +5877,7 @@ RequestManager.prototype.reset = function (keepIsSyncing) {
  */
 RequestManager.prototype.poll = function () {
     /*jshint maxcomplexity: 6 */
-    this.timeout = setTimeout(this.poll.bind(this), c.ETH_POLLING_TIMEOUT);
+    this.timeout = setTimeout(this.poll.bind(this), c.ED_POLLING_TIMEOUT);
 
     if (Object.keys(this.polls).length === 0) {
         return;
