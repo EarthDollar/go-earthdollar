@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Earthdollar/go-earthdollar/logger"
+	"github.com/ethereum/go-ethereum/logger"
 )
 
 func testErrors() *Errors {

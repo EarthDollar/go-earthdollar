@@ -19,8 +19,8 @@ package api
 import (
 	"encoding/json"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/rpc/shared"
 )
 
 type DbArgs struct {

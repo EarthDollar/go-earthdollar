@@ -21,4 +21,3 @@ import (
 )
 
 var BlockReward *big.Int = big.NewInt(5e+18)
-var MintBalance *big.Int = big.NewInt(20)

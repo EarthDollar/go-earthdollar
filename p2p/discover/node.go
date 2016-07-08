@@ -29,9 +29,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/crypto/secp256k1"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 )
 
 const nodeIDBits = 512
@@ -98,10 +98,10 @@ func (n *Node) String() string {
 // parameter "discport".
 //
 // In the following example, the node URL describes
-// a node with IP address 10.3.58.6, TCP listening port 20203
-// and UDP discovery port 20201.
+// a node with IP address 10.3.58.6, TCP listening port 30303
+// and UDP discovery port 30301.
 //
-//    enode://<hex node id>@10.3.58.6:20203?discport=20201
+//    enode://<hex node id>@10.3.58.6:30303?discport=30301
 func ParseNode(rawurl string) (*Node, error) {
 	var (
 		id               NodeID

@@ -21,8 +21,8 @@ import (
 
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/rpc/shared"
 )
 
 type StartMinerArgs struct {
@@ -93,11 +93,11 @@ func (args *GasPriceArgs) UnmarshalJSON(b []byte) (err error) {
 	return shared.NewInvalidTypeError("Price", "not a string")
 }
 
-type SetEarthbaseArgs struct {
-	Earthbase common.Address
+type SetEtherbaseArgs struct {
+	Etherbase common.Address
 }
 
-func (args *SetEarthbaseArgs) UnmarshalJSON(b []byte) (err error) {
+func (args *SetEtherbaseArgs) UnmarshalJSON(b []byte) (err error) {
 	var obj []interface{}
 	if err := json.Unmarshal(b, &obj); err != nil {
 		return shared.NewDecodeParamError(err.Error())
@@ -108,14 +108,14 @@ func (args *SetEarthbaseArgs) UnmarshalJSON(b []byte) (err error) {
 	}
 
 	if addr, ok := obj[0].(string); ok {
-		args.Earthbase = common.HexToAddress(addr)
-		if (args.Earthbase == common.Address{}) {
-			return shared.NewInvalidTypeError("Earthbase", "not a valid address")
+		args.Etherbase = common.HexToAddress(addr)
+		if (args.Etherbase == common.Address{}) {
+			return shared.NewInvalidTypeError("Etherbase", "not a valid address")
 		}
 		return nil
 	}
 
-	return shared.NewInvalidTypeError("Earthbase", "not a string")
+	return shared.NewInvalidTypeError("Etherbase", "not a string")
 }
 
 type MakeDAGArgs struct {

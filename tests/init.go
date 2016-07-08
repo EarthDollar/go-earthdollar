@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package tests implements execution of Earthdollar JSON tests.
+// Package tests implements execution of Ethereum JSON tests.
 package tests
 
 import (
@@ -26,7 +26,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Earthdollar/go-earthdollar/core"
+	"github.com/ethereum/go-ethereum/core"
 )
 
 var (

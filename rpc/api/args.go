@@ -19,7 +19,7 @@ package api
 import (
 	"encoding/json"
 
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/ethereum/go-ethereum/rpc/shared"
 )
 
 type CompileArgs struct {

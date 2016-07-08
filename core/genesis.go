@@ -24,17 +24,17 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/params"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/params"
 )
 
 // WriteGenesisBlock writes the genesis block to the database as block number 0
-func WriteGenesisBlock(chainDb eddb.Database, reader io.Reader) (*types.Block, error) {
+func WriteGenesisBlock(chainDb ethdb.Database, reader io.Reader) (*types.Block, error) {
 	contents, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,6 @@ func WriteGenesisBlock(chainDb eddb.Database, reader io.Reader) (*types.Block, e
 		ParentHash string
 		ExtraData  string
 		GasLimit   string
-		Mint       string
 		Difficulty string
 		Mixhash    string
 		Coinbase   string
@@ -57,12 +56,10 @@ func WriteGenesisBlock(chainDb eddb.Database, reader io.Reader) (*types.Block, e
 		}
 	}
 
-
-
 	if err := json.Unmarshal(contents, &genesis); err != nil {
 		return nil, err
 	}
-	
+
 	// creating with empty hash always works
 	statedb, _ := state.New(common.Hash{}, chainDb)
 	for addr, account := range genesis.Alloc {
@@ -79,7 +76,6 @@ func WriteGenesisBlock(chainDb eddb.Database, reader io.Reader) (*types.Block, e
 	block := types.NewBlock(&types.Header{
 		Nonce:      types.EncodeNonce(common.String2Big(genesis.Nonce).Uint64()),
 		Time:       common.String2Big(genesis.Timestamp),
-		Mint:       common.String2Big(genesis.Mint),
 		ParentHash: common.HexToHash(genesis.ParentHash),
 		Extra:      common.FromHex(genesis.ExtraData),
 		GasLimit:   common.String2Big(genesis.GasLimit),
@@ -97,7 +93,6 @@ func WriteGenesisBlock(chainDb eddb.Database, reader io.Reader) (*types.Block, e
 		}
 		return block, nil
 	}
-	
 
 	if err := stateBatch.Write(); err != nil {
 		return nil, fmt.Errorf("cannot write state: %v", err)
@@ -120,9 +115,9 @@ func WriteGenesisBlock(chainDb eddb.Database, reader io.Reader) (*types.Block, e
 	return block, nil
 }
 
-// GenesisBlockForTesting creates a block in which addr has the given seed balance.
+// GenesisBlockForTesting creates a block in which addr has the given wei balance.
 // The state trie of the block is written to db. the passed db needs to contain a state root
-func GenesisBlockForTesting(db eddb.Database, addr common.Address, balance *big.Int) *types.Block {
+func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big.Int) *types.Block {
 	statedb, _ := state.New(common.Hash{}, db)
 	obj := statedb.GetOrNewStateObject(addr)
 	obj.SetBalance(balance)
@@ -143,7 +138,7 @@ type GenesisAccount struct {
 	Balance *big.Int
 }
 
-func WriteGenesisBlockForTesting(db eddb.Database, accounts ...GenesisAccount) *types.Block {
+func WriteGenesisBlockForTesting(db ethdb.Database, accounts ...GenesisAccount) *types.Block {
 	accountJson := "{"
 	for i, account := range accounts {
 		if i != 0 {
@@ -157,19 +152,13 @@ func WriteGenesisBlockForTesting(db eddb.Database, accounts ...GenesisAccount) *
 	"nonce":"0x%x",
 	"gasLimit":"0x%x",
 	"difficulty":"0x%x",
-	"alloc": {
-		"0000000000000000000000000000000000000001": {"balance": "1"},
-		"0000000000000000000000000000000000000002": {"balance": "1"},
-		"0000000000000000000000000000000000000003": {"balance": "1"},
-		"2b88ff71ad679b91a2d8f255e61777b45bc83f6f": {"balance": "1"},
-		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "10000"}
-	}
+	"alloc": %s
 }`, types.EncodeNonce(0), params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes(), accountJson)
 	block, _ := WriteGenesisBlock(db, strings.NewReader(testGenesis))
 	return block
 }
 
-func WriteTestNetGenesisBlock(chainDb eddb.Database, nonce uint64) (*types.Block, error) {
+func WriteTestNetGenesisBlock(chainDb ethdb.Database, nonce uint64) (*types.Block, error) {
 	testGenesis := fmt.Sprintf(`{
         "nonce": "0x%x",
         "difficulty": "0x20000",
@@ -184,55 +173,31 @@ func WriteTestNetGenesisBlock(chainDb eddb.Database, nonce uint64) (*types.Block
                 "0000000000000000000000000000000000000002": { "balance": "1" },
                 "0000000000000000000000000000000000000003": { "balance": "1" },
                 "0000000000000000000000000000000000000004": { "balance": "1" },
-		        "102e61f5d8f9bc71d0ad4a084df4e65e05ce0e1c": { "balance": "1606938044258990275541962092341162602522202993782792835301376" }
+		"102e61f5d8f9bc71d0ad4a084df4e65e05ce0e1c": { "balance": "1606938044258990275541962092341162602522202993782792835301376" }
         }
 }`, types.EncodeNonce(nonce))
 	return WriteGenesisBlock(chainDb, strings.NewReader(testGenesis))
 }
 
-func WriteOlympicGenesisBlock(chainDb eddb.Database , nonce uint64) (*types.Block, error) {
+func WriteOlympicGenesisBlock(chainDb ethdb.Database, nonce uint64) (*types.Block, error) {
 	testGenesis := fmt.Sprintf(`{
-	"nonce": "0x%x",
-	"gasLimit":"0x%x",
-	"difficulty":"0x%x",
-	"alloc": {
-		"0xe856f883f4862cb7f55a35a5b554451798902d16":  {"balance": "100000000000000000000000000"},  
-		"0x4e32fb7cb1d33861aa2677d7ff32da16027e7e08":  {"balance": "100000000000000000000000000"},
-		"0x2ba175ee5b11ac09eabbef73234452b5857a0f01":  {"balance": "100000000000000000000000000"},
-		"0x681c1dcdfaaf43b37bb5db81d219e801c5d6426f":  {"balance": "100000000000000000000000000"}, 
-		"0x5b1c61d10fe21e45182c71987abda0eab33ea9e7":  {"balance": "100000000000000000000000000"}, 
-		"0x84bb68e581f8513945d7c2269e134f61abdceb77":  {"balance": "100000000000000000000000000"}, 
-		"0x1ed132a81aaea349d619c71a580d1426fc8cf6dc":  {"balance": "100000000000000000000000000"}, 
-		"0xaa7a66a45e61f2e31980150dc2e79898cf2b9b6b":  {"balance": "100000000000000000000000000"}, 
-		"0x150a588f68344a61800b3c3761a37e57231bf454":  {"balance": "100000000000000000000000000"}, 
-		"0xb7fa96bb09aaa87c642c7fb753d2ef0b410ffd29":  {"balance": "100000000000000000000000000"}, 
-		"0x062305dbbeff97f2cd7d16a2e76780c64b0794e9":  {"balance": "100000000000000000000000000"}, 
-		"0xd3842991acd4823fa0f22f7915aba179ca1c84ff":  {"balance": "100000000000000000000000000"}, 
-		"0x80ef182cfd269467c8d8732aae65c046da5ccee7":  {"balance": "100000000000000000000000000"}, 
-		"0xe91efd17378a653d3d36b336bfdeefd858bf0eb4":  {"balance": "100000000000000000000000000"}, 
-		"0x61e342a5430c9fd2d9427a5794ff85bfea20af77":  {"balance": "100000000000000000000000000"}, 
-		"0xbae738480167bd65284a6f85d8bc661f22b2364e":  {"balance": "100000000000000000000000000"}, 
-		"0xba9fc55c1a79b4ec3a2c78c6e82996c74d6dc6ba":  {"balance": "100000000000000000000000000"}, 
-		"0x5768a44376352a25155452337ddeb647b7988ac0":  {"balance": "100000000000000000000000000"}, 
-		"0x61f2a927f5f7d91786f8779cd0ea4d769201f1ce":  {"balance": "100000000000000000000000000"}, 
-		"0xeef42335bc391518bf07a03518918c7ab0de9e9c":  {"balance": "100000000000000000000000000"} 
-	}
-}`, types.EncodeNonce(nonce), params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes())
-	return WriteGenesisBlock(chainDb, strings.NewReader(testGenesis))
-}
-
-func EDGenesisBlockString() *strings.Reader {	
-	testGenesis := fmt.Sprintf(`{
-	"nonce":"0x0000000000000042",
+	"nonce":"0x%x",
 	"gasLimit":"0x%x",
 	"difficulty":"0x%x",
 	"alloc": {
 		"0000000000000000000000000000000000000001": {"balance": "1"},
 		"0000000000000000000000000000000000000002": {"balance": "1"},
-		"d1c30456071d97c3abbd48874a0ed0868f2ac859": {"balance": "100"},
-		"2b88ff71ad679b91a2d8f255e61777b45bc83f6f": {"balance": "1"},
-		"3470a1706a5bbf5a3fc6a2af0d6de86027e96302": {"balance": "10000"}
+		"0000000000000000000000000000000000000003": {"balance": "1"},
+		"0000000000000000000000000000000000000004": {"balance": "1"},
+		"dbdbdb2cbd23b783741e8d7fcf51e459b497e4a6": {"balance": "1606938044258990275541962092341162602522202993782792835301376"},
+		"e4157b34ea9615cfbde6b4fda419828124b70c78": {"balance": "1606938044258990275541962092341162602522202993782792835301376"},
+		"b9c015918bdaba24b4ff057a92a3873d6eb201be": {"balance": "1606938044258990275541962092341162602522202993782792835301376"},
+		"6c386a4b26f73c802f34673f7248bb118f97424a": {"balance": "1606938044258990275541962092341162602522202993782792835301376"},
+		"cd2a3d9f938e13cd947ec05abc7fe734df8dd826": {"balance": "1606938044258990275541962092341162602522202993782792835301376"},
+		"2ef47100e0787b915105fd5e3f4ff6752079d5cb": {"balance": "1606938044258990275541962092341162602522202993782792835301376"},
+		"e6716f9544a56c530d868e4bfbacb172315bdead": {"balance": "1606938044258990275541962092341162602522202993782792835301376"},
+		"1a26338f0d905e295fccb71fa9ea849ffa12aaf4": {"balance": "1606938044258990275541962092341162602522202993782792835301376"}
 	}
-}`, params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes())
-	return strings.NewReader(testGenesis)
+}`, types.EncodeNonce(nonce), params.GenesisGasLimit.Bytes(), params.GenesisDifficulty.Bytes())
+	return WriteGenesisBlock(chainDb, strings.NewReader(testGenesis))
 }

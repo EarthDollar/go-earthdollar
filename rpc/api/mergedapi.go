@@ -17,9 +17,9 @@
 package api
 
 import (
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/rpc/shared"
 )
 
 const (
@@ -29,14 +29,14 @@ const (
 // combines multiple API's
 type MergedApi struct {
 	apis    map[string]string
-	methods map[string]shared.EarthdollarApi
+	methods map[string]shared.EthereumApi
 }
 
 // create new merged api instance
-func newMergedApi(apis ...shared.EarthdollarApi) *MergedApi {
+func newMergedApi(apis ...shared.EthereumApi) *MergedApi {
 	mergedApi := new(MergedApi)
 	mergedApi.apis = make(map[string]string, len(apis))
-	mergedApi.methods = make(map[string]shared.EarthdollarApi)
+	mergedApi.methods = make(map[string]shared.EthereumApi)
 
 	for _, api := range apis {
 		mergedApi.apis[api.Name()] = api.ApiVersion()

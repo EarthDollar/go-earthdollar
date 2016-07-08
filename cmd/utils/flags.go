@@ -1,18 +1,18 @@
-// Copyright 2015 The go-earthdollar Authors
-// This file is part of go-earthdollar.
+// Copyright 2015 The go-ethereum Authors
+// This file is part of go-ethereum.
 //
-// go-earthdollar is free software: you can redistribute it and/or modify
+// go-ethereum is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-earthdollar is distributed in the hope that it will be useful,
+// go-ethereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-earthdollar. If not, see <http://www.gnu.org/licenses/>.
+// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
 package utils
 
@@ -31,25 +31,25 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/ethereum/ethash"
-	"github.com/Earthdollar/go-earthdollar/accounts"
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/event"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/metrics"
-	"github.com/Earthdollar/go-earthdollar/p2p/nat"
-	"github.com/Earthdollar/go-earthdollar/params"
-	"github.com/Earthdollar/go-earthdollar/rpc/api"
-	"github.com/Earthdollar/go-earthdollar/rpc/codec"
-	"github.com/Earthdollar/go-earthdollar/rpc/comms"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
-	"github.com/Earthdollar/go-earthdollar/rpc/useragent"
-	"github.com/Earthdollar/go-earthdollar/xed"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/ethereum/go-ethereum/p2p/nat"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/rpc/api"
+	"github.com/ethereum/go-ethereum/rpc/codec"
+	"github.com/ethereum/go-ethereum/rpc/comms"
+	"github.com/ethereum/go-ethereum/rpc/shared"
+	"github.com/ethereum/go-ethereum/rpc/useragent"
+	"github.com/ethereum/go-ethereum/xeth"
 )
 
 func init() {
@@ -107,7 +107,7 @@ var (
 	NetworkIdFlag = cli.IntFlag{
 		Name:  "networkid",
 		Usage: "Network identifier (integer, 0=Olympic, 1=Frontier, 2=Morden)",
-		Value: ed.NetworkId,
+		Value: eth.NetworkId,
 	}
 	OlympicFlag = cli.BoolFlag{
 		Name:  "olympic",
@@ -175,8 +175,8 @@ var (
 		Name:  "autodag",
 		Usage: "Enable automatic DAG pregeneration",
 	}
-	EarthbaseFlag = cli.StringFlag{
-		Name:  "earthbase",
+	EtherbaseFlag = cli.StringFlag{
+		Name:  "etherbase",
 		Usage: "Public address for block mining rewards (default = first account created)",
 		Value: "0",
 	}
@@ -268,7 +268,7 @@ var (
 	RPCPortFlag = cli.IntFlag{
 		Name:  "rpcport",
 		Usage: "HTTP-RPC server listening port",
-		Value: shared.ED_LocalPort,
+		Value: 8545,
 	}
 	RPCCORSDomainFlag = cli.StringFlag{
 		Name:  "rpccorsdomain",
@@ -312,7 +312,7 @@ var (
 	ListenPortFlag = cli.IntFlag{
 		Name:  "port",
 		Usage: "Network listening port",
-		Value: 20203,
+		Value: 30303,
 	}
 	BootnodesFlag = cli.StringFlag{
 		Name:  "bootnodes",
@@ -413,19 +413,19 @@ func MakeNodeKey(ctx *cli.Context) (key *ecdsa.PrivateKey) {
 	return key
 }
 
-// MakeEthConfig creates earthdollar options from set command line flags.
-func MakeEthConfig(clientID, version string, ctx *cli.Context) *ed.Config {
+// MakeEthConfig creates ethereum options from set command line flags.
+func MakeEthConfig(clientID, version string, ctx *cli.Context) *eth.Config {
 	customName := ctx.GlobalString(IdentityFlag.Name)
 	if len(customName) > 0 {
 		clientID += "/" + customName
 	}
 	am := MakeAccountManager(ctx)
-	earthbase, err := ParamToAddress(ctx.GlobalString(EarthbaseFlag.Name), am)
+	etherbase, err := ParamToAddress(ctx.GlobalString(EtherbaseFlag.Name), am)
 	if err != nil {
-		glog.V(logger.Error).Infoln("WARNING: No earthbase set and no accounts found as default")
+		glog.V(logger.Error).Infoln("WARNING: No etherbase set and no accounts found as default")
 	}
-	// Assemble the entire ed configuration and return
-	cfg := &ed.Config{
+	// Assemble the entire eth configuration and return
+	cfg := &eth.Config{
 		Name:                    common.MakeName(clientID, version),
 		DataDir:                 MustDataDir(ctx),
 		GenesisFile:             ctx.GlobalString(GenesisFileFlag.Name),
@@ -436,7 +436,7 @@ func MakeEthConfig(clientID, version string, ctx *cli.Context) *ed.Config {
 		NetworkId:               ctx.GlobalInt(NetworkIdFlag.Name),
 		LogFile:                 ctx.GlobalString(LogFileFlag.Name),
 		Verbosity:               ctx.GlobalInt(VerbosityFlag.Name),
-		Earthbase:               common.HexToAddress(earthbase),
+		Etherbase:               common.HexToAddress(etherbase),
 		MinerThreads:            ctx.GlobalInt(MinerThreadsFlag.Name),
 		AccountManager:          am,
 		VmDebug:                 ctx.GlobalBool(VMDebugFlag.Name),
@@ -496,7 +496,7 @@ func MakeEthConfig(clientID, version string, ctx *cli.Context) *ed.Config {
 			cfg.Shh = true
 		}
 		if !ctx.GlobalIsSet(DataDirFlag.Name) {
-			cfg.DataDir = os.TempDir() + "/earthdollar_dev_mode"
+			cfg.DataDir = os.TempDir() + "/ethereum_dev_mode"
 		}
 		cfg.PowTest = true
 		cfg.DevMode = true
@@ -536,12 +536,12 @@ func SetupVM(ctx *cli.Context) {
 }
 
 // MakeChain creates a chain manager from set command line flags.
-func MakeChain(ctx *cli.Context) (chain *core.BlockChain, chainDb eddb.Database) {
+func MakeChain(ctx *cli.Context) (chain *core.BlockChain, chainDb ethdb.Database) {
 	datadir := MustDataDir(ctx)
 	cache := ctx.GlobalInt(CacheFlag.Name)
 
 	var err error
-	if chainDb, err = eddb.NewLDBDatabase(filepath.Join(datadir, "chaindata"), cache); err != nil {
+	if chainDb, err = ethdb.NewLDBDatabase(filepath.Join(datadir, "chaindata"), cache); err != nil {
 		Fatalf("Could not open database: %v", err)
 	}
 	if ctx.GlobalBool(OlympicFlag.Name) {
@@ -597,7 +597,7 @@ func IpcSocketPath(ctx *cli.Context) (ipcpath string) {
 	} else {
 		ipcpath = common.DefaultIpcPath()
 		if ctx.GlobalIsSet(DataDirFlag.Name) {
-			ipcpath = filepath.Join(ctx.GlobalString(DataDirFlag.Name), "ged.ipc")
+			ipcpath = filepath.Join(ctx.GlobalString(DataDirFlag.Name), "geth.ipc")
 		}
 		if ctx.GlobalIsSet(IPCPathFlag.Name) {
 			ipcpath = ctx.GlobalString(IPCPathFlag.Name)
@@ -607,35 +607,35 @@ func IpcSocketPath(ctx *cli.Context) (ipcpath string) {
 	return
 }
 
-func StartIPC(ed *ed.Earthdollar, ctx *cli.Context) error {
+func StartIPC(eth *eth.Ethereum, ctx *cli.Context) error {
 	config := comms.IpcConfig{
 		Endpoint: IpcSocketPath(ctx),
 	}
 
-	initializer := func(conn net.Conn) (comms.Stopper, shared.EarthdollarApi, error) {
-		fe := useragent.NewRemoteFrontend(conn, ed.AccountManager())
-		xed := xed.New(ed, fe)
-		apis, err := api.ParseApiString(ctx.GlobalString(IPCApiFlag.Name), codec.JSON, xed, ed)
+	initializer := func(conn net.Conn) (comms.Stopper, shared.EthereumApi, error) {
+		fe := useragent.NewRemoteFrontend(conn, eth.AccountManager())
+		xeth := xeth.New(eth, fe)
+		apis, err := api.ParseApiString(ctx.GlobalString(IPCApiFlag.Name), codec.JSON, xeth, eth)
 		if err != nil {
 			return nil, nil, err
 		}
-		return xed, api.Merge(apis...), nil
+		return xeth, api.Merge(apis...), nil
 	}
 
 	return comms.StartIpc(config, codec.JSON, initializer)
 }
 
-func StartRPC(ed *ed.Earthdollar, ctx *cli.Context) error {
+func StartRPC(eth *eth.Ethereum, ctx *cli.Context) error {
 	config := comms.HttpConfig{
 		ListenAddress: ctx.GlobalString(RPCListenAddrFlag.Name),
 		ListenPort:    uint(ctx.GlobalInt(RPCPortFlag.Name)),
 		CorsDomain:    ctx.GlobalString(RPCCORSDomainFlag.Name),
 	}
 
-	xed := xed.New(ed, nil)
+	xeth := xeth.New(eth, nil)
 	codec := codec.JSON
 
-	apis, err := api.ParseApiString(ctx.GlobalString(RpcApiFlag.Name), codec, xed, ed)
+	apis, err := api.ParseApiString(ctx.GlobalString(RpcApiFlag.Name), codec, xeth, eth)
 	if err != nil {
 		return err
 	}

@@ -21,13 +21,13 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rlp"
-	"github.com/Earthdollar/go-earthdollar/trie"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/trie"
 )
 
 type Code []byte
@@ -57,7 +57,7 @@ func (self Storage) Copy() Storage {
 
 type StateObject struct {
 	// State database for storing state changes
-	db   eddb.Database
+	db   ethdb.Database
 	trie *trie.SecureTrie
 
 	// Address belonging to this account
@@ -83,14 +83,14 @@ type StateObject struct {
 	dirty   bool
 }
 
-func NewStateObject(address common.Address, db eddb.Database) *StateObject {
+func NewStateObject(address common.Address, db ethdb.Database) *StateObject {
 	object := &StateObject{db: db, address: address, balance: new(big.Int), dirty: true}
 	object.trie, _ = trie.NewSecure(common.Hash{}, db)
 	object.storage = make(Storage)
 	return object
 }
 
-func NewStateObjectFromBytes(address common.Address, data []byte, db eddb.Database) *StateObject {
+func NewStateObjectFromBytes(address common.Address, data []byte, db ethdb.Database) *StateObject {
 	var extobject struct {
 		Nonce    uint64
 		Balance  *big.Int

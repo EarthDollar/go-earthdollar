@@ -20,19 +20,19 @@ import (
 	"container/list"
 	"fmt"
 
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	// "github.com/Earthdollar/go-earthdollar/crypto"
+	"github.com/ethereum/go-ethereum/core/types"
+	// "github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/event"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
 )
 
-// Implement our EDTest Manager
+// Implement our EthTest Manager
 type TestManager struct {
 	// stateManager *StateManager
 	eventMux *event.TypeMux
 
-	db         eddb.Database
+	db         ethdb.Database
 	txPool     *TxPool
 	blockChain *BlockChain
 	Blocks     []*types.Block
@@ -74,12 +74,12 @@ func (tm *TestManager) EventMux() *event.TypeMux {
 // 	return nil
 // }
 
-func (tm *TestManager) Db() eddb.Database {
+func (tm *TestManager) Db() ethdb.Database {
 	return tm.db
 }
 
 func NewTestManager() *TestManager {
-	db, err := eddb.NewMemDatabase()
+	db, err := ethdb.NewMemDatabase()
 	if err != nil {
 		fmt.Println("Could not create mem-db, failing")
 		return nil

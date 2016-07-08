@@ -2,110 +2,110 @@
 # with Go source code. If you know what GOPATH is then you probably
 # don't need to bother with make.
 
-.PHONY: ged ged-cross evm all test travis-test-with-coverage xgo clean
-.PHONY: ged-linux ged-linux-arm ged-linux-386 ged-linux-amd64
-.PHONY: ged-darwin ged-darwin-386 ged-darwin-amd64
-.PHONY: ged-windows ged-windows-386 ged-windows-amd64
-.PHONY: ged-android ged-android-16 ged-android-21
+.PHONY: geth geth-cross evm all test travis-test-with-coverage xgo clean
+.PHONY: geth-linux geth-linux-arm geth-linux-386 geth-linux-amd64
+.PHONY: geth-darwin geth-darwin-386 geth-darwin-amd64
+.PHONY: geth-windows geth-windows-386 geth-windows-amd64
+.PHONY: geth-android geth-android-16 geth-android-21
 
 GOBIN = build/bin
 
 MODE ?= default
 GO ?= latest
 
-ged:
-	build/env.sh go install -v $(shell build/flags.sh) ./cmd/ged
+geth:
+	build/env.sh go install -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Done building."
-	@echo "Run \"$(GOBIN)/ged\" to launch ged."
+	@echo "Run \"$(GOBIN)/geth\" to launch geth."
 
-ged-cross: ged-linux ged-darwin ged-windows ged-android
+geth-cross: geth-linux geth-darwin geth-windows geth-android
 	@echo "Full cross compilation done:"
-	@ls -l $(GOBIN)/ged-*
+	@ls -l $(GOBIN)/geth-*
 
-ged-linux: xgo ged-linux-arm ged-linux-386 ged-linux-amd64
+geth-linux: xgo geth-linux-arm geth-linux-386 geth-linux-amd64
 	@echo "Linux cross compilation done:"
-	@ls -l $(GOBIN)/ged-linux-*
+	@ls -l $(GOBIN)/geth-linux-*
 
-ged-linux-386: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/386 -v $(shell build/flags.sh) ./cmd/ged
+geth-linux-386: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/386 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Linux 386 cross compilation done:"
-	@ls -l $(GOBIN)/ged-linux-* | grep 386
+	@ls -l $(GOBIN)/geth-linux-* | grep 386
 
-ged-linux-amd64: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/amd64 -v $(shell build/flags.sh) ./cmd/ged
+geth-linux-amd64: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/amd64 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Linux amd64 cross compilation done:"
-	@ls -l $(GOBIN)/ged-linux-* | grep amd64
+	@ls -l $(GOBIN)/geth-linux-* | grep amd64
 
-ged-linux-arm: ged-linux-arm-5 ged-linux-arm-6 ged-linux-arm-7 ged-linux-arm64
+geth-linux-arm: geth-linux-arm-5 geth-linux-arm-6 geth-linux-arm-7 geth-linux-arm64
 	@echo "Linux ARM cross compilation done:"
-	@ls -l $(GOBIN)/ged-linux-* | grep arm
+	@ls -l $(GOBIN)/geth-linux-* | grep arm
 
-ged-linux-arm-5: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/arm-5 -v $(shell build/flags.sh) ./cmd/ged
+geth-linux-arm-5: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/arm-5 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Linux ARMv5 cross compilation done:"
-	@ls -l $(GOBIN)/ged-linux-* | grep arm-5
+	@ls -l $(GOBIN)/geth-linux-* | grep arm-5
 
-ged-linux-arm-6: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/arm-6 -v $(shell build/flags.sh) ./cmd/ged
+geth-linux-arm-6: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/arm-6 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Linux ARMv6 cross compilation done:"
-	@ls -l $(GOBIN)/ged-linux-* | grep arm-6
+	@ls -l $(GOBIN)/geth-linux-* | grep arm-6
 
-ged-linux-arm-7: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/arm-7 -v $(shell build/flags.sh) ./cmd/ged
+geth-linux-arm-7: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/arm-7 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Linux ARMv7 cross compilation done:"
-	@ls -l $(GOBIN)/ged-linux-* | grep arm-7
+	@ls -l $(GOBIN)/geth-linux-* | grep arm-7
 
-ged-linux-arm64: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/arm64 -v $(shell build/flags.sh) ./cmd/ged
+geth-linux-arm64: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=linux/arm64 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Linux ARM64 cross compilation done:"
-	@ls -l $(GOBIN)/ged-linux-* | grep arm64
+	@ls -l $(GOBIN)/geth-linux-* | grep arm64
 
-ged-darwin: ged-darwin-386 ged-darwin-amd64
+geth-darwin: geth-darwin-386 geth-darwin-amd64
 	@echo "Darwin cross compilation done:"
-	@ls -l $(GOBIN)/ged-darwin-*
+	@ls -l $(GOBIN)/geth-darwin-*
 
-ged-darwin-386: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=darwin/386 -v $(shell build/flags.sh) ./cmd/ged
+geth-darwin-386: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=darwin/386 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Darwin 386 cross compilation done:"
-	@ls -l $(GOBIN)/ged-darwin-* | grep 386
+	@ls -l $(GOBIN)/geth-darwin-* | grep 386
 
-ged-darwin-amd64: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=darwin/amd64 -v $(shell build/flags.sh) ./cmd/ged
+geth-darwin-amd64: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=darwin/amd64 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Darwin amd64 cross compilation done:"
-	@ls -l $(GOBIN)/ged-darwin-* | grep amd64
+	@ls -l $(GOBIN)/geth-darwin-* | grep amd64
 
-ged-windows: xgo ged-windows-386 ged-windows-amd64
+geth-windows: xgo geth-windows-386 geth-windows-amd64
 	@echo "Windows cross compilation done:"
-	@ls -l $(GOBIN)/ged-windows-*
+	@ls -l $(GOBIN)/geth-windows-*
 
-ged-windows-386: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=windows/386 -v $(shell build/flags.sh) ./cmd/ged
+geth-windows-386: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=windows/386 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Windows 386 cross compilation done:"
-	@ls -l $(GOBIN)/ged-windows-* | grep 386
+	@ls -l $(GOBIN)/geth-windows-* | grep 386
 
-ged-windows-amd64: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=windows/amd64 -v $(shell build/flags.sh) ./cmd/ged
+geth-windows-amd64: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=windows/amd64 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Windows amd64 cross compilation done:"
-	@ls -l $(GOBIN)/ged-windows-* | grep amd64
+	@ls -l $(GOBIN)/geth-windows-* | grep amd64
 
-ged-android: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=android/* -v $(shell build/flags.sh) ./cmd/ged
+geth-android: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=android/* -v $(shell build/flags.sh) ./cmd/geth
 	@echo "Android cross compilation done:"
-	@ls -l $(GOBIN)/ged-android-*
+	@ls -l $(GOBIN)/geth-android-*
 
-ged-ios: ged-ios-arm-7 ged-ios-arm64
+geth-ios: geth-ios-arm-7 geth-ios-arm64
 	@echo "iOS cross compilation done:"
-	@ls -l $(GOBIN)/ged-ios-*
+	@ls -l $(GOBIN)/geth-ios-*
 
-ged-ios-arm-7: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=ios/arm-7 -v $(shell build/flags.sh) ./cmd/ged
+geth-ios-arm-7: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=ios/arm-7 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "iOS ARMv7 cross compilation done:"
-	@ls -l $(GOBIN)/ged-ios-* | grep arm-7
+	@ls -l $(GOBIN)/geth-ios-* | grep arm-7
 
-ged-ios-arm64: xgo
-	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=ios-7.0/arm64 -v $(shell build/flags.sh) ./cmd/ged
+geth-ios-arm64: xgo
+	build/env.sh $(GOBIN)/xgo --go=$(GO) --buildmode=$(MODE) --dest=$(GOBIN) --targets=ios-7.0/arm64 -v $(shell build/flags.sh) ./cmd/geth
 	@echo "iOS ARM64 cross compilation done:"
-	@ls -l $(GOBIN)/ged-ios-* | grep arm64
+	@ls -l $(GOBIN)/geth-ios-* | grep arm64
 
 evm:
 	build/env.sh $(GOROOT)/bin/go install -v $(shell build/flags.sh) ./cmd/evm

@@ -30,19 +30,19 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/event"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/metrics"
-	"github.com/Earthdollar/go-earthdollar/pow"
-	"github.com/Earthdollar/go-earthdollar/rlp"
-	"github.com/Earthdollar/go-earthdollar/trie"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/ethereum/go-ethereum/pow"
+	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/trie"
 	"github.com/hashicorp/golang-lru"
 )
 
@@ -82,7 +82,7 @@ const (
 // included in the canonical one where as GetBlockByNumber always represents the
 // canonical chain.
 type BlockChain struct {
-	chainDb      eddb.Database
+	chainDb      ethdb.Database
 	eventMux     *event.TypeMux
 	genesisBlock *types.Block
 	// Last known total difficulty
@@ -116,9 +116,9 @@ type BlockChain struct {
 }
 
 // NewBlockChain returns a fully initialised block chain using information
-// available in the database. It initialiser the default Earthdollar Validator and
+// available in the database. It initialiser the default Ethereum Validator and
 // Processor.
-func NewBlockChain(chainDb eddb.Database, pow pow.PoW, mux *event.TypeMux) (*BlockChain, error) {
+func NewBlockChain(chainDb ethdb.Database, pow pow.PoW, mux *event.TypeMux) (*BlockChain, error) {
 	headerCache, _ := lru.New(headerCacheLimit)
 	bodyCache, _ := lru.New(bodyCacheLimit)
 	bodyRLPCache, _ := lru.New(bodyCacheLimit)
@@ -138,7 +138,6 @@ func NewBlockChain(chainDb eddb.Database, pow pow.PoW, mux *event.TypeMux) (*Blo
 		futureBlocks: futureBlocks,
 		pow:          pow,
 	}
-
 	// Seed a fast but crypto originating random generator
 	seed, err := crand.Int(crand.Reader, big.NewInt(math.MaxInt64))
 	if err != nil {
@@ -150,15 +149,15 @@ func NewBlockChain(chainDb eddb.Database, pow pow.PoW, mux *event.TypeMux) (*Blo
 
 	bc.genesisBlock = bc.GetBlockByNumber(0)
 	if bc.genesisBlock == nil {
-		//reader, err := NewDefaultGenesisReader()
-		//if err != nil {
-			//return nil, err
-		//}
-		bc.genesisBlock, err = WriteOlympicGenesisBlock(chainDb, 42) // WriteGenesisBlock(chainDb, reader) earthdollar
+		reader, err := NewDefaultGenesisReader()
 		if err != nil {
 			return nil, err
 		}
-		glog.V(logger.Info).Infoln("WARNING: Wrote default earthdollar genesis block")
+		bc.genesisBlock, err = WriteGenesisBlock(chainDb, reader)
+		if err != nil {
+			return nil, err
+		}
+		glog.V(logger.Info).Infoln("WARNING: Wrote default ethereum genesis block")
 	}
 	if err := bc.loadLastState(); err != nil {
 		return nil, err
@@ -171,9 +170,8 @@ func NewBlockChain(chainDb eddb.Database, pow pow.PoW, mux *event.TypeMux) (*Blo
 			glog.V(logger.Error).Infoln("Chain rewind was successful, resuming normal operation")
 		}
 	}
-
-		// Take ownership of this particular state
-	go bc.update()	
+	// Take ownership of this particular state
+	go bc.update()
 	return bc, nil
 }
 
@@ -208,7 +206,6 @@ func (self *BlockChain) loadLastState() error {
 			self.currentFastBlock = block
 		}
 	}
-
 	// Issue a status log and return
 	headerTd := self.GetTd(self.currentHeader.Hash())
 	blockTd := self.GetTd(self.currentBlock.Hash())
@@ -654,7 +651,7 @@ func (self *BlockChain) GetBlockHashesFromHash(hash common.Hash, max uint64) []c
 	return chain
 }
 
-// [deprecated by ed/62]
+// [deprecated by eth/62]
 // GetBlocksFromHash returns the block corresponding to hash and up to n-1 ancestors.
 func (self *BlockChain) GetBlocksFromHash(hash common.Hash, n int) (blocks []*types.Block) {
 	for i := 0; i < n; i++ {

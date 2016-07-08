@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var bigMaxUint64 = new(big.Int).SetUint64(^uint64(0))

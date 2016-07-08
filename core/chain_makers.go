@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/event"
-	"github.com/Earthdollar/go-earthdollar/pow"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/pow"
 )
 
 // FakePow is a non-validating proof of work implementation.
@@ -163,7 +163,7 @@ func (b *BlockGen) OffsetTime(seconds int64) {
 // Blocks created by GenerateChain do not contain valid proof of work
 // values. Inserting them into BlockChain requires use of FakePow or
 // a similar non-validating proof of work implementation.
-func GenerateChain(parent *types.Block, db eddb.Database, n int, gen func(int, *BlockGen)) ([]*types.Block, []types.Receipts) {
+func GenerateChain(parent *types.Block, db ethdb.Database, n int, gen func(int, *BlockGen)) ([]*types.Block, []types.Receipts) {
 	statedb, err := state.New(parent.Root(), db)
 	if err != nil {
 		panic(err)
@@ -176,7 +176,6 @@ func GenerateChain(parent *types.Block, db eddb.Database, n int, gen func(int, *
 		}
 		AccumulateRewards(statedb, h, b.uncles)
 		root, err := statedb.Commit()
-
 		if err != nil {
 			panic(fmt.Sprintf("state write error: %v", err))
 		}
@@ -209,23 +208,21 @@ func makeHeader(parent *types.Block, state *state.StateDB) *types.Header {
 		GasUsed:    new(big.Int),
 		Number:     new(big.Int).Add(parent.Number(), common.Big1),
 		Time:       time,
-		Mint:	    new(big.Int).Set(parent.Mint()),
 	}
 }
 
 // newCanonical creates a chain database, and injects a deterministic canonical
 // chain. Depending on the full flag, if creates either a full block chain or a
 // header only chain.
-func newCanonical(n int, full bool) (eddb.Database, *BlockChain, error) {
+func newCanonical(n int, full bool) (ethdb.Database, *BlockChain, error) {
 	// Create te new chain database
-	db, _ := eddb.NewMemDatabase()
+	db, _ := ethdb.NewMemDatabase()
 	evmux := &event.TypeMux{}
-	
+
 	// Initialize a fresh chain with only a genesis block
 	genesis, _ := WriteTestNetGenesisBlock(db, 0)
 
 	blockchain, _ := NewBlockChain(db, FakePow{}, evmux)
-
 	// Create and inject the requested chain
 	if n == 0 {
 		return db, blockchain, nil
@@ -236,14 +233,14 @@ func newCanonical(n int, full bool) (eddb.Database, *BlockChain, error) {
 		_, err := blockchain.InsertChain(blocks)
 		return db, blockchain, err
 	}
-	// Header-only chain	 requested
+	// Header-only chain requested
 	headers := makeHeaderChain(genesis.Header(), n, db, canonicalSeed)
-	_, err := blockchain.InsertHeaderChain(headers,1)
+	_, err := blockchain.InsertHeaderChain(headers, 1)
 	return db, blockchain, err
 }
 
 // makeHeaderChain creates a deterministic chain of headers rooted at parent.
-func makeHeaderChain(parent *types.Header, n int, db eddb.Database, seed int) []*types.Header { 
+func makeHeaderChain(parent *types.Header, n int, db ethdb.Database, seed int) []*types.Header {
 	blocks := makeBlockChain(types.NewBlockWithHeader(parent), n, db, seed)
 	headers := make([]*types.Header, len(blocks))
 	for i, block := range blocks {
@@ -252,9 +249,8 @@ func makeHeaderChain(parent *types.Header, n int, db eddb.Database, seed int) []
 	return headers
 }
 
-
 // makeBlockChain creates a deterministic chain of blocks rooted at parent.
-func makeBlockChain(parent *types.Block, n int, db eddb.Database, seed int) []*types.Block {
+func makeBlockChain(parent *types.Block, n int, db ethdb.Database, seed int) []*types.Block {
 	blocks, _ := GenerateChain(parent, db, n, func(i int, b *BlockGen) {
 		b.SetCoinbase(common.Address{0: byte(seed), 19: byte(i)})
 	})

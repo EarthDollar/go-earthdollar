@@ -21,7 +21,7 @@ package p2p
 import (
 	"net"
 
-	"github.com/Earthdollar/go-earthdollar/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 var (

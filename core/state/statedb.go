@@ -14,31 +14,36 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package state provides a caching layer atop the Earthdollar state trie.
+// Package state provides a caching layer atop the Ethereum state trie.
 package state
 
 import (
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/trie"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/trie"
 )
 
 // The starting nonce determines the default nonce when new accounts are being
 // created.
 var StartingNonce uint64
 
-// StateDBs within the earthdollar protocol are used to store anything
+// earthdollar
+var (
+	ED_RESERVE common.Address = common.StringToAddress("0xabde66892c050b5c8fe50685f338b6ad424d970")
+)
+
+// StateDBs within the ethereum protocol are used to store anything
 // within the merkle trie. StateDBs take care of caching and storing
 // nested states. It's the general query interface to retrieve:
 // * Contracts
 // * Accounts
 type StateDB struct {
-	db   eddb.Database
+	db   ethdb.Database
 	trie *trie.SecureTrie
 
 	stateObjects map[string]*StateObject
@@ -52,12 +57,11 @@ type StateDB struct {
 }
 
 // Create a new state from a given trie
-func New(root common.Hash, db eddb.Database) (*StateDB, error) {
+func New(root common.Hash, db ethdb.Database) (*StateDB, error) {
 	tr, err := trie.NewSecure(root, db)
 	if err != nil {
 		return nil, err
 	}
-
 	return &StateDB{
 		db:           db,
 		trie:         tr,
@@ -164,6 +168,17 @@ func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 	if stateObject != nil {
 		stateObject.AddBalance(amount)
 	}
+}
+
+//earthdollar
+func (self *StateDB) ReduceReserve(reward *big.Int) bool{
+	reserve := self.stateObjects[ED_RESERVE.Str()]
+	if reserve.Balance().Cmp(reward) >= 0	 {
+		reserve.SubBalance(reward)
+		return true
+	}
+	//else {BANKRUPT->INSURANCE PAYOUT or switch to Tr}
+	return false
 }
 
 func (self *StateDB) SetNonce(addr common.Address, nonce uint64) {
@@ -354,7 +369,7 @@ func (s *StateDB) Commit() (root common.Hash, err error) {
 // CommitBatch commits all state changes to a write batch but does not
 // execute the batch. It is used to validate state changes against
 // the root hash stored in a block.
-func (s *StateDB) CommitBatch() (root common.Hash, batch eddb.Batch) {
+func (s *StateDB) CommitBatch() (root common.Hash, batch ethdb.Batch) {
 	batch = s.db.NewBatch()
 	root, _ = s.commit(batch)
 	return root, batch

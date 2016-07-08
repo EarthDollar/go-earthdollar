@@ -22,11 +22,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/common/httpclient"
-	"github.com/Earthdollar/go-earthdollar/common/registrar"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/xed"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/httpclient"
+	"github.com/ethereum/go-ethereum/common/registrar"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/xeth"
 	"github.com/robertkrimen/otto"
 )
 
@@ -43,8 +43,8 @@ type NatSpec struct {
 // the implementation is frontend friendly in that it always gives back
 // a notice that is safe to display
 // :FIXME: the second return value is an error, which can be used to fine-tune bahaviour
-func GetNotice(xed *xed.XEd, tx string, http *httpclient.HTTPClient) (notice string) {
-	ns, err := New(xed, tx, http)
+func GetNotice(xeth *xeth.XEth, tx string, http *httpclient.HTTPClient) (notice string) {
+	ns, err := New(xeth, tx, http)
 	if err != nil {
 		if ns == nil {
 			return getFallbackNotice(fmt.Sprintf("no NatSpec info found for contract: %v", err), tx)
@@ -83,7 +83,7 @@ type contractInfo struct {
 	DeveloperDoc  json.RawMessage `json:"developerDoc"`
 }
 
-func New(xed *xed.XEd, jsontx string, http *httpclient.HTTPClient) (self *NatSpec, err error) {
+func New(xeth *xeth.XEth, jsontx string, http *httpclient.HTTPClient) (self *NatSpec, err error) {
 
 	// extract contract address from tx
 	var tx jsonTx
@@ -94,7 +94,7 @@ func New(xed *xed.XEd, jsontx string, http *httpclient.HTTPClient) (self *NatSpe
 	t := tx.Params[0]
 	contractAddress := t.To
 
-	content, err := FetchDocsForContract(contractAddress, xed, http)
+	content, err := FetchDocsForContract(contractAddress, xeth, http)
 	if err != nil {
 		return
 	}
@@ -104,10 +104,10 @@ func New(xed *xed.XEd, jsontx string, http *httpclient.HTTPClient) (self *NatSpe
 }
 
 // also called by admin.contractInfo.get
-func FetchDocsForContract(contractAddress string, xed *xed.XEd, client *httpclient.HTTPClient) (content []byte, err error) {
+func FetchDocsForContract(contractAddress string, xeth *xeth.XEth, client *httpclient.HTTPClient) (content []byte, err error) {
 	// retrieve contract hash from state
-	codehex := xed.CodeAt(contractAddress)
-	codeb := xed.CodeAtBytes(contractAddress)
+	codehex := xeth.CodeAt(contractAddress)
+	codeb := xeth.CodeAtBytes(contractAddress)
 
 	if codehex == "0x" {
 		err = fmt.Errorf("contract (%v) not found", contractAddress)
@@ -115,7 +115,7 @@ func FetchDocsForContract(contractAddress string, xed *xed.XEd, client *httpclie
 	}
 	codehash := common.BytesToHash(crypto.Sha3(codeb))
 	// set up nameresolver with natspecreg + urlhint contract addresses
-	reg := registrar.New(xed)
+	reg := registrar.New(xeth)
 
 	// resolve host via HashReg/UrlHint Resolver
 	hash, err := reg.HashToHash(codehash)

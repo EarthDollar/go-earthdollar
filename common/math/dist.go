@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"sort"
 
-	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Summer interface {

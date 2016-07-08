@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/params"
+	"github.com/ethereum/go-ethereum/params"
 )
 
 var (

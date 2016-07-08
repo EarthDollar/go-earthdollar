@@ -1,18 +1,18 @@
-// Copyright 2015 The go-earthdollar Authors
-// This file is part of the go-earthdollar library.
+// Copyright 2015 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-earthdollar library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-earthdollar library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package comms
 
@@ -29,10 +29,10 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rpc/codec"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/rpc/codec"
+	"github.com/ethereum/go-ethereum/rpc/shared"
 	"github.com/rs/cors"
 )
 
@@ -66,11 +66,11 @@ type stopServer struct {
 
 type handler struct {
 	codec codec.Codec
-	api   shared.EarthdollarApi
+	api   shared.EthereumApi
 }
 
 // StartHTTP starts listening for RPC requests sent via HTTP.
-func StartHttp(cfg HttpConfig, codec codec.Codec, api shared.EarthdollarApi) error {
+func StartHttp(cfg HttpConfig, codec codec.Codec, api shared.EthereumApi) error {
 	httpServerMu.Lock()
 	defer httpServerMu.Unlock()
 

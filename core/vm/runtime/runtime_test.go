@@ -20,9 +20,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Earthdollar/go-earthdollar/accounts/abi"
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/vm"
 )
 
 func TestDefaults(t *testing.T) {

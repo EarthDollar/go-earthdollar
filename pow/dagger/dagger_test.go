@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 func BenchmarkDaggerSearch(b *testing.B) {

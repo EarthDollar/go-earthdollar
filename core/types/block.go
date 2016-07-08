@@ -28,9 +28,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/crypto/sha3"
-	"github.com/Earthdollar/go-earthdollar/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // A BlockNonce is a 64-bit hash which proves (combined with the
@@ -61,7 +61,6 @@ type Header struct {
 	GasLimit    *big.Int       // Gas limit
 	GasUsed     *big.Int       // Gas used
 	Time        *big.Int       // Creation time
-	Mint	    *big.Int	   // Earthdollar- Mint balance 
 	Extra       []byte         // Extra data
 	MixDigest   common.Hash    // for quick difficulty verification
 	Nonce       BlockNonce
@@ -85,7 +84,6 @@ func (h *Header) HashNoNonce() common.Hash {
 		h.GasLimit,
 		h.GasUsed,
 		h.Time,
-		h.Mint,  //Earthdollar
 		h.Extra,
 	})
 }
@@ -97,7 +95,6 @@ func (h *Header) UnmarshalJSON(data []byte) error {
 		Difficulty string
 		GasLimit   string
 		Time       *big.Int
-		Mint       string
 		Extra      string
 	}
 	dec := json.NewDecoder(bytes.NewReader(data))
@@ -109,7 +106,6 @@ func (h *Header) UnmarshalJSON(data []byte) error {
 	h.Coinbase = common.HexToAddress(ext.Coinbase)
 	h.Difficulty = common.String2Big(ext.Difficulty)
 	h.Time = ext.Time
-	//h.Mint = common.String2Big(ext.Mint) //earthdollar
 	h.Extra = []byte(ext.Extra)
 	return nil
 }
@@ -131,8 +127,8 @@ type Body struct {
 type Block struct {
 	header       *Header
 	uncles       []*Header
-	transactions Transactions	
-	
+	transactions Transactions
+
 	// caches
 	hash atomic.Value
 	size atomic.Value
@@ -140,8 +136,6 @@ type Block struct {
 	// Td is used by package core to store the total difficulty
 	// of the chain up to and including the block.
 	td *big.Int
-
-	
 
 	// ReceivedAt is used by package eth to track block propagation time.
 	ReceivedAt time.Time
@@ -216,7 +210,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 			b.uncles[i] = CopyHeader(uncles[i])
 		}
 	}
-	
+
 	return b
 }
 
@@ -233,9 +227,6 @@ func CopyHeader(h *Header) *Header {
 	cpy := *h
 	if cpy.Time = new(big.Int); h.Time != nil {
 		cpy.Time.Set(h.Time)
-	}
-	if cpy.Mint = new(big.Int); h.Mint != nil {
-		cpy.Mint.Set(h.Mint)
 	}
 	if cpy.Difficulty = new(big.Int); h.Difficulty != nil {
 		cpy.Difficulty.Set(h.Difficulty)
@@ -320,7 +311,6 @@ func (b *Block) GasLimit() *big.Int   { return new(big.Int).Set(b.header.GasLimi
 func (b *Block) GasUsed() *big.Int    { return new(big.Int).Set(b.header.GasUsed) }
 func (b *Block) Difficulty() *big.Int { return new(big.Int).Set(b.header.Difficulty) }
 func (b *Block) Time() *big.Int       { return new(big.Int).Set(b.header.Time) }
-func (b *Block) Mint() *big.Int       { return new(big.Int).Set(b.header.Mint) } //earthdollar
 
 func (b *Block) NumberU64() uint64        { return b.header.Number.Uint64() }
 func (b *Block) MixDigest() common.Hash   { return b.header.MixDigest }
@@ -333,7 +323,6 @@ func (b *Block) TxHash() common.Hash      { return b.header.TxHash }
 func (b *Block) ReceiptHash() common.Hash { return b.header.ReceiptHash }
 func (b *Block) UncleHash() common.Hash   { return b.header.UncleHash }
 func (b *Block) Extra() []byte            { return common.CopyBytes(b.header.Extra) }
-
 
 func (b *Block) Header() *Header { return CopyHeader(b.header) }
 
@@ -428,11 +417,10 @@ func (h *Header) String() string {
 	GasLimit:	    %v
 	GasUsed:	    %v
 	Time:		    %v
-	Mint:          	    %v
 	Extra:		    %s
-	MixDigest:          %x
+	MixDigest:      %x
 	Nonce:		    %x
-]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Mint, h.Extra, h.MixDigest, h.Nonce)
+]`, h.Hash(), h.ParentHash, h.UncleHash, h.Coinbase, h.Root, h.TxHash, h.ReceiptHash, h.Bloom, h.Difficulty, h.Number, h.GasLimit, h.GasUsed, h.Time, h.Extra, h.MixDigest, h.Nonce)
 }
 
 type Blocks []*Block

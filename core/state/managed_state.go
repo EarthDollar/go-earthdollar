@@ -19,7 +19,7 @@ package state
 import (
 	"sync"
 
-	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type account struct {

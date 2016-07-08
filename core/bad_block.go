@@ -22,24 +22,24 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // DisabledBadBlockReporting can be set to prevent blocks being reported.
 var DisableBadBlockReporting = true
 
 // ReportBlock reports the block to the block reporting tool found at
-// badblocks.eddev.com
+// badblocks.ethdev.com
 func ReportBlock(block *types.Block, err error) {
 	if DisableBadBlockReporting {
 		return
 	}
 
-	const url = "https://badblocks.eddev.com"
+	const url = "https://badblocks.ethdev.com"
 
 	blockRlp, _ := rlp.EncodeToBytes(block)
 	data := map[string]interface{}{
@@ -50,7 +50,7 @@ func ReportBlock(block *types.Block, err error) {
 			"vmtrace":  "NYI",
 		},
 	}
-	jsonStr, _ := json.Marshal(map[string]interface{}{"method": "ed_badBlock", "params": []interface{}{data}, "id": "1", "jsonrpc": "2.0"})
+	jsonStr, _ := json.Marshal(map[string]interface{}{"method": "eth_badBlock", "params": []interface{}{data}, "id": "1", "jsonrpc": "2.0"})
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")

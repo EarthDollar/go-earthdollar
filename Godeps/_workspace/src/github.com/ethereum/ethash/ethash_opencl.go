@@ -39,8 +39,8 @@ import (
 	"unsafe"
 
 	"github.com/Gustav-Simonsson/go-opencl/cl"
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/pow"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/pow"
 )
 
 /*

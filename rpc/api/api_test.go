@@ -1,18 +1,18 @@
-// Copyright 2015 The go-earthdollar Authors
-// This file is part of the go-earthdollar library.
+// Copyright 2015 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-earthdollar library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-earthdollar library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package api
 
@@ -22,11 +22,11 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/Earthdollar/go-earthdollar/common/compiler"
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/rpc/codec"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
-	"github.com/Earthdollar/go-earthdollar/xed"
+	"github.com/ethereum/go-ethereum/common/compiler"
+	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/rpc/codec"
+	"github.com/ethereum/go-ethereum/rpc/shared"
+	"github.com/ethereum/go-ethereum/xeth"
 )
 
 func TestParseApiString(t *testing.T) {
@@ -39,7 +39,7 @@ func TestParseApiString(t *testing.T) {
 		t.Errorf("Expected 0 apis from empty API string")
 	}
 
-	apis, err = ParseApiString("ed", codec.JSON, nil, nil)
+	apis, err = ParseApiString("eth", codec.JSON, nil, nil)
 	if err != nil {
 		t.Errorf("Expected nil err from parsing empty API string but got %v", err)
 	}
@@ -48,7 +48,7 @@ func TestParseApiString(t *testing.T) {
 		t.Errorf("Expected 1 apis but got %d - %v", apis, apis)
 	}
 
-	apis, err = ParseApiString("ed,ed", codec.JSON, nil, nil)
+	apis, err = ParseApiString("eth,eth", codec.JSON, nil, nil)
 	if err != nil {
 		t.Errorf("Expected nil err from parsing empty API string but got \"%v\"", err)
 	}
@@ -57,7 +57,7 @@ func TestParseApiString(t *testing.T) {
 		t.Errorf("Expected 2 apis but got %d - %v", apis, apis)
 	}
 
-	apis, err = ParseApiString("ed,invalid", codec.JSON, nil, nil)
+	apis, err = ParseApiString("eth,invalid", codec.JSON, nil, nil)
 	if err == nil {
 		t.Errorf("Expected an err but got no err")
 	}
@@ -81,7 +81,7 @@ func TestCompileSolidity(t *testing.T) {
 		`   }\n` +
 		`}\n`
 
-	jsonstr := `{"jsonrpc":"2.0","method":"ed_compileSolidity","params":["` + source + `"],"id":64}`
+	jsonstr := `{"jsonrpc":"2.0","method":"eth_compileSolidity","params":["` + source + `"],"id":64}`
 
 	expCode := "0x605880600c6000396000f3006000357c010000000000000000000000000000000000000000000000000000000090048063c6888fa114602e57005b603d6004803590602001506047565b8060005260206000f35b60006007820290506053565b91905056"
 	expAbiDefinition := `[{"constant":false,"inputs":[{"name":"a","type":"uint256"}],"name":"multiply","outputs":[{"name":"d","type":"uint256"}],"type":"function"}]`
@@ -92,9 +92,9 @@ func TestCompileSolidity(t *testing.T) {
 	expLanguageVersion := "0"
 	expSource := source
 
-	ed := &ed.Earthdollar{}
-	xed := xed.NewTest(ed, nil)
-	api := NewEthApi(xed, ed, codec.JSON)
+	eth := &eth.Ethereum{}
+	xeth := xeth.NewTest(eth, nil)
+	api := NewEthApi(xeth, eth, codec.JSON)
 
 	var rpcRequest shared.Request
 	json.Unmarshal([]byte(jsonstr), &rpcRequest)

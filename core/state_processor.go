@@ -2,15 +2,13 @@ package core
 
 import (
 	"math/big"
-	
-	//"github.com/Earthdollar/go-earthdollar/common" //earthdollar
 
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
 )
 
 var (
@@ -26,7 +24,7 @@ func NewStateProcessor(bc *BlockChain) *StateProcessor {
 	return &StateProcessor{bc}
 }
 
-// Process processes the state changes according to the Earthdollar rules by running
+// Process processes the state changes according to the Ethereum rules by running
 // the transaction messages using the statedb and applying any rewards to both
 // the processor (coinbase) and any included uncles.
 //
@@ -52,8 +50,8 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB) (ty
 		receipts = append(receipts, receipt)
 		allLogs = append(allLogs, logs...)
 	}
+	AccumulateRewards(statedb, header, block.Uncles())
 
-	AccumulateRewards(statedb, header, block.Uncles())	
 	return receipts, allLogs, totalUsedGas, err
 }
 
@@ -85,7 +83,7 @@ func ApplyTransaction(bc *BlockChain, gp *GasPool, statedb *state.StateDB, heade
 	glog.V(logger.Debug).Infoln(receipt)
 
 	return receipt, logs, gas, err
-} 
+}
 
 // AccumulateRewards credits the coinbase of the given block with the
 // mining reward. The total reward consists of the static block reward
@@ -94,27 +92,14 @@ func ApplyTransaction(bc *BlockChain, gp *GasPool, statedb *state.StateDB, heade
 func AccumulateRewards(statedb *state.StateDB, header *types.Header, uncles []*types.Header) {
 	reward := new(big.Int).Set(BlockReward)
 	r := new(big.Int)
-	//mint := new(big.Int).Set(header.Mint)
-	//MintBalance.Set(mint)
-
 	for _, uncle := range uncles {
 		r.Add(uncle.Number, big8)
 		r.Sub(r, header.Number)
 		r.Mul(r, BlockReward)
 		r.Div(r, big8)
-
-		//if MintBalance.Cmp(r) >= 0 { 
-			//MintBalance.Sub(MintBalance, r)
-			statedb.AddBalance(uncle.Coinbase, r)			
-		//}
-
+		if statedb.ReduceReserve(r) {statedb.AddBalance(uncle.Coinbase, r) } //earthdollar
 		r.Div(BlockReward, big32)
 		reward.Add(reward, r)
 	}
-
-	//if MintBalance.Cmp(reward) >= 0 { 
-		//MintBalance.Sub(MintBalance, reward)
-		statedb.AddBalance(header.Coinbase, reward)
-	//}
-}
-
+	if statedb.ReduceReserve(reward) {statedb.AddBalance(header.Coinbase, reward) } //earthdollar
+} 

@@ -28,16 +28,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Earthdollar/go-earthdollar/accounts"
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rlp"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // Block Test JSON Format
@@ -163,13 +163,13 @@ func runBlockTests(bt map[string]*BlockTest, skipTests []string) error {
 func runBlockTest(test *BlockTest) error {
 	ks := crypto.NewKeyStorePassphrase(filepath.Join(common.DefaultDataDir(), "keystore"), crypto.StandardScryptN, crypto.StandardScryptP)
 	am := accounts.NewManager(ks)
-	db, _ := eddb.NewMemDatabase()
-	cfg := &ed.Config{
+	db, _ := ethdb.NewMemDatabase()
+	cfg := &eth.Config{
 		DataDir:        common.DefaultDataDir(),
 		Verbosity:      5,
-		Earthbase:      common.Address{},
+		Etherbase:      common.Address{},
 		AccountManager: am,
-		NewDB:          func(path string) (eddb.Database, error) { return db, nil },
+		NewDB:          func(path string) (ethdb.Database, error) { return db, nil },
 	}
 
 	cfg.GenesisBlock = test.Genesis
@@ -180,17 +180,17 @@ func runBlockTest(test *BlockTest) error {
 		return fmt.Errorf("InsertPreState: %v", err)
 	}
 
-	earthdollar, err := ed.New(cfg)
+	ethereum, err := eth.New(cfg)
 	if err != nil {
 		return err
 	}
 
-	err = earthdollar.Start()
+	err = ethereum.Start()
 	if err != nil {
 		return err
 	}
 
-	cm := earthdollar.BlockChain()
+	cm := ethereum.BlockChain()
 	//vm.Debug = true
 	validBlocks, err := test.TryBlocksInsert(cm)
 	if err != nil {
@@ -216,7 +216,7 @@ func runBlockTest(test *BlockTest) error {
 
 // InsertPreState populates the given database with the genesis
 // accounts defined by the test.
-func (t *BlockTest) InsertPreState(db eddb.Database, am *accounts.Manager) (*state.StateDB, error) {
+func (t *BlockTest) InsertPreState(db ethdb.Database, am *accounts.Manager) (*state.StateDB, error) {
 	statedb, err := state.New(common.Hash{}, db)
 	if err != nil {
 		return nil, err

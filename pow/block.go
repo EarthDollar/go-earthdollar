@@ -19,8 +19,8 @@ package pow
 import (
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 type Block interface {
@@ -28,7 +28,6 @@ type Block interface {
 	HashNoNonce() common.Hash
 	Nonce() uint64
 	MixDigest() common.Hash
-	Mint() *big.Int //earthdollar
 	NumberU64() uint64
 }
 

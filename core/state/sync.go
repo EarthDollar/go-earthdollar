@@ -20,10 +20,10 @@ import (
 	"bytes"
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/rlp"
-	"github.com/Earthdollar/go-earthdollar/trie"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/trie"
 )
 
 // StateSync is the main state synchronisation scheduler, which provides yet the
@@ -32,7 +32,7 @@ import (
 type StateSync trie.TrieSync
 
 // NewStateSync create a new state trie download scheduler.
-func NewStateSync(root common.Hash, database eddb.Database) *StateSync {
+func NewStateSync(root common.Hash, database ethdb.Database) *StateSync {
 	var syncer *trie.TrieSync
 
 	callback := func(leaf []byte, parent common.Hash) error {

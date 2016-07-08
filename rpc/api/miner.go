@@ -1,27 +1,27 @@
-// Copyright 2015 The go-earthdollar Authors
-// This file is part of the go-earthdollar library.
+// Copyright 2015 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-earthdollar library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-earthdollar library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package api
 
 import (
 	"github.com/ethereum/ethash"
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/rpc/codec"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/rpc/codec"
+	"github.com/ethereum/go-ethereum/rpc/shared"
 )
 
 const (
@@ -35,7 +35,7 @@ var (
 		"miner_makeDAG":      (*minerApi).MakeDAG,
 		"miner_setExtra":     (*minerApi).SetExtra,
 		"miner_setGasPrice":  (*minerApi).SetGasPrice,
-		"miner_setEarthbase": (*minerApi).SetEarthbase,
+		"miner_setEtherbase": (*minerApi).SetEtherbase,
 		"miner_startAutoDAG": (*minerApi).StartAutoDAG,
 		"miner_start":        (*minerApi).StartMiner,
 		"miner_stopAutoDAG":  (*minerApi).StopAutoDAG,
@@ -48,15 +48,15 @@ type minerhandler func(*minerApi, *shared.Request) (interface{}, error)
 
 // miner api provider
 type minerApi struct {
-	earthdollar *ed.Earthdollar
+	ethereum *eth.Ethereum
 	methods  map[string]minerhandler
 	codec    codec.ApiCoder
 }
 
 // create a new miner api instance
-func NewMinerApi(earthdollar *ed.Earthdollar, coder codec.Codec) *minerApi {
+func NewMinerApi(ethereum *eth.Ethereum, coder codec.Codec) *minerApi {
 	return &minerApi{
-		earthdollar: earthdollar,
+		ethereum: ethereum,
 		methods:  MinerMapping,
 		codec:    coder.New(nil),
 	}
@@ -96,11 +96,11 @@ func (self *minerApi) StartMiner(req *shared.Request) (interface{}, error) {
 		return nil, err
 	}
 	if args.Threads == -1 { // (not specified by user, use default)
-		args.Threads = self.earthdollar.MinerThreads
+		args.Threads = self.ethereum.MinerThreads
 	}
 
-	self.earthdollar.StartAutoDAG()
-	err := self.earthdollar.StartMining(args.Threads, "")
+	self.ethereum.StartAutoDAG()
+	err := self.ethereum.StartMining(args.Threads, "")
 	if err == nil {
 		return true, nil
 	}
@@ -109,12 +109,12 @@ func (self *minerApi) StartMiner(req *shared.Request) (interface{}, error) {
 }
 
 func (self *minerApi) StopMiner(req *shared.Request) (interface{}, error) {
-	self.earthdollar.StopMining()
+	self.ethereum.StopMining()
 	return true, nil
 }
 
 func (self *minerApi) Hashrate(req *shared.Request) (interface{}, error) {
-	return self.earthdollar.Miner().HashRate(), nil
+	return self.ethereum.Miner().HashRate(), nil
 }
 
 func (self *minerApi) SetExtra(req *shared.Request) (interface{}, error) {
@@ -123,7 +123,7 @@ func (self *minerApi) SetExtra(req *shared.Request) (interface{}, error) {
 		return nil, err
 	}
 
-	if err := self.earthdollar.Miner().SetExtra([]byte(args.Data)); err != nil {
+	if err := self.ethereum.Miner().SetExtra([]byte(args.Data)); err != nil {
 		return false, err
 	}
 
@@ -136,26 +136,26 @@ func (self *minerApi) SetGasPrice(req *shared.Request) (interface{}, error) {
 		return false, err
 	}
 
-	self.earthdollar.Miner().SetGasPrice(common.String2Big(args.Price))
+	self.ethereum.Miner().SetGasPrice(common.String2Big(args.Price))
 	return true, nil
 }
 
-func (self *minerApi) SetEarthbase(req *shared.Request) (interface{}, error) {
-	args := new(SetEarthbaseArgs)
+func (self *minerApi) SetEtherbase(req *shared.Request) (interface{}, error) {
+	args := new(SetEtherbaseArgs)
 	if err := self.codec.Decode(req.Params, &args); err != nil {
 		return false, err
 	}
-	self.earthdollar.SetEarthbase(args.Earthbase)
+	self.ethereum.SetEtherbase(args.Etherbase)
 	return nil, nil
 }
 
 func (self *minerApi) StartAutoDAG(req *shared.Request) (interface{}, error) {
-	self.earthdollar.StartAutoDAG()
+	self.ethereum.StartAutoDAG()
 	return true, nil
 }
 
 func (self *minerApi) StopAutoDAG(req *shared.Request) (interface{}, error) {
-	self.earthdollar.StopAutoDAG()
+	self.ethereum.StopAutoDAG()
 	return true, nil
 }
 

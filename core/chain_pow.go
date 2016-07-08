@@ -19,8 +19,8 @@ package core
 import (
 	"runtime"
 
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/pow"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/pow"
 )
 
 // nonceCheckResult contains the result of a nonce verification.

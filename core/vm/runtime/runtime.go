@@ -20,11 +20,11 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/eddb"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethdb"
 )
 
 // Config is a basic type specifing certain configuration flags for running
@@ -95,7 +95,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 	vm.Debug = cfg.Debug
 
 	var (
-		db, _      = eddb.NewMemDatabase()
+		db, _      = ethdb.NewMemDatabase()
 		statedb, _ = state.New(common.Hash{}, db)
 		vmenv      = NewEnv(cfg, statedb)
 		sender     = statedb.CreateAccount(cfg.Origin)

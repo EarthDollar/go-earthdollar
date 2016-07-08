@@ -24,9 +24,9 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rpc/shared"
 )
 
 type hexdata struct {
@@ -171,7 +171,6 @@ type BlockRes struct {
 	StateRoot       *hexdata          `json:"stateRoot"`
 	ReceiptRoot     *hexdata          `json:"receiptRoot"`
 	Miner           *hexdata          `json:"miner"`
-	Mint            *hexnum           `json:"mint"`	//earthdollar
 	Difficulty      *hexnum           `json:"difficulty"`
 	TotalDifficulty *hexnum           `json:"totalDifficulty"`
 	Size            *hexnum           `json:"size"`
@@ -196,7 +195,6 @@ func (b *BlockRes) MarshalJSON() ([]byte, error) {
 			StateRoot       *hexdata          `json:"stateRoot"`
 			ReceiptRoot     *hexdata          `json:"receiptRoot"`
 			Miner           *hexdata          `json:"miner"`
-			Mint            *hexnum           `json:"mint"`	//earthdollar
 			Difficulty      *hexnum           `json:"difficulty"`
 			TotalDifficulty *hexnum           `json:"totalDifficulty"`
 			Size            *hexnum           `json:"size"`
@@ -218,7 +216,6 @@ func (b *BlockRes) MarshalJSON() ([]byte, error) {
 		ext.StateRoot = b.StateRoot
 		ext.ReceiptRoot = b.ReceiptRoot
 		ext.Miner = b.Miner
-		ext.Mint = b.Mint //earthdollar
 		ext.Difficulty = b.Difficulty
 		ext.TotalDifficulty = b.TotalDifficulty
 		ext.Size = b.Size
@@ -244,7 +241,6 @@ func (b *BlockRes) MarshalJSON() ([]byte, error) {
 			StateRoot       *hexdata   `json:"stateRoot"`
 			ReceiptRoot     *hexdata   `json:"receiptRoot"`
 			Miner           *hexdata   `json:"miner"`
-			Mint            *hexnum    `json:"mint"`  //earthdollar
 			Difficulty      *hexnum    `json:"difficulty"`
 			TotalDifficulty *hexnum    `json:"totalDifficulty"`
 			Size            *hexnum    `json:"size"`
@@ -266,7 +262,6 @@ func (b *BlockRes) MarshalJSON() ([]byte, error) {
 		ext.StateRoot = b.StateRoot
 		ext.ReceiptRoot = b.ReceiptRoot
 		ext.Miner = b.Miner
-		ext.Mint = b.Mint
 		ext.Difficulty = b.Difficulty
 		ext.TotalDifficulty = b.TotalDifficulty
 		ext.Size = b.Size
@@ -303,7 +298,6 @@ func NewBlockRes(block *types.Block, td *big.Int, fullTx bool) *BlockRes {
 	res.StateRoot = newHexData(block.Root())
 	res.ReceiptRoot = newHexData(block.ReceiptHash())
 	res.Miner = newHexData(block.Coinbase())
-	res.Mint = newHexNum(block.Mint()) //earthdollar
 	res.Difficulty = newHexNum(block.Difficulty())
 	res.TotalDifficulty = newHexNum(td)
 	res.Size = newHexNum(block.Size().Int64())

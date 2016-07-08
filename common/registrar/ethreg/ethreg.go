@@ -14,32 +14,32 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package edreg
+package ethreg
 
 import (
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common/registrar"
-	"github.com/Earthdollar/go-earthdollar/xed"
+	"github.com/ethereum/go-ethereum/common/registrar"
+	"github.com/ethereum/go-ethereum/xeth"
 )
 
 // implements a versioned Registrar on an archiving full node
-type EdReg struct {
-	backend  *xed.XEd
+type EthReg struct {
+	backend  *xeth.XEth
 	registry *registrar.Registrar
 }
 
-func New(xe *xed.XEd) (self *EdReg) {
-	self = &EdReg{backend: xe}
+func New(xe *xeth.XEth) (self *EthReg) {
+	self = &EthReg{backend: xe}
 	self.registry = registrar.New(xe)
 	return
 }
 
-func (self *EdReg) Registry() *registrar.Registrar {
+func (self *EthReg) Registry() *registrar.Registrar {
 	return self.registry
 }
 
-func (self *EdReg) Resolver(n *big.Int) *registrar.Registrar {
+func (self *EthReg) Resolver(n *big.Int) *registrar.Registrar {
 	xe := self.backend
 	if n != nil {
 		xe = self.backend.AtStateNum(n.Int64())

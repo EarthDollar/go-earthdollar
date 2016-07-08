@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/Earthdollar/go-earthdollar/crypto"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (

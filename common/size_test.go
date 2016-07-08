@@ -1,18 +1,18 @@
-// Copyright 2014 The go-earthdollar Authors
-// This file is part of the go-earthdollar library.
+// Copyright 2014 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-earthdollar library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-earthdollar library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package common
 
@@ -41,19 +41,19 @@ func (s *SizeSuite) TestStorageSizeString(c *checker.C) {
 }
 
 func (s *SizeSuite) TestCommon(c *checker.C) {
-	tree := CurrencyToString(BigPow(10, 19))
-	penny := CurrencyToString(BigPow(10, 16))
-	fish := CurrencyToString(BigPow(10, 13))
-	wawatie := CurrencyToString(BigPow(10, 10))
-	tien := CurrencyToString(BigPow(10, 7))
-	skydancer := CurrencyToString(BigPow(10, 4))
-	seed := CurrencyToString(big.NewInt(10))
+	ether := CurrencyToString(BigPow(10, 19))
+	finney := CurrencyToString(BigPow(10, 16))
+	szabo := CurrencyToString(BigPow(10, 13))
+	shannon := CurrencyToString(BigPow(10, 10))
+	babbage := CurrencyToString(BigPow(10, 7))
+	ada := CurrencyToString(BigPow(10, 4))
+	wei := CurrencyToString(big.NewInt(10))
 
-	c.Assert(tree, checker.Equals, "10 Tree")
-	c.Assert(penny, checker.Equals, "10 Penny")
-	c.Assert(szabo, checker.Equals, "10 Fish")
-	c.Assert(shannon, checker.Equals, "10 Wawatie")
-	c.Assert(babbage, checker.Equals, "10 Tien")
-	c.Assert(ada, checker.Equals, "10 Skydancer")
-	c.Assert(wei, checker.Equals, "10 Seed")
+	c.Assert(ether, checker.Equals, "10 Ether")
+	c.Assert(finney, checker.Equals, "10 Finney")
+	c.Assert(szabo, checker.Equals, "10 Szabo")
+	c.Assert(shannon, checker.Equals, "10 Shannon")
+	c.Assert(babbage, checker.Equals, "10 Babbage")
+	c.Assert(ada, checker.Equals, "10 Ada")
+	c.Assert(wei, checker.Equals, "10 Wei")
 }

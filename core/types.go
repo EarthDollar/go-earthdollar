@@ -19,12 +19,12 @@ package core
 import (
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/accounts"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/event"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
 )
 
 // Validator is an interface which defines the standard for block validation.
@@ -57,14 +57,14 @@ type Processor interface {
 }
 
 // Backend is an interface defining the basic functionality for an operable node
-// with all the functionality to be a functional, valid Earthdollar operator.
+// with all the functionality to be a functional, valid Ethereum operator.
 //
 // TODO Remove this
 type Backend interface {
 	AccountManager() *accounts.Manager
 	BlockChain() *BlockChain
 	TxPool() *TxPool
-	ChainDb() eddb.Database
-	DappDb() eddb.Database
+	ChainDb() ethdb.Database
+	DappDb() ethdb.Database
 	EventMux() *event.TypeMux
 }

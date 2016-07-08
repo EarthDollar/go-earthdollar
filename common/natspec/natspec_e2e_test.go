@@ -1,18 +1,18 @@
-// Copyright 2015 The go-earthdollar Authors
-// This file is part of the go-earthdollar library.
+// Copyright 2015 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-earthdollar library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-earthdollar library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package natspec
 
@@ -26,15 +26,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Earthdollar/go-earthdollar/accounts"
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/common/httpclient"
-	"github.com/Earthdollar/go-earthdollar/common/registrar"
-	"github.com/Earthdollar/go-earthdollar/core"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	xe "github.com/Earthdollar/go-earthdollar/xed"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/httpclient"
+	"github.com/ethereum/go-ethereum/common/registrar"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/ethdb"
+	xe "github.com/ethereum/go-ethereum/xeth"
 )
 
 const (
@@ -95,8 +95,8 @@ const (
 
 type testFrontend struct {
 	t           *testing.T
-	earthdollar    *ed.Earthdollar
-	xed        *xe.XEd
+	ethereum    *eth.Ethereum
+	xeth        *xe.XEth
 	wait        chan *big.Int
 	lastConfirm string
 	wantNatSpec bool
@@ -107,25 +107,25 @@ func (self *testFrontend) AskPassword() (string, bool) {
 }
 
 func (self *testFrontend) UnlockAccount(acc []byte) bool {
-	self.earthdollar.AccountManager().Unlock(common.BytesToAddress(acc), "password")
+	self.ethereum.AccountManager().Unlock(common.BytesToAddress(acc), "password")
 	return true
 }
 
 func (self *testFrontend) ConfirmTransaction(tx string) bool {
 	if self.wantNatSpec {
 		client := httpclient.New("/tmp/")
-		self.lastConfirm = GetNotice(self.xed, tx, client)
+		self.lastConfirm = GetNotice(self.xeth, tx, client)
 	}
 	return true
 }
 
-func testEd(t *testing.T) (earthdollar *ed.Earthdollar, err error) {
+func testEth(t *testing.T) (ethereum *eth.Ethereum, err error) {
 
 	tmp, err := ioutil.TempDir("", "natspec-test")
 	if err != nil {
 		t.Fatal(err)
 	}
-	db, _ := eddb.NewMemDatabase()
+	db, _ := ethdb.NewMemDatabase()
 	addr := common.HexToAddress(testAddress)
 	core.WriteGenesisBlockForTesting(db, core.GenesisAccount{addr, common.String2Big(testBalance)})
 	ks := crypto.NewKeyStorePassphrase(filepath.Join(tmp, "keystore"), crypto.LightScryptN, crypto.LightScryptP)
@@ -146,13 +146,13 @@ func testEd(t *testing.T) (earthdollar *ed.Earthdollar, err error) {
 	}
 
 	// only use minimalistic stack with no networking
-	return ed.New(&ed.Config{
+	return eth.New(&eth.Config{
 		DataDir:                 tmp,
 		AccountManager:          am,
-		Ederbase:               common.HexToAddress(testAddress),
+		Etherbase:               common.HexToAddress(testAddress),
 		MaxPeers:                0,
 		PowTest:                 true,
-		NewDB:                   func(path string) (eddb.Database, error) { return db, nil },
+		NewDB:                   func(path string) (ethdb.Database, error) { return db, nil },
 		GpoMinGasPrice:          common.Big1,
 		GpobaseCorrectionFactor: 1,
 		GpoMaxGasPrice:          common.Big1,
@@ -160,26 +160,26 @@ func testEd(t *testing.T) (earthdollar *ed.Earthdollar, err error) {
 }
 
 func testInit(t *testing.T) (self *testFrontend) {
-	// initialise and start minimal earthdollar stack
-	earthdollar, err := testEd(t)
+	// initialise and start minimal ethereum stack
+	ethereum, err := testEth(t)
 	if err != nil {
-		t.Errorf("error creating earthdollar: %v", err)
+		t.Errorf("error creating ethereum: %v", err)
 		return
 	}
-	err = earthdollar.Start()
+	err = ethereum.Start()
 	if err != nil {
-		t.Errorf("error starting earthdollar: %v", err)
+		t.Errorf("error starting ethereum: %v", err)
 		return
 	}
 
 	// mock frontend
-	self = &testFrontend{t: t, earthdollar: earthdollar}
-	self.xed = xe.New(earthdollar, self)
-	self.wait = self.xed.UpdateState()
-	addr, _ := self.earthdollar.Ederbase()
+	self = &testFrontend{t: t, ethereum: ethereum}
+	self.xeth = xe.New(ethereum, self)
+	self.wait = self.xeth.UpdateState()
+	addr, _ := self.ethereum.Etherbase()
 
 	// initialise the registry contracts
-	reg := registrar.New(self.xed)
+	reg := registrar.New(self.xeth)
 	registrar.GlobalRegistrarAddr = "0x0"
 
 	var txG, txH, txU string
@@ -190,7 +190,7 @@ func testInit(t *testing.T) (self *testFrontend) {
 	if !processTxs(self, t, 1) {
 		t.Fatalf("error mining txs")
 	}
-	recG := self.xed.GetTxReceipt(common.HexToHash(txG))
+	recG := self.xeth.GetTxReceipt(common.HexToHash(txG))
 	if recG == nil {
 		t.Fatalf("blockchain error creating GlobalRegistrar")
 	}
@@ -203,7 +203,7 @@ func testInit(t *testing.T) (self *testFrontend) {
 	if !processTxs(self, t, 1) {
 		t.Errorf("error mining txs")
 	}
-	recH := self.xed.GetTxReceipt(common.HexToHash(txH))
+	recH := self.xeth.GetTxReceipt(common.HexToHash(txH))
 	if recH == nil {
 		t.Fatalf("blockchain error creating HashReg")
 	}
@@ -216,7 +216,7 @@ func testInit(t *testing.T) (self *testFrontend) {
 	if !processTxs(self, t, 1) {
 		t.Errorf("error mining txs")
 	}
-	recU := self.xed.GetTxReceipt(common.HexToHash(txU))
+	recU := self.xeth.GetTxReceipt(common.HexToHash(txU))
 	if recU == nil {
 		t.Fatalf("blockchain error creating UrlHint")
 	}
@@ -230,8 +230,8 @@ func TestNatspecE2E(t *testing.T) {
 	t.Skip()
 
 	tf := testInit(t)
-	defer tf.earthdollar.Stop()
-	addr, _ := tf.earthdollar.Ederbase()
+	defer tf.ethereum.Stop()
+	addr, _ := tf.ethereum.Etherbase()
 
 	// create a contractInfo file (mock cloud-deployed contract metadocs)
 	// incidentally this is the info for the HashReg contract itself
@@ -239,10 +239,10 @@ func TestNatspecE2E(t *testing.T) {
 	dochash := crypto.Sha3Hash([]byte(testContractInfo))
 
 	// take the codehash for the contract we wanna test
-	codeb := tf.xed.CodeAtBytes(registrar.HashRegAddr)
+	codeb := tf.xeth.CodeAtBytes(registrar.HashRegAddr)
 	codehash := crypto.Sha3Hash(codeb)
 
-	reg := registrar.New(tf.xed)
+	reg := registrar.New(tf.xeth)
 	_, err := reg.SetHashToHash(addr, codehash, dochash)
 	if err != nil {
 		t.Errorf("error registering: %v", err)
@@ -295,7 +295,7 @@ func TestNatspecE2E(t *testing.T) {
 }
 
 func pendingTransactions(repl *testFrontend, t *testing.T) (txc int64, err error) {
-	txs := repl.earthdollar.TxPool().GetTransactions()
+	txs := repl.ethereum.TxPool().GetTransactions()
 	return int64(len(txs)), nil
 }
 
@@ -321,19 +321,19 @@ func processTxs(repl *testFrontend, t *testing.T, expTxc int) bool {
 		return false
 	}
 
-	err = repl.earthdollar.StartMining(runtime.NumCPU(), "")
+	err = repl.ethereum.StartMining(runtime.NumCPU(), "")
 	if err != nil {
 		t.Errorf("unexpected error mining: %v", err)
 		return false
 	}
-	defer repl.earthdollar.StopMining()
+	defer repl.ethereum.StopMining()
 
 	timer := time.NewTimer(100 * time.Second)
-	height := new(big.Int).Add(repl.xed.CurrentBlock().Number(), big.NewInt(1))
+	height := new(big.Int).Add(repl.xeth.CurrentBlock().Number(), big.NewInt(1))
 	repl.wait <- height
 	select {
 	case <-timer.C:
-		// if times out make sure the xed loop does not block
+		// if times out make sure the xeth loop does not block
 		go func() {
 			select {
 			case repl.wait <- nil:

@@ -19,12 +19,12 @@ package shared
 import (
 	"encoding/json"
 
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
 )
 
 // Ethereum RPC API interface
-type EarthdollarApi interface {
+type EthereumApi interface {
 	// API identifier
 	Name() string
 

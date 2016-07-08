@@ -1,26 +1,26 @@
-// Copyright 2015 The go-earthdollar Authors
-// This file is part of the go-earthdollar library.
+// Copyright 2015 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-earthdollar library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-earthdollar library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package api
 
 import (
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/rpc/codec"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
-	"github.com/Earthdollar/go-earthdollar/xed"
+	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/rpc/codec"
+	"github.com/ethereum/go-ethereum/rpc/shared"
+	"github.com/ethereum/go-ethereum/xeth"
 )
 
 const (
@@ -39,17 +39,17 @@ type txpoolhandler func(*txPoolApi, *shared.Request) (interface{}, error)
 
 // txpool api provider
 type txPoolApi struct {
-	xed     *xed.XEd
-	earthdollar *ed.Earthdollar
+	xeth     *xeth.XEth
+	ethereum *eth.Ethereum
 	methods  map[string]txpoolhandler
 	codec    codec.ApiCoder
 }
 
 // create a new txpool api instance
-func NewTxPoolApi(xed *xed.XEd, ed *ed.Earthdollar, coder codec.Codec) *txPoolApi {
+func NewTxPoolApi(xeth *xeth.XEth, eth *eth.Ethereum, coder codec.Codec) *txPoolApi {
 	return &txPoolApi{
-		xed:     xed,
-		earthdollar: ed,
+		xeth:     xeth,
+		ethereum: eth,
 		methods:  txpoolMapping,
 		codec:    coder.New(nil),
 	}
@@ -84,7 +84,7 @@ func (self *txPoolApi) ApiVersion() string {
 }
 
 func (self *txPoolApi) Status(req *shared.Request) (interface{}, error) {
-	pending, queue := self.earthdollar.TxPool().Stats()
+	pending, queue := self.ethereum.TxPool().Stats()
 	return map[string]int{
 		"pending": pending,
 		"queued":  queue,

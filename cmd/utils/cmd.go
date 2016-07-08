@@ -1,20 +1,20 @@
-// Copyright 2014 The go-earthdollar Authors
-// This file is part of go-earthdollar.
+// Copyright 2014 The go-ethereum Authors
+// This file is part of go-ethereum.
 //
-// go-earthdollar is free software: you can redistribute it and/or modify
+// go-ethereum is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-earthdollar is distributed in the hope that it will be useful,
+// go-ethereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-earthdollar. If not, see <http://www.gnu.org/licenses/>.
+// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-// Package utils contains internal helper functions for go-earthdollar commands.
+// Package utils contains internal helper functions for go-ethereum commands.
 package utils
 
 import (
@@ -26,13 +26,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/peterh/liner"
 )
 
@@ -91,7 +91,6 @@ func PromptPassword(prompt string, warnTerm bool) (string, error) {
 	}
 	fmt.Print(prompt)
 	input, err := bufio.NewReader(os.Stdin).ReadString('\n')
-	input = strings.TrimRight(input, "\r\n")
 	fmt.Println()
 	return input, err
 }
@@ -111,10 +110,10 @@ func Fatalf(format string, args ...interface{}) {
 	os.Exit(1)
 }
 
-func StartEarthdollar(earthdollar *ed.Earthdollar) {
-	glog.V(logger.Info).Infoln("Starting", earthdollar.Name())
-	if err := earthdollar.Start(); err != nil {
-		Fatalf("Error starting Earthdollar: %v", err)
+func StartEthereum(ethereum *eth.Ethereum) {
+	glog.V(logger.Info).Infoln("Starting", ethereum.Name())
+	if err := ethereum.Start(); err != nil {
+		Fatalf("Error starting Ethereum: %v", err)
 	}
 	go func() {
 		sigc := make(chan os.Signal, 1)
@@ -122,7 +121,7 @@ func StartEarthdollar(earthdollar *ed.Earthdollar) {
 		defer signal.Stop(sigc)
 		<-sigc
 		glog.V(logger.Info).Infoln("Got interrupt, shutting down...")
-		go earthdollar.Stop()
+		go ethereum.Stop()
 		logger.Flush()
 		for i := 10; i > 0; i-- {
 			<-sigc

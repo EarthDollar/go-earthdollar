@@ -1,18 +1,18 @@
-// Copyright 2015 The go-earthdollar Authors
-// This file is part of the go-earthdollar library.
+// Copyright 2015 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-earthdollar library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-earthdollar library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-earthdollar library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package comms
 
@@ -25,10 +25,10 @@ import (
 
 	"strconv"
 
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rpc/codec"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/rpc/codec"
+	"github.com/ethereum/go-ethereum/rpc/shared"
 )
 
 const (
@@ -44,11 +44,11 @@ var (
 
 	// List with API's which are offered over thr HTTP/RPC interface by default
 	DefaultHttpRpcApis = strings.Join([]string{
-		shared.DbApiName, shared.EdApiName, shared.NetApiName, shared.Web3ApiName,
+		shared.DbApiName, shared.EthApiName, shared.NetApiName, shared.Web3ApiName,
 	}, ",")
 )
 
-type EarthdollarClient interface {
+type EthereumClient interface {
 	// Close underlying connection
 	Close()
 	// Send request
@@ -59,7 +59,7 @@ type EarthdollarClient interface {
 	SupportedModules() (map[string]string, error)
 }
 
-func handle(id int, conn net.Conn, api shared.EarthdollarApi, c codec.Codec) {
+func handle(id int, conn net.Conn, api shared.EthereumApi, c codec.Codec) {
 	codec := c.New(conn)
 
 	defer func() {
@@ -113,7 +113,7 @@ func handle(id int, conn net.Conn, api shared.EarthdollarApi, c codec.Codec) {
 // ${protocol}:${path}
 // e.g. ipc:/tmp/geth.ipc
 //      rpc:localhost:8545
-func ClientFromEndpoint(endpoint string, c codec.Codec) (EarthdollarClient, error) {
+func ClientFromEndpoint(endpoint string, c codec.Codec) (EthereumClient, error) {
 	if strings.HasPrefix(endpoint, "ipc:") {
 		cfg := IpcConfig{
 			Endpoint: endpoint[4:],
