@@ -34,8 +34,8 @@ web3._extend({
 			inputFormatter: [null]
 		}),
 		new web3._extend.Method({
-			name: 'setEarthBase',
-			call: 'miner_setEarthBase',
+			name: 'setEarthbase',
+			call: 'miner_setEarthbase',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.formatInputInt],
 			outputFormatter: web3._extend.formatters.formatOutputBool
