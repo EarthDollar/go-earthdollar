@@ -41,19 +41,19 @@ func (s *SizeSuite) TestStorageSizeString(c *checker.C) {
 }
 
 func (s *SizeSuite) TestCommon(c *checker.C) {
-	tree := CurrencyToString(BigPow(10, 19))
-	penny := CurrencyToString(BigPow(10, 16))
-	fish := CurrencyToString(BigPow(10, 13))
+	tree    := CurrencyToString(BigPow(10, 19))
+	penny   := CurrencyToString(BigPow(10, 16))
+	fish    := CurrencyToString(BigPow(10, 13))
 	wawatie := CurrencyToString(BigPow(10, 10))
-	tien := CurrencyToString(BigPow(10, 7))
+	tien    := CurrencyToString(BigPow(10, 7))
 	skydancer := CurrencyToString(BigPow(10, 4))
-	seed := CurrencyToString(big.NewInt(10))
+	seed      := CurrencyToString(big.NewInt(10))
 
 	c.Assert(tree, checker.Equals, "10 Tree")
 	c.Assert(penny, checker.Equals, "10 Penny")
-	c.Assert(szabo, checker.Equals, "10 Fish")
-	c.Assert(shannon, checker.Equals, "10 Wawatie")
-	c.Assert(babbage, checker.Equals, "10 Tien")
-	c.Assert(ada, checker.Equals, "10 Skydancer")
-	c.Assert(wei, checker.Equals, "10 Seed")
+	c.Assert(fish, checker.Equals, "10 Fish")
+	c.Assert(wawatie, checker.Equals, "10 Wawatie")
+	c.Assert(tien, checker.Equals, "10 Tien")
+	c.Assert(skydancer, checker.Equals, "10 Skydancer")
+	c.Assert(seed, checker.Equals, "10 Seed")
 }

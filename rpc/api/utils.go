@@ -144,8 +144,8 @@ var (
 		"web3": []string{
 			"sha3",
 			"version",
-			"fromWei",
-			"toWei",
+			"fromSeed",
+			"toSeed",
 			"toHex",
 			"toAscii",
 			"fromAscii",
