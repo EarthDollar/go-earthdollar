@@ -112,7 +112,7 @@ func handle(id int, conn net.Conn, api shared.EarthdollarApi, c codec.Codec) {
 // Endpoint must be in the form of:
 // ${protocol}:${path}
 // e.g. ipc:/tmp/geth.ipc
-//      rpc:localhost:8545
+//      rpc:localhost:8811
 func ClientFromEndpoint(endpoint string, c codec.Codec) (EarthdollarClient, error) {
 	if strings.HasPrefix(endpoint, "ipc:") {
 		cfg := IpcConfig{
@@ -124,7 +124,7 @@ func ClientFromEndpoint(endpoint string, c codec.Codec) (EarthdollarClient, erro
 	if strings.HasPrefix(endpoint, "rpc:") {
 		parts := strings.Split(endpoint, ":")
 		addr := "http://localhost"
-		port := uint(8545)
+		port := uint(8811)
 		if len(parts) >= 3 {
 			addr = parts[1] + ":" + parts[2]
 		}

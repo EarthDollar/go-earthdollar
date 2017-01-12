@@ -32,7 +32,7 @@ const (
 	Web3ApiName     = "web3"
 
 	JsonRpcVersion = "2.0"
-        ED_LocalPort = 8545 //earthdollar
+        ED_LocalPort = 8811 //earthdollar
 )
 
 var (
