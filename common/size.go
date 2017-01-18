@@ -38,29 +38,16 @@ func (self StorageSize) Int64() int64 {
 }
 
 // The different number of units
-var (		
-	Quarter   = big.NewInt(250000000000000000)	
-	Nickle    = big.NewInt(50000000000000000)
-
-	Tree      = BigPow(10, 18)	
-	Dime      = BigPow(10, 17)
-	Penny     = BigPow(10, 16)
-	Kam       = BigPow(10, 15)
-	Tilly     = BigPow(10, 14)
-	Fish      = BigPow(10, 13)
-	Rajpal    = BigPow(10, 12)
-	Ratt      = BigPow(10, 11)
-	Wawatie   = BigPow(10, 10)
-	Chief     = BigPow(10, 9)
-	Luck      = BigPow(10, 8)
-	Tien      = BigPow(10, 7)
-	Jack      = BigPow(10, 6)
-	Nottaway  = BigPow(10, 5)
-	Skydancer = BigPow(10, 4)
-	Maes      = BigPow(10, 3)
-	So        = BigPow(10, 2)
-	Little    = BigPow(10, 1)
-	Seed      = big.NewInt(1)
+var (
+	Douglas  = BigPow(10, 42)
+	Einstein = BigPow(10, 21)
+	Ether    = BigPow(10, 18)
+	Finney   = BigPow(10, 15)
+	Szabo    = BigPow(10, 12)
+	Shannon  = BigPow(10, 9)
+	Babbage  = BigPow(10, 6)
+	Ada      = BigPow(10, 3)
+	Wei      = big.NewInt(1)
 )
 
 //
@@ -69,28 +56,28 @@ var (
 func CurrencyToString(num *big.Int) string {
 	var (
 		fin   *big.Int = num
-		denom string   = "Seed"
+		denom string   = "Wei"
 	)
 
 	switch {
-	case num.Cmp(Tree) >= 0:
-		fin = new(big.Int).Div(num, Tree)
-		denom = "Tree"
-	case num.Cmp(Kam) >= 0:
-		fin = new(big.Int).Div(num, Kam)
-		denom = "Kam"
-	case num.Cmp(Rajpal) >= 0:
-		fin = new(big.Int).Div(num, Rajpal)
-		denom = "Rajpal"
-	case num.Cmp(Chief) >= 0:
-		fin = new(big.Int).Div(num, Chief)
-		denom = "Chief"
-	case num.Cmp(Jack) >= 0:
-		fin = new(big.Int).Div(num, Jack)
-		denom = "Jack"
-	case num.Cmp(Maes) >= 0:
-		fin = new(big.Int).Div(num, Maes)
-		denom = "Maes"
+	case num.Cmp(Ether) >= 0:
+		fin = new(big.Int).Div(num, Ether)
+		denom = "Ether"
+	case num.Cmp(Finney) >= 0:
+		fin = new(big.Int).Div(num, Finney)
+		denom = "Finney"
+	case num.Cmp(Szabo) >= 0:
+		fin = new(big.Int).Div(num, Szabo)
+		denom = "Szabo"
+	case num.Cmp(Shannon) >= 0:
+		fin = new(big.Int).Div(num, Shannon)
+		denom = "Shannon"
+	case num.Cmp(Babbage) >= 0:
+		fin = new(big.Int).Div(num, Babbage)
+		denom = "Babbage"
+	case num.Cmp(Ada) >= 0:
+		fin = new(big.Int).Div(num, Ada)
+		denom = "Ada"
 	}
 
 	// TODO add comment clarifying expected behavior

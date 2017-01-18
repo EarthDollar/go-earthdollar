@@ -25,6 +25,14 @@ import (
 
 type testEvent int
 
+func TestSubCloseUnsub(t *testing.T) {
+	// the point of this test is **not** to panic
+	var mux TypeMux
+	mux.Stop()
+	sub := mux.Subscribe(int(0))
+	sub.Unsubscribe()
+}
+
 func TestSub(t *testing.T) {
 	mux := new(TypeMux)
 	defer mux.Stop()
@@ -136,7 +144,7 @@ func TestMuxConcurrent(t *testing.T) {
 func emptySubscriber(mux *TypeMux, types ...interface{}) {
 	s := mux.Subscribe(testEvent(0))
 	go func() {
-		for _ = range s.Chan() {
+		for range s.Chan() {
 		}
 	}()
 }
@@ -179,7 +187,7 @@ func BenchmarkChanSend(b *testing.B) {
 	c := make(chan interface{})
 	closed := make(chan struct{})
 	go func() {
-		for _ = range c {
+		for range c {
 		}
 	}()
 

@@ -21,16 +21,21 @@ import (
 	"math/big"
 	"math/rand"
 	"reflect"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 const (
-	hashLength    = 32
-	addressLength = 20
+	HashLength    = 32
+	AddressLength = 20
 )
 
 type (
-	Hash    [hashLength]byte
-	Address [addressLength]byte
+	// Hash represents the 32 byte Keccak256 hash of arbitrary data.
+	Hash [HashLength]byte
+
+	// Address represents the 20 byte address of an Ethereum account.
+	Address [AddressLength]byte
 )
 
 func BytesToHash(b []byte) Hash {
@@ -48,15 +53,25 @@ func HexToHash(s string) Hash    { return BytesToHash(FromHex(s)) }
 func (h Hash) Str() string   { return string(h[:]) }
 func (h Hash) Bytes() []byte { return h[:] }
 func (h Hash) Big() *big.Int { return Bytes2Big(h[:]) }
-func (h Hash) Hex() string   { return "0x" + Bytes2Hex(h[:]) }
+func (h Hash) Hex() string   { return hexutil.Encode(h[:]) }
+
+// UnmarshalJSON parses a hash in its hex from to a hash.
+func (h *Hash) UnmarshalJSON(input []byte) error {
+	return hexutil.UnmarshalJSON("Hash", input, h[:])
+}
+
+// Serialize given hash to JSON
+func (h Hash) MarshalJSON() ([]byte, error) {
+	return hexutil.Bytes(h[:]).MarshalJSON()
+}
 
 // Sets the hash to the value of b. If b is larger than len(h) it will panic
 func (h *Hash) SetBytes(b []byte) {
 	if len(b) > len(h) {
-		b = b[len(b)-hashLength:]
+		b = b[len(b)-HashLength:]
 	}
 
-	copy(h[hashLength-len(b):], b)
+	copy(h[HashLength-len(b):], b)
 }
 
 // Set string `s` to h. If s is larger than len(h) it will panic
@@ -92,19 +107,31 @@ func StringToAddress(s string) Address { return BytesToAddress([]byte(s)) }
 func BigToAddress(b *big.Int) Address  { return BytesToAddress(b.Bytes()) }
 func HexToAddress(s string) Address    { return BytesToAddress(FromHex(s)) }
 
+// IsHexAddress verifies whether a string can represent a valid hex-encoded
+// Ethereum address or not.
+func IsHexAddress(s string) bool {
+	if len(s) == 2+2*AddressLength && IsHex(s) {
+		return true
+	}
+	if len(s) == 2*AddressLength && IsHex("0x"+s) {
+		return true
+	}
+	return false
+}
+
 // Get the string representation of the underlying address
 func (a Address) Str() string   { return string(a[:]) }
 func (a Address) Bytes() []byte { return a[:] }
 func (a Address) Big() *big.Int { return Bytes2Big(a[:]) }
 func (a Address) Hash() Hash    { return BytesToHash(a[:]) }
-func (a Address) Hex() string   { return "0x" + Bytes2Hex(a[:]) }
+func (a Address) Hex() string   { return hexutil.Encode(a[:]) }
 
 // Sets the address to the value of b. If b is larger than len(a) it will panic
 func (a *Address) SetBytes(b []byte) {
 	if len(b) > len(a) {
-		b = b[len(b)-addressLength:]
+		b = b[len(b)-AddressLength:]
 	}
-	copy(a[addressLength-len(b):], b)
+	copy(a[AddressLength-len(b):], b)
 }
 
 // Set string `s` to a. If s is larger than len(a) it will panic
@@ -115,6 +142,16 @@ func (a *Address) Set(other Address) {
 	for i, v := range other {
 		a[i] = v
 	}
+}
+
+// Serialize given address to JSON
+func (a Address) MarshalJSON() ([]byte, error) {
+	return hexutil.Bytes(a[:]).MarshalJSON()
+}
+
+// Parse address from raw json data
+func (a *Address) UnmarshalJSON(input []byte) error {
+	return hexutil.UnmarshalJSON("Address", input, a[:])
 }
 
 // PP Pretty Prints a byte slice in the following format:

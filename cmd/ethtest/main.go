@@ -25,10 +25,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/codegangsta/cli"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/tests"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/tests"
+	"gopkg.in/urfave/cli.v1"
 )
 
 var (
@@ -74,11 +74,13 @@ func runTestWithReader(test string, r io.Reader) error {
 	var err error
 	switch strings.ToLower(test) {
 	case "bk", "block", "blocktest", "blockchaintest", "blocktests", "blockchaintests":
-		err = tests.RunBlockTestWithReader(r, skipTests)
+		err = tests.RunBlockTestWithReader(params.MainNetHomesteadBlock, params.MainNetDAOForkBlock, params.MainNetHomesteadGasRepriceBlock, r, skipTests)
 	case "st", "state", "statetest", "statetests":
-		err = tests.RunStateTestWithReader(r, skipTests)
+		rs := &params.ChainConfig{HomesteadBlock: params.MainNetHomesteadBlock, DAOForkBlock: params.MainNetDAOForkBlock, DAOForkSupport: true, EIP150Block: params.MainNetHomesteadGasRepriceBlock}
+		err = tests.RunStateTestWithReader(rs, r, skipTests)
 	case "tx", "transactiontest", "transactiontests":
-		err = tests.RunTransactionTestsWithReader(r, skipTests)
+		rs := &params.ChainConfig{HomesteadBlock: params.MainNetHomesteadBlock, DAOForkBlock: params.MainNetDAOForkBlock, DAOForkSupport: true, EIP150Block: params.MainNetHomesteadGasRepriceBlock}
+		err = tests.RunTransactionTestsWithReader(rs, r, skipTests)
 	case "vm", "vmtest", "vmtests":
 		err = tests.RunVmTestWithReader(r, skipTests)
 	case "rlp", "rlptest", "rlptests":
@@ -86,12 +88,7 @@ func runTestWithReader(test string, r io.Reader) error {
 	default:
 		err = fmt.Errorf("Invalid test type specified: %v", test)
 	}
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func getFiles(path string) ([]string, error) {
@@ -182,13 +179,12 @@ func runSuite(test, file string) {
 	}
 }
 
-func setupApp(c *cli.Context) {
+func setupApp(c *cli.Context) error {
 	flagTest := c.GlobalString(TestFlag.Name)
 	flagFile := c.GlobalString(FileFlag.Name)
 	continueOnError = c.GlobalBool(ContinueOnErrorFlag.Name)
 	useStdIn := c.GlobalBool(ReadStdInFlag.Name)
 	skipTests = strings.Split(c.GlobalString(SkipTestsFlag.Name), " ")
-	vm.Debug = c.GlobalBool(TraceFlag.Name)
 
 	if !useStdIn {
 		runSuite(flagTest, flagFile)
@@ -196,8 +192,8 @@ func setupApp(c *cli.Context) {
 		if err := runTestWithReader(flagTest, os.Stdin); err != nil {
 			glog.Fatalln(err)
 		}
-
 	}
+	return nil
 }
 
 func main() {

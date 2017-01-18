@@ -21,21 +21,26 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/event"
-	"github.com/Earthdollar/go-earthdollar/pow/ezp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/params"
 )
 
+func testChainConfig() *params.ChainConfig {
+	return params.TestChainConfig
+	//return &params.ChainConfig{HomesteadBlock: big.NewInt(0)}
+}
+
 func proc() (Validator, *BlockChain) {
-	db, _ := eddb.NewMemDatabase()
+	db, _ := ethdb.NewMemDatabase()
 	var mux event.TypeMux
 
-	WriteTestNetGenesisBlock(db, 0)
-	blockchain, err := NewBlockChain(db, thePow(), &mux)
+	WriteTestNetGenesisBlock(db)
+	blockchain, err := NewBlockChain(db, testChainConfig(), thePow(), &mux, vm.Config{})
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -43,26 +48,26 @@ func proc() (Validator, *BlockChain) {
 }
 
 func TestNumber(t *testing.T) {
-	pow := ezp.New()
 	_, chain := proc()
 
 	statedb, _ := state.New(chain.Genesis().Root(), chain.chainDb)
-	header := makeHeader(chain.Genesis(), statedb)
+	cfg := testChainConfig()
+	header := makeHeader(cfg, chain.Genesis(), statedb)
 	header.Number = big.NewInt(3)
-	err := ValidateHeader(pow, header, chain.Genesis().Header(), false, false)
+	err := ValidateHeader(cfg, FakePow{}, header, chain.Genesis().Header(), false, false)
 	if err != BlockNumberErr {
 		t.Errorf("expected block number error, got %q", err)
 	}
 
-	header = makeHeader(chain.Genesis(), statedb)
-	err = ValidateHeader(pow, header, chain.Genesis().Header(), false, false)
+	header = makeHeader(cfg, chain.Genesis(), statedb)
+	err = ValidateHeader(cfg, FakePow{}, header, chain.Genesis().Header(), false, false)
 	if err == BlockNumberErr {
 		t.Errorf("didn't expect block number error")
 	}
 }
 
 func TestPutReceipt(t *testing.T) {
-	db, _ := eddb.NewMemDatabase()
+	db, _ := ethdb.NewMemDatabase()
 
 	var addr common.Address
 	addr[0] = 1
@@ -70,7 +75,7 @@ func TestPutReceipt(t *testing.T) {
 	hash[0] = 2
 
 	receipt := new(types.Receipt)
-	receipt.Logs = vm.Logs{&vm.Log{
+	receipt.Logs = []*types.Log{{
 		Address:     addr,
 		Topics:      []common.Hash{hash},
 		Data:        []byte("hi"),

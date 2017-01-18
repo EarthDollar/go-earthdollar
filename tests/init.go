@@ -1,4 +1,4 @@
-// Copyright 2014 The go-ethereum Authors
+// Copyright 2015 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package tests implements execution of Earthdollar JSON tests.
+// Package tests implements execution of Ethereum JSON tests.
 package tests
 
 import (
@@ -25,8 +25,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-
-	"github.com/Earthdollar/go-earthdollar/core"
 )
 
 var (
@@ -47,6 +45,9 @@ var (
 
 		"ChainAtoChainB_blockorder2",
 		"ChainAtoChainB_blockorder1",
+
+		"GasLimitHigherThan2p63m1", // not yet ;)
+		"SuicideIssue",             // fails genesis check
 	}
 
 	/* Go client does not support transaction (account) nonces above 2^64. This
@@ -54,20 +55,20 @@ var (
 	engineering constraint" as accounts cannot easily reach such high
 	nonce values in practice
 	*/
-	TransSkipTests = []string{"TransactionWithHihghNonce256"}
+	TransSkipTests = []string{
+		"TransactionWithHihghNonce256",
+		"Vitalik_15",
+		"Vitalik_16",
+		"Vitalik_17",
+	}
 	StateSkipTests = []string{}
 	VmSkipTests    = []string{}
 )
 
-// Disable reporting bad blocks for the tests
-func init() {
-	core.DisableBadBlockReporting = true
-}
-
 func readJson(reader io.Reader, value interface{}) error {
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return fmt.Errorf("Error reading JSON file", err.Error())
+		return fmt.Errorf("error reading JSON file: %v", err)
 	}
 	if err = json.Unmarshal(data, &value); err != nil {
 		if syntaxerr, ok := err.(*json.SyntaxError); ok {
@@ -86,11 +87,7 @@ func readJsonHttp(uri string, value interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	err = readJson(resp.Body, value)
-	if err != nil {
-		return err
-	}
-	return nil
+	return readJson(resp.Body, value)
 }
 
 func readJsonFile(fn string, value interface{}) error {

@@ -1,4 +1,4 @@
-// Copyright 2014 The go-ethereum Authors
+// Copyright 2015 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
@@ -21,12 +21,12 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/params"
-	"github.com/Earthdollar/go-earthdollar/pow"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/pow"
 	"gopkg.in/fatih/set.v0"
 )
 
@@ -41,15 +41,17 @@ var (
 //
 // BlockValidator implements Validator.
 type BlockValidator struct {
-	bc  *BlockChain // Canonical block chain
-	Pow pow.PoW     // Proof of work used for validating
+	config *params.ChainConfig // Chain configuration options
+	bc     *BlockChain         // Canonical block chain
+	Pow    pow.PoW             // Proof of work used for validating
 }
 
 // NewBlockValidator returns a new block validator which is safe for re-use
-func NewBlockValidator(blockchain *BlockChain, pow pow.PoW) *BlockValidator {
+func NewBlockValidator(config *params.ChainConfig, blockchain *BlockChain, pow pow.PoW) *BlockValidator {
 	validator := &BlockValidator{
-		Pow: pow,
-		bc:  blockchain,
+		config: config,
+		Pow:    pow,
+		bc:     blockchain,
 	}
 	return validator
 }
@@ -58,11 +60,11 @@ func NewBlockValidator(blockchain *BlockChain, pow pow.PoW) *BlockValidator {
 // the block header's transaction and uncle roots.
 //
 // ValidateBlock does not validate the header's pow. The pow work validated
-// seperately so we can process them in paralel.
+// separately so we can process them in parallel.
 //
 // ValidateBlock also validates and makes sure that any previous state (or present)
 // state that might or might not be present is checked to make sure that fast
-// sync has done it's job proper. This prevents the block validator form accepting
+// sync has done it's job proper. This prevents the block validator from accepting
 // false positives where a header is present but the state is not.
 func (v *BlockValidator) ValidateBlock(block *types.Block) error {
 	if v.bc.HasBlock(block.Hash()) {
@@ -70,7 +72,7 @@ func (v *BlockValidator) ValidateBlock(block *types.Block) error {
 			return &KnownBlockError{block.Number(), block.Hash()}
 		}
 	}
-	parent := v.bc.GetBlock(block.ParentHash())
+	parent := v.bc.GetBlock(block.ParentHash(), block.NumberU64()-1)
 	if parent == nil {
 		return ParentError(block.ParentHash())
 	}
@@ -80,7 +82,7 @@ func (v *BlockValidator) ValidateBlock(block *types.Block) error {
 
 	header := block.Header()
 	// validate the block header
-	if err := ValidateHeader(v.Pow, header, parent.Header(), false, false); err != nil {
+	if err := ValidateHeader(v.config, v.Pow, header, parent.Header(), false, false); err != nil {
 		return err
 	}
 	// verify the uncles are correctly rewarded
@@ -91,14 +93,14 @@ func (v *BlockValidator) ValidateBlock(block *types.Block) error {
 	// Verify UncleHash before running other uncle validations
 	unclesSha := types.CalcUncleHash(block.Uncles())
 	if unclesSha != header.UncleHash {
-		return fmt.Errorf("invalid uncles root hash. received=%x calculated=%x", header.UncleHash, unclesSha)
+		return fmt.Errorf("invalid uncles root hash (remote: %x local: %x)", header.UncleHash, unclesSha)
 	}
 
 	// The transactions Trie's root (R = (Tr [[i, RLP(T1)], [i, RLP(T2)], ... [n, RLP(Tn)]]))
 	// can be used by light clients to make sure they've received the correct Txs
 	txSha := types.DeriveSha(block.Transactions())
 	if txSha != header.TxHash {
-		return fmt.Errorf("invalid transaction root hash. received=%x calculated=%x", header.TxHash, txSha)
+		return fmt.Errorf("invalid transaction root hash (remote: %x local: %x)", header.TxHash, txSha)
 	}
 
 	return nil
@@ -106,38 +108,38 @@ func (v *BlockValidator) ValidateBlock(block *types.Block) error {
 
 // ValidateState validates the various changes that happen after a state
 // transition, such as amount of used gas, the receipt roots and the state root
-// itself. ValidateState returns a database batch if the validation was a succes
+// itself. ValidateState returns a database batch if the validation was a success
 // otherwise nil and an error is returned.
 func (v *BlockValidator) ValidateState(block, parent *types.Block, statedb *state.StateDB, receipts types.Receipts, usedGas *big.Int) (err error) {
 	header := block.Header()
 	if block.GasUsed().Cmp(usedGas) != 0 {
-		return ValidationError(fmt.Sprintf("gas used error (%v / %v)", block.GasUsed(), usedGas))
+		return ValidationError(fmt.Sprintf("invalid gas used (remote: %v local: %v)", block.GasUsed(), usedGas))
 	}
 	// Validate the received block's bloom with the one derived from the generated receipts.
 	// For valid blocks this should always validate to true.
 	rbloom := types.CreateBloom(receipts)
 	if rbloom != header.Bloom {
-		return fmt.Errorf("unable to replicate block's bloom=%x vs calculated bloom=%x", header.Bloom, rbloom)
+		return fmt.Errorf("invalid bloom (remote: %x  local: %x)", header.Bloom, rbloom)
 	}
 	// Tre receipt Trie's root (R = (Tr [[H1, R1], ... [Hn, R1]]))
 	receiptSha := types.DeriveSha(receipts)
 	if receiptSha != header.ReceiptHash {
-		return fmt.Errorf("invalid receipt root hash. received=%x calculated=%x", header.ReceiptHash, receiptSha)
+		return fmt.Errorf("invalid receipt root hash (remote: %x local: %x)", header.ReceiptHash, receiptSha)
 	}
 	// Validate the state root against the received state root and throw
 	// an error if they don't match.
-	if root := statedb.IntermediateRoot(); header.Root != root {
-		return fmt.Errorf("invalid merkle root: header=%x computed=%x", header.Root, root)
+	if root := statedb.IntermediateRoot(v.config.IsEIP158(header.Number)); header.Root != root {
+		return fmt.Errorf("invalid merkle root (remote: %x local: %x)", header.Root, root)
 	}
 	return nil
 }
 
-// VerifyUncles verifies the given block's uncles and applies the Earthdollar
+// VerifyUncles verifies the given block's uncles and applies the Ethereum
 // consensus rules to the various block headers included; it will return an
 // error if any of the included uncle headers were invalid. It returns an error
 // if the validation failed.
 func (v *BlockValidator) VerifyUncles(block, parent *types.Block) error {
-	// validate that there at most 2 uncles included in this block
+	// validate that there are at most 2 uncles included in this block
 	if len(block.Uncles()) > 2 {
 		return ValidationError("Block can only contain maximum 2 uncles (contained %v)", len(block.Uncles()))
 	}
@@ -175,7 +177,7 @@ func (v *BlockValidator) VerifyUncles(block, parent *types.Block) error {
 			return UncleError("uncle[%d](%x)'s parent is not ancestor (%x)", i, hash[:4], uncle.ParentHash[0:4])
 		}
 
-		if err := ValidateHeader(v.Pow, uncle, ancestors[uncle.ParentHash].Header(), true, true); err != nil {
+		if err := ValidateHeader(v.config, v.Pow, uncle, ancestors[uncle.ParentHash].Header(), true, true); err != nil {
 			return ValidationError(fmt.Sprintf("uncle[%d](%x) header invalid: %v", i, hash[:4], err))
 		}
 	}
@@ -191,17 +193,17 @@ func (v *BlockValidator) ValidateHeader(header, parent *types.Header, checkPow b
 	if parent == nil {
 		return ParentError(header.ParentHash)
 	}
-	// Short circuit if the header's already known or its parent missing
+	// Short circuit if the header's already known or its parent is missing
 	if v.bc.HasHeader(header.Hash()) {
 		return nil
 	}
-	return ValidateHeader(v.Pow, header, parent, checkPow, false)
+	return ValidateHeader(v.config, v.Pow, header, parent, checkPow, false)
 }
 
 // Validates a header. Returns an error if the header is invalid.
 //
 // See YP section 4.3.4. "Block Header Validity"
-func ValidateHeader(pow pow.PoW, header *types.Header, parent *types.Header, checkPow, uncle bool) error {
+func ValidateHeader(config *params.ChainConfig, pow pow.PoW, header *types.Header, parent *types.Header, checkPow, uncle bool) error {
 	if big.NewInt(int64(len(header.Extra))).Cmp(params.MaximumExtraDataSize) == 1 {
 		return fmt.Errorf("Header extra data too long (%d)", len(header.Extra))
 	}
@@ -219,9 +221,9 @@ func ValidateHeader(pow pow.PoW, header *types.Header, parent *types.Header, che
 		return BlockEqualTSErr
 	}
 
-	expd := CalcDifficulty(header.Time.Uint64(), parent.Time.Uint64(), parent.Number, parent.Difficulty)
+	expd := CalcDifficulty(config, header.Time.Uint64(), parent.Time.Uint64(), parent.Number, parent.Difficulty)
 	if expd.Cmp(header.Difficulty) != 0 {
-		return fmt.Errorf("Difficulty check failed for header %v, %v", header.Difficulty, expd)
+		return fmt.Errorf("Difficulty check failed for header (remote: %v local: %v)", header.Difficulty, expd)
 	}
 
 	a := new(big.Int).Set(parent.GasLimit)
@@ -230,7 +232,7 @@ func ValidateHeader(pow pow.PoW, header *types.Header, parent *types.Header, che
 	b := new(big.Int).Set(parent.GasLimit)
 	b = b.Div(b, params.GasLimitBoundDivisor)
 	if !(a.Cmp(b) < 0) || (header.GasLimit.Cmp(params.MinGasLimit) == -1) {
-		return fmt.Errorf("GasLimit check failed for header %v (%v > %v)", header.GasLimit, a, b)
+		return fmt.Errorf("GasLimit check failed for header (remote: %v local_max: %v)", header.GasLimit, b)
 	}
 
 	num := new(big.Int).Set(parent.Number)
@@ -245,14 +247,23 @@ func ValidateHeader(pow pow.PoW, header *types.Header, parent *types.Header, che
 			return &BlockNonceErr{header.Number, header.Hash(), header.Nonce.Uint64()}
 		}
 	}
+	// If all checks passed, validate the extra-data field for hard forks
+	if err := ValidateDAOHeaderExtraData(config, header); err != nil {
+		return err
+	}
+	if !uncle && config.EIP150Block != nil && config.EIP150Block.Cmp(header.Number) == 0 {
+		if config.EIP150Hash != (common.Hash{}) && config.EIP150Hash != header.Hash() {
+			return ValidationError("Homestead gas reprice fork hash mismatch: have 0x%x, want 0x%x", header.Hash(), config.EIP150Hash)
+		}
+	}
 	return nil
 }
 
 // CalcDifficulty is the difficulty adjustment algorithm. It returns
 // the difficulty that a new block should have when created at time
 // given the parent block's time and difficulty.
-func CalcDifficulty(time, parentTime uint64, parentNumber, parentDiff *big.Int) *big.Int {
-	if params.IsHomestead(new(big.Int).Add(parentNumber, common.Big1)) {
+func CalcDifficulty(config *params.ChainConfig, time, parentTime uint64, parentNumber, parentDiff *big.Int) *big.Int {
+	if config.IsHomestead(new(big.Int).Add(parentNumber, common.Big1)) {
 		return calcDifficultyHomestead(time, parentTime, parentNumber, parentDiff)
 	} else {
 		return calcDifficultyFrontier(time, parentTime, parentNumber, parentDiff)
@@ -290,14 +301,14 @@ func calcDifficultyHomestead(time, parentTime uint64, parentNumber, parentDiff *
 
 	// minimum difficulty can ever be (before exponential factor)
 	if x.Cmp(params.MinimumDifficulty) < 0 {
-		x = params.MinimumDifficulty
+		x.Set(params.MinimumDifficulty)
 	}
 
 	// for the exponential factor
 	periodCount := new(big.Int).Add(parentNumber, common.Big1)
 	periodCount.Div(periodCount, ExpDiffPeriod)
 
-	// the exponential factor, commonly refered to as "the bomb"
+	// the exponential factor, commonly referred to as "the bomb"
 	// diff = diff + 2^(periodCount - 2)
 	if periodCount.Cmp(common.Big1) > 0 {
 		y.Sub(periodCount, common.Big2)
@@ -323,7 +334,7 @@ func calcDifficultyFrontier(time, parentTime uint64, parentNumber, parentDiff *b
 		diff.Sub(parentDiff, adjust)
 	}
 	if diff.Cmp(params.MinimumDifficulty) < 0 {
-		diff = params.MinimumDifficulty
+		diff.Set(params.MinimumDifficulty)
 	}
 
 	periodCount := new(big.Int).Add(parentNumber, common.Big1)
@@ -363,11 +374,11 @@ func CalcGasLimit(parent *types.Block) *big.Int {
 	gl = gl.Add(gl, contrib)
 	gl.Set(common.BigMax(gl, params.MinGasLimit))
 
-	// however, if we're now below the target (GenesisGasLimit) we increase the
+	// however, if we're now below the target (TargetGasLimit) we increase the
 	// limit as much as we can (parentGasLimit / 1024 -1)
-	if gl.Cmp(params.GenesisGasLimit) < 0 {
+	if gl.Cmp(params.TargetGasLimit) < 0 {
 		gl.Add(parent.GasLimit(), decay)
-		gl.Set(common.BigMin(gl, params.GenesisGasLimit))
+		gl.Set(common.BigMin(gl, params.TargetGasLimit))
 	}
 	return gl
 }

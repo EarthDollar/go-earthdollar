@@ -27,10 +27,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rlp"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
@@ -188,7 +188,7 @@ func (db *nodeDB) node(id NodeID) *Node {
 		glog.V(logger.Warn).Infof("failed to decode node RLP: %v", err)
 		return nil
 	}
-	node.sha = crypto.Sha3Hash(node.ID[:])
+	node.sha = crypto.Keccak256Hash(node.ID[:])
 	return node
 }
 
@@ -243,7 +243,7 @@ func (db *nodeDB) expirer() {
 }
 
 // expireNodes iterates over the database and deletes all nodes that have not
-// been seen (i.e. received a pong from) for some alloted time.
+// been seen (i.e. received a pong from) for some allotted time.
 func (db *nodeDB) expireNodes() error {
 	threshold := time.Now().Add(-nodeDBNodeExpiration)
 
@@ -258,7 +258,7 @@ func (db *nodeDB) expireNodes() error {
 			continue
 		}
 		// Skip the node if not expired yet (and not self)
-		if bytes.Compare(id[:], db.self[:]) != 0 {
+		if !bytes.Equal(id[:], db.self[:]) {
 			if seen := db.lastPong(id); seen.After(threshold) {
 				continue
 			}

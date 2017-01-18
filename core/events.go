@@ -19,13 +19,9 @@ package core
 import (
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
-
-// MintEvent is posted when the mint changes value.
-type MintEvent struct{ Mt *big.Int }  // Earthdollar
 
 // TxPreEvent is posted when a transaction enters the transaction pool.
 type TxPreEvent struct{ Tx *types.Transaction }
@@ -33,8 +29,13 @@ type TxPreEvent struct{ Tx *types.Transaction }
 // TxPostEvent is posted when a transaction has been processed.
 type TxPostEvent struct{ Tx *types.Transaction }
 
-// NewBlockEvent is posted when a block has been imported.
-type NewBlockEvent struct{ Block *types.Block }
+// PendingLogsEvent is posted pre mining and notifies of pending logs.
+type PendingLogsEvent struct {
+	Logs []*types.Log
+}
+
+// PendingStateEvent is posted pre mining and notifies of pending state changes.
+type PendingStateEvent struct{}
 
 // NewMinedBlockEvent is posted when a block has been imported.
 type NewMinedBlockEvent struct{ Block *types.Block }
@@ -42,26 +43,28 @@ type NewMinedBlockEvent struct{ Block *types.Block }
 // RemovedTransactionEvent is posted when a reorg happens
 type RemovedTransactionEvent struct{ Txs types.Transactions }
 
+// RemovedLogEvent is posted when a reorg happens
+type RemovedLogsEvent struct{ Logs []*types.Log }
+
 // ChainSplit is posted when a new head is detected
 type ChainSplitEvent struct {
 	Block *types.Block
-	Logs  vm.Logs
+	Logs  []*types.Log
 }
 
 type ChainEvent struct {
 	Block *types.Block
 	Hash  common.Hash
-	Logs  vm.Logs
+	Logs  []*types.Log
 }
 
 type ChainSideEvent struct {
 	Block *types.Block
-	Logs  vm.Logs
 }
 
 type PendingBlockEvent struct {
 	Block *types.Block
-	Logs  vm.Logs
+	Logs  []*types.Log
 }
 
 type ChainUncleEvent struct {

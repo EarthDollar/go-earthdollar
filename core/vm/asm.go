@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/Earthdollar/go-earthdollar/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
-// Dissassemble dissassembles the byte code and returns the string
+// Disassemble disassembles the byte code and returns the string
 // representation (human readable opcodes).
 func Disassemble(script []byte) (asm []string) {
 	pc := new(big.Int)
@@ -58,6 +58,4 @@ func Disassemble(script []byte) (asm []string) {
 
 		pc.Add(pc, common.Big1)
 	}
-
-	return
 }

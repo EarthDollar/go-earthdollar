@@ -31,16 +31,15 @@ import (
 	"io"
 	mrand "math/rand"
 	"net"
-	"os"
 	"sync"
 	"time"
 
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/crypto/ecies"
-	"github.com/Earthdollar/go-earthdollar/crypto/secp256k1"
-	"github.com/Earthdollar/go-earthdollar/crypto/sha3"
-	"github.com/Earthdollar/go-earthdollar/p2p/discover"
-	"github.com/Earthdollar/go-earthdollar/rlp"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/crypto/ecies"
+	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"github.com/ethereum/go-ethereum/p2p/discover"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 const (
@@ -232,12 +231,12 @@ func (h *encHandshake) secrets(auth, authResp []byte) (secrets, error) {
 	}
 
 	// derive base secrets from ephemeral key agreement
-	sharedSecret := crypto.Sha3(ecdheSecret, crypto.Sha3(h.respNonce, h.initNonce))
-	aesSecret := crypto.Sha3(ecdheSecret, sharedSecret)
+	sharedSecret := crypto.Keccak256(ecdheSecret, crypto.Keccak256(h.respNonce, h.initNonce))
+	aesSecret := crypto.Keccak256(ecdheSecret, sharedSecret)
 	s := secrets{
 		RemoteID: h.remoteID,
 		AES:      aesSecret,
-		MAC:      crypto.Sha3(ecdheSecret, aesSecret),
+		MAC:      crypto.Keccak256(ecdheSecret, aesSecret),
 	}
 
 	// setup sha3 instances for the MACs
@@ -262,8 +261,6 @@ func (h *encHandshake) staticSharedSecret(prv *ecdsa.PrivateKey) ([]byte, error)
 	return ecies.ImportECDSA(prv).GenerateShared(h.remotePub, sskLen, sskLen)
 }
 
-var configSendEIP = os.Getenv("RLPX_EIP8") != ""
-
 // initiatorEncHandshake negotiates a session token on conn.
 // it should be called on the dialing side of the connection.
 //
@@ -274,12 +271,7 @@ func initiatorEncHandshake(conn io.ReadWriter, prv *ecdsa.PrivateKey, remoteID d
 	if err != nil {
 		return s, err
 	}
-	var authPacket []byte
-	if configSendEIP {
-		authPacket, err = sealEIP8(authMsg, h)
-	} else {
-		authPacket, err = authMsg.sealPlain(h)
-	}
+	authPacket, err := sealEIP8(authMsg, h)
 	if err != nil {
 		return s, err
 	}
@@ -311,7 +303,7 @@ func (h *encHandshake) makeAuthMsg(prv *ecdsa.PrivateKey, token []byte) (*authMs
 		return nil, err
 	}
 	// Generate random keypair to for ECDH.
-	h.randomPrivKey, err = ecies.GenerateKey(rand.Reader, crypto.S256(), nil)
+	h.randomPrivKey, err = ecies.GenerateKey(rand.Reader, secp256k1.S256(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -389,7 +381,7 @@ func (h *encHandshake) handleAuthMsg(msg *authMsgV4, prv *ecdsa.PrivateKey) erro
 	// Generate random keypair for ECDH.
 	// If a private key is already set, use it instead of generating one (for testing).
 	if h.randomPrivKey == nil {
-		h.randomPrivKey, err = ecies.GenerateKey(rand.Reader, crypto.S256(), nil)
+		h.randomPrivKey, err = ecies.GenerateKey(rand.Reader, secp256k1.S256(), nil)
 		if err != nil {
 			return err
 		}
@@ -426,7 +418,7 @@ func (h *encHandshake) makeAuthResp() (msg *authRespV4, err error) {
 func (msg *authMsgV4) sealPlain(h *encHandshake) ([]byte, error) {
 	buf := make([]byte, authMsgLen)
 	n := copy(buf, msg.Signature[:])
-	n += copy(buf[n:], crypto.Sha3(exportPubkey(&h.randomPrivKey.PublicKey)))
+	n += copy(buf[n:], crypto.Keccak256(exportPubkey(&h.randomPrivKey.PublicKey)))
 	n += copy(buf[n:], msg.InitiatorPubkey[:])
 	n += copy(buf[n:], msg.Nonce[:])
 	buf[n] = 0 // token-flag
@@ -437,7 +429,7 @@ func (msg *authMsgV4) decodePlain(input []byte) {
 	n := copy(msg.Signature[:], input)
 	n += shaLen // skip sha3(initiator-ephemeral-pubk)
 	n += copy(msg.InitiatorPubkey[:], input[n:])
-	n += copy(msg.Nonce[:], input[n:])
+	copy(msg.Nonce[:], input[n:])
 	msg.Version = 4
 	msg.gotPlain = true
 }
@@ -445,13 +437,13 @@ func (msg *authMsgV4) decodePlain(input []byte) {
 func (msg *authRespV4) sealPlain(hs *encHandshake) ([]byte, error) {
 	buf := make([]byte, authRespLen)
 	n := copy(buf, msg.RandomPubkey[:])
-	n += copy(buf[n:], msg.Nonce[:])
+	copy(buf[n:], msg.Nonce[:])
 	return ecies.Encrypt(rand.Reader, hs.remotePub, buf, nil, nil)
 }
 
 func (msg *authRespV4) decodePlain(input []byte) {
 	n := copy(msg.RandomPubkey[:], input)
-	n += copy(msg.Nonce[:], input[n:])
+	copy(msg.Nonce[:], input[n:])
 	msg.Version = 4
 }
 

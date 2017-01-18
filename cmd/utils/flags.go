@@ -1,55 +1,58 @@
-// Copyright 2015 The go-earthdollar Authors
-// This file is part of go-earthdollar.
+// Copyright 2015 The go-ethereum Authors
+// This file is part of go-ethereum.
 //
-// go-earthdollar is free software: you can redistribute it and/or modify
+// go-ethereum is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-earthdollar is distributed in the hope that it will be useful,
+// go-ethereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-earthdollar. If not, see <http://www.gnu.org/licenses/>.
+// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
+// Package utils contains internal helper functions for go-ethereum commands.
 package utils
 
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"log"
-	"math"
+	"io/ioutil"
 	"math/big"
-	"net"
-	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 
-	"github.com/codegangsta/cli"
 	"github.com/ethereum/ethash"
-	"github.com/Earthdollar/go-earthdollar/accounts"
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/event"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/metrics"
-	"github.com/Earthdollar/go-earthdollar/p2p/nat"
-	"github.com/Earthdollar/go-earthdollar/params"
-	"github.com/Earthdollar/go-earthdollar/rpc/api"
-	"github.com/Earthdollar/go-earthdollar/rpc/codec"
-	"github.com/Earthdollar/go-earthdollar/rpc/comms"
-	"github.com/Earthdollar/go-earthdollar/rpc/shared"
-	"github.com/Earthdollar/go-earthdollar/rpc/useragent"
-	"github.com/Earthdollar/go-earthdollar/xed"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/ethstats"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/les"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/ethereum/go-ethereum/node"
+	"github.com/ethereum/go-ethereum/p2p/discover"
+	"github.com/ethereum/go-ethereum/p2p/discv5"
+	"github.com/ethereum/go-ethereum/p2p/nat"
+	"github.com/ethereum/go-ethereum/p2p/netutil"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/pow"
+	"github.com/ethereum/go-ethereum/rpc"
+	whisper "github.com/ethereum/go-ethereum/whisper/whisperv2"
+	"gopkg.in/urfave/cli.v1"
 )
 
 func init() {
@@ -79,13 +82,16 @@ OPTIONS:
 }
 
 // NewApp creates an app with sane defaults.
-func NewApp(version, usage string) *cli.App {
+func NewApp(gitCommit, usage string) *cli.App {
 	app := cli.NewApp()
 	app.Name = filepath.Base(os.Args[0])
 	app.Author = ""
 	//app.Authors = nil
 	app.Email = ""
-	app.Version = version
+	app.Version = params.Version
+	if gitCommit != "" {
+		app.Version += "-" + gitCommit[:8]
+	}
 	app.Usage = usage
 	return app
 }
@@ -102,62 +108,68 @@ var (
 	DataDirFlag = DirectoryFlag{
 		Name:  "datadir",
 		Usage: "Data directory for the databases and keystore",
-		Value: DirectoryString{common.DefaultDataDir()},
+		Value: DirectoryString{node.DefaultDataDir()},
+	}
+	KeyStoreDirFlag = DirectoryFlag{
+		Name:  "keystore",
+		Usage: "Directory for the keystore (default = inside the datadir)",
 	}
 	NetworkIdFlag = cli.IntFlag{
 		Name:  "networkid",
-		Usage: "Network identifier (integer, 0=Olympic, 1=Frontier, 2=Morden)",
-		Value: ed.NetworkId,
-	}
-	OlympicFlag = cli.BoolFlag{
-		Name:  "olympic",
-		Usage: "Olympic network: pre-configured pre-release test network",
+		Usage: "Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten)",
+		Value: eth.NetworkId,
 	}
 	TestNetFlag = cli.BoolFlag{
 		Name:  "testnet",
-		Usage: "Morden network: pre-configured test network with modified starting nonces (replay protection)",
+		Usage: "Ropsten network: pre-configured test network",
 	}
 	DevModeFlag = cli.BoolFlag{
 		Name:  "dev",
 		Usage: "Developer mode: pre-configured private network with several debugging flags",
 	}
-	GenesisFileFlag = cli.StringFlag{
-		Name:  "genesis",
-		Usage: "Insert/overwrite the genesis block (JSON format)",
-	}
 	IdentityFlag = cli.StringFlag{
 		Name:  "identity",
 		Usage: "Custom node name",
 	}
-	NatspecEnabledFlag = cli.BoolFlag{
-		Name:  "natspec",
-		Usage: "Enable NatSpec confirmation notice",
-	}
 	DocRootFlag = DirectoryFlag{
 		Name:  "docroot",
 		Usage: "Document Root for HTTPClient file scheme",
-		Value: DirectoryString{common.HomeDir()},
-	}
-	CacheFlag = cli.IntFlag{
-		Name:  "cache",
-		Usage: "Megabytes of memory allocated to internal caching (min 16MB / database forced)",
-		Value: 0,
-	}
-	BlockchainVersionFlag = cli.IntFlag{
-		Name:  "blockchainversion",
-		Usage: "Blockchain version (integer)",
-		Value: core.BlockChainVersion,
+		Value: DirectoryString{homeDir()},
 	}
 	FastSyncFlag = cli.BoolFlag{
 		Name:  "fast",
 		Usage: "Enable fast syncing through state downloads",
 	}
+	LightModeFlag = cli.BoolFlag{
+		Name:  "light",
+		Usage: "Enable light client mode",
+	}
+	LightServFlag = cli.IntFlag{
+		Name:  "lightserv",
+		Usage: "Maximum percentage of time allowed for serving LES requests (0-90)",
+		Value: 0,
+	}
+	LightPeersFlag = cli.IntFlag{
+		Name:  "lightpeers",
+		Usage: "Maximum number of LES client peers",
+		Value: 20,
+	}
 	LightKDFFlag = cli.BoolFlag{
 		Name:  "lightkdf",
 		Usage: "Reduce key-derivation RAM & CPU usage at some expense of KDF strength",
 	}
+	// Performance tuning settings
+	CacheFlag = cli.IntFlag{
+		Name:  "cache",
+		Usage: "Megabytes of memory allocated to internal caching (min 16MB / database forced)",
+		Value: 128,
+	}
+	TrieCacheGenFlag = cli.IntFlag{
+		Name:  "trie-cache-gens",
+		Usage: "Number of trie node generations to keep in memory",
+		Value: int(state.MaxTrieCacheGen),
+	}
 	// Miner settings
-	// TODO: refactor CPU vs GPU mining flags
 	MiningEnabledFlag = cli.BoolFlag{
 		Name:  "mine",
 		Usage: "Enable mining",
@@ -167,23 +179,24 @@ var (
 		Usage: "Number of CPU threads to use for mining",
 		Value: runtime.NumCPU(),
 	}
-	MiningGPUFlag = cli.StringFlag{
-		Name:  "minergpus",
-		Usage: "List of GPUs to use for mining (e.g. '0,1' will use the first two GPUs found)",
+	TargetGasLimitFlag = cli.StringFlag{
+		Name:  "targetgaslimit",
+		Usage: "Target gas limit sets the artificial target gas floor for the blocks to mine",
+		Value: params.GenesisGasLimit.String(),
 	}
 	AutoDAGFlag = cli.BoolFlag{
 		Name:  "autodag",
 		Usage: "Enable automatic DAG pregeneration",
 	}
-	EarthbaseFlag = cli.StringFlag{
-		Name:  "earthbase",
+	EtherbaseFlag = cli.StringFlag{
+		Name:  "etherbase",
 		Usage: "Public address for block mining rewards (default = first account created)",
 		Value: "0",
 	}
 	GasPriceFlag = cli.StringFlag{
 		Name:  "gasprice",
 		Usage: "Minimal gas price to accept for mining a transactions",
-		Value: new(big.Int).Mul(big.NewInt(20), common.Chief).String(),
+		Value: new(big.Int).Mul(big.NewInt(20), common.Shannon).String(),
 	}
 	ExtraDataFlag = cli.StringFlag{
 		Name:  "extradata",
@@ -192,20 +205,15 @@ var (
 	// Account settings
 	UnlockedAccountFlag = cli.StringFlag{
 		Name:  "unlock",
-		Usage: "Unlock an account (may be creation index) until this program exits (prompts for password)",
+		Usage: "Comma separated list of accounts to unlock",
 		Value: "",
 	}
 	PasswordFileFlag = cli.StringFlag{
 		Name:  "password",
-		Usage: "Password file to use with options/subcommands needing a pass phrase",
+		Usage: "Password file to use for non-inteactive password input",
 		Value: "",
 	}
 
-	// vm flags
-	VMDebugFlag = cli.BoolFlag{
-		Name:  "vmdebug",
-		Usage: "Virtual Machine debug output",
-	}
 	VMForceJitFlag = cli.BoolFlag{
 		Name:  "forcejit",
 		Usage: "Force the JIT VM to take precedence",
@@ -219,40 +227,22 @@ var (
 		Name:  "jitvm",
 		Usage: "Enable the JIT VM",
 	}
-
-	// logging and debug settings
-	VerbosityFlag = cli.IntFlag{
-		Name:  "verbosity",
-		Usage: "Logging verbosity: 0-6 (0=silent, 1=error, 2=warn, 3=info, 4=core, 5=debug, 6=debug detail)",
-		Value: int(logger.InfoLevel),
+	VMEnableDebugFlag = cli.BoolFlag{
+		Name:  "vmdebug",
+		Usage: "Record information useful for VM and contract debugging",
 	}
-	LogFileFlag = cli.StringFlag{
-		Name:  "logfile",
-		Usage: "Log output file within the data dir (default = no log file generated)",
-		Value: "",
-	}
-	LogVModuleFlag = cli.GenericFlag{
-		Name:  "vmodule",
-		Usage: "Per-module verbosity: comma-separated list of <module>=<level>, where <module> is file literal or a glog pattern",
-		Value: glog.GetVModule(),
-	}
-	BacktraceAtFlag = cli.GenericFlag{
-		Name:  "backtrace",
-		Usage: "Request a stack trace at a specific logging statement (e.g. \"block.go:271\")",
-		Value: glog.GetTraceLocation(),
-	}
-	PProfEanbledFlag = cli.BoolFlag{
-		Name:  "pprof",
-		Usage: "Enable the profiling server on localhost",
-	}
-	PProfPortFlag = cli.IntFlag{
-		Name:  "pprofport",
-		Usage: "Profile server listening port",
-		Value: 6060,
+	// Logging and debug settings
+	EthStatsURLFlag = cli.StringFlag{
+		Name:  "ethstats",
+		Usage: "Reporting URL of a ethstats service (nodename:secret@host:port)",
 	}
 	MetricsEnabledFlag = cli.BoolFlag{
 		Name:  metrics.MetricsEnabledFlag,
 		Usage: "Enable metrics collection and reporting",
+	}
+	FakePoWFlag = cli.BoolFlag{
+		Name:  "fakepow",
+		Usage: "Disables proof-of-work verification",
 	}
 
 	// RPC settings
@@ -263,22 +253,22 @@ var (
 	RPCListenAddrFlag = cli.StringFlag{
 		Name:  "rpcaddr",
 		Usage: "HTTP-RPC server listening interface",
-		Value: "127.0.0.1",
+		Value: node.DefaultHTTPHost,
 	}
 	RPCPortFlag = cli.IntFlag{
 		Name:  "rpcport",
 		Usage: "HTTP-RPC server listening port",
-		Value: shared.ED_LocalPort,
+		Value: node.DefaultHTTPPort,
 	}
 	RPCCORSDomainFlag = cli.StringFlag{
 		Name:  "rpccorsdomain",
-		Usage: "Domains from which to accept cross origin requests (browser enforced)",
+		Usage: "Comma separated list of domains from which to accept cross origin requests (browser enforced)",
 		Value: "",
 	}
-	RpcApiFlag = cli.StringFlag{
+	RPCApiFlag = cli.StringFlag{
 		Name:  "rpcapi",
 		Usage: "API's offered over the HTTP-RPC interface",
-		Value: comms.DefaultHttpRpcApis,
+		Value: rpc.DefaultHTTPApis,
 	}
 	IPCDisabledFlag = cli.BoolFlag{
 		Name:  "ipcdisable",
@@ -286,18 +276,47 @@ var (
 	}
 	IPCApiFlag = cli.StringFlag{
 		Name:  "ipcapi",
-		Usage: "API's offered over the IPC-RPC interface",
-		Value: comms.DefaultIpcApis,
+		Usage: "APIs offered over the IPC-RPC interface",
+		Value: rpc.DefaultIPCApis,
 	}
 	IPCPathFlag = DirectoryFlag{
 		Name:  "ipcpath",
-		Usage: "Filename for IPC socket/pipe",
-		Value: DirectoryString{common.DefaultIpcPath()},
+		Usage: "Filename for IPC socket/pipe within the datadir (explicit paths escape it)",
+		Value: DirectoryString{"geth.ipc"},
+	}
+	WSEnabledFlag = cli.BoolFlag{
+		Name:  "ws",
+		Usage: "Enable the WS-RPC server",
+	}
+	WSListenAddrFlag = cli.StringFlag{
+		Name:  "wsaddr",
+		Usage: "WS-RPC server listening interface",
+		Value: node.DefaultWSHost,
+	}
+	WSPortFlag = cli.IntFlag{
+		Name:  "wsport",
+		Usage: "WS-RPC server listening port",
+		Value: node.DefaultWSPort,
+	}
+	WSApiFlag = cli.StringFlag{
+		Name:  "wsapi",
+		Usage: "API's offered over the WS-RPC interface",
+		Value: rpc.DefaultHTTPApis,
+	}
+	WSAllowedOriginsFlag = cli.StringFlag{
+		Name:  "wsorigins",
+		Usage: "Origins from which to accept websockets requests",
+		Value: "",
 	}
 	ExecFlag = cli.StringFlag{
 		Name:  "exec",
 		Usage: "Execute JavaScript statement (only in combination with console/attach)",
 	}
+	PreloadJSFlag = cli.StringFlag{
+		Name:  "preload",
+		Usage: "Comma separated list of JavaScript files to preload into the console",
+	}
+
 	// Network Settings
 	MaxPeersFlag = cli.IntFlag{
 		Name:  "maxpeers",
@@ -312,11 +331,11 @@ var (
 	ListenPortFlag = cli.IntFlag{
 		Name:  "port",
 		Usage: "Network listening port",
-		Value: 20203,
+		Value: 30303,
 	}
 	BootnodesFlag = cli.StringFlag{
 		Name:  "bootnodes",
-		Usage: "Space-separated enode URLs for P2P discovery bootstrap",
+		Usage: "Comma separated enode URLs for P2P discovery bootstrap",
 		Value: "",
 	}
 	NodeKeyFileFlag = cli.StringFlag{
@@ -336,14 +355,24 @@ var (
 		Name:  "nodiscover",
 		Usage: "Disables the peer discovery mechanism (manual peer addition)",
 	}
+	DiscoveryV5Flag = cli.BoolFlag{
+		Name:  "v5disc",
+		Usage: "Enables the experimental RLPx V5 (Topic Discovery) mechanism",
+	}
+	NetrestrictFlag = cli.StringFlag{
+		Name:  "netrestrict",
+		Usage: "Restricts network communication to the given IP networks (CIDR masks)",
+	}
+
 	WhisperEnabledFlag = cli.BoolFlag{
 		Name:  "shh",
 		Usage: "Enable Whisper",
 	}
+
 	// ATM the url is left to the user and deployment to
 	JSpathFlag = cli.StringFlag{
 		Name:  "jspath",
-		Usage: "JavaSript root path for `loadScript` and document root for `admin.httpGet`",
+		Usage: "JavaScript root path for `loadScript`",
 		Value: ".",
 	}
 	SolcPathFlag = cli.StringFlag{
@@ -356,12 +385,12 @@ var (
 	GpoMinGasPriceFlag = cli.StringFlag{
 		Name:  "gpomin",
 		Usage: "Minimum suggested gas price",
-		Value: new(big.Int).Mul(big.NewInt(20), common.Chief).String(),
+		Value: new(big.Int).Mul(big.NewInt(20), common.Shannon).String(),
 	}
 	GpoMaxGasPriceFlag = cli.StringFlag{
 		Name:  "gpomax",
 		Usage: "Maximum suggested gas price",
-		Value: new(big.Int).Mul(big.NewInt(500), common.Chief).String(),
+		Value: new(big.Int).Mul(big.NewInt(500), common.Shannon).String(),
 	}
 	GpoFullBlockRatioFlag = cli.IntFlag{
 		Name:  "gpofull",
@@ -385,6 +414,124 @@ var (
 	}
 )
 
+// MakeDataDir retrieves the currently requested data directory, terminating
+// if none (or the empty string) is specified. If the node is starting a testnet,
+// the a subdirectory of the specified datadir will be used.
+func MakeDataDir(ctx *cli.Context) string {
+	if path := ctx.GlobalString(DataDirFlag.Name); path != "" {
+		// TODO: choose a different location outside of the regular datadir.
+		if ctx.GlobalBool(TestNetFlag.Name) {
+			return filepath.Join(path, "testnet")
+		}
+		return path
+	}
+	Fatalf("Cannot determine default data directory, please set manually (--datadir)")
+	return ""
+}
+
+// MakeIPCPath creates an IPC path configuration from the set command line flags,
+// returning an empty string if IPC was explicitly disabled, or the set path.
+func MakeIPCPath(ctx *cli.Context) string {
+	if ctx.GlobalBool(IPCDisabledFlag.Name) {
+		return ""
+	}
+	return ctx.GlobalString(IPCPathFlag.Name)
+}
+
+// MakeNodeKey creates a node key from set command line flags, either loading it
+// from a file or as a specified hex value. If neither flags were provided, this
+// method returns nil and an emphemeral key is to be generated.
+func MakeNodeKey(ctx *cli.Context) *ecdsa.PrivateKey {
+	var (
+		hex  = ctx.GlobalString(NodeKeyHexFlag.Name)
+		file = ctx.GlobalString(NodeKeyFileFlag.Name)
+
+		key *ecdsa.PrivateKey
+		err error
+	)
+	switch {
+	case file != "" && hex != "":
+		Fatalf("Options %q and %q are mutually exclusive", NodeKeyFileFlag.Name, NodeKeyHexFlag.Name)
+
+	case file != "":
+		if key, err = crypto.LoadECDSA(file); err != nil {
+			Fatalf("Option %q: %v", NodeKeyFileFlag.Name, err)
+		}
+
+	case hex != "":
+		if key, err = crypto.HexToECDSA(hex); err != nil {
+			Fatalf("Option %q: %v", NodeKeyHexFlag.Name, err)
+		}
+	}
+	return key
+}
+
+// makeNodeUserIdent creates the user identifier from CLI flags.
+func makeNodeUserIdent(ctx *cli.Context) string {
+	var comps []string
+	if identity := ctx.GlobalString(IdentityFlag.Name); len(identity) > 0 {
+		comps = append(comps, identity)
+	}
+	if ctx.GlobalBool(VMEnableJitFlag.Name) {
+		comps = append(comps, "JIT")
+	}
+	return strings.Join(comps, "/")
+}
+
+// MakeBootstrapNodes creates a list of bootstrap nodes from the command line
+// flags, reverting to pre-configured ones if none have been specified.
+func MakeBootstrapNodes(ctx *cli.Context) []*discover.Node {
+	urls := params.MainnetBootnodes
+	if ctx.GlobalIsSet(BootnodesFlag.Name) {
+		urls = strings.Split(ctx.GlobalString(BootnodesFlag.Name), ",")
+	} else if ctx.GlobalBool(TestNetFlag.Name) {
+		urls = params.TestnetBootnodes
+	}
+
+	bootnodes := make([]*discover.Node, 0, len(urls))
+	for _, url := range urls {
+		node, err := discover.ParseNode(url)
+		if err != nil {
+			glog.V(logger.Error).Infof("Bootstrap URL %s: %v\n", url, err)
+			continue
+		}
+		bootnodes = append(bootnodes, node)
+	}
+	return bootnodes
+}
+
+// MakeBootstrapNodesV5 creates a list of bootstrap nodes from the command line
+// flags, reverting to pre-configured ones if none have been specified.
+func MakeBootstrapNodesV5(ctx *cli.Context) []*discv5.Node {
+	urls := params.DiscoveryV5Bootnodes
+	if ctx.GlobalIsSet(BootnodesFlag.Name) {
+		urls = strings.Split(ctx.GlobalString(BootnodesFlag.Name), ",")
+	}
+
+	bootnodes := make([]*discv5.Node, 0, len(urls))
+	for _, url := range urls {
+		node, err := discv5.ParseNode(url)
+		if err != nil {
+			glog.V(logger.Error).Infof("Bootstrap URL %s: %v\n", url, err)
+			continue
+		}
+		bootnodes = append(bootnodes, node)
+	}
+	return bootnodes
+}
+
+// MakeListenAddress creates a TCP listening address string from set command
+// line flags.
+func MakeListenAddress(ctx *cli.Context) string {
+	return fmt.Sprintf(":%d", ctx.GlobalInt(ListenPortFlag.Name))
+}
+
+// MakeDiscoveryV5Address creates a UDP listening address string from set command
+// line flags for the V5 discovery protocol.
+func MakeDiscoveryV5Address(ctx *cli.Context) string {
+	return fmt.Sprintf(":%d", ctx.GlobalInt(ListenPortFlag.Name)+1)
+}
+
 // MakeNAT creates a port mapper from set command line flags.
 func MakeNAT(ctx *cli.Context) nat.Interface {
 	natif, err := nat.Parse(ctx.GlobalString(NATFlag.Name))
@@ -394,64 +541,197 @@ func MakeNAT(ctx *cli.Context) nat.Interface {
 	return natif
 }
 
-// MakeNodeKey creates a node key from set command line flags.
-func MakeNodeKey(ctx *cli.Context) (key *ecdsa.PrivateKey) {
-	hex, file := ctx.GlobalString(NodeKeyHexFlag.Name), ctx.GlobalString(NodeKeyFileFlag.Name)
-	var err error
-	switch {
-	case file != "" && hex != "":
-		Fatalf("Options %q and %q are mutually exclusive", NodeKeyFileFlag.Name, NodeKeyHexFlag.Name)
-	case file != "":
-		if key, err = crypto.LoadECDSA(file); err != nil {
-			Fatalf("Option %q: %v", NodeKeyFileFlag.Name, err)
-		}
-	case hex != "":
-		if key, err = crypto.HexToECDSA(hex); err != nil {
-			Fatalf("Option %q: %v", NodeKeyHexFlag.Name, err)
-		}
+// MakeRPCModules splits input separated by a comma and trims excessive white
+// space from the substrings.
+func MakeRPCModules(input string) []string {
+	result := strings.Split(input, ",")
+	for i, r := range result {
+		result[i] = strings.TrimSpace(r)
 	}
-	return key
+	return result
 }
 
-// MakeEthConfig creates earthdollar options from set command line flags.
-func MakeEthConfig(clientID, version string, ctx *cli.Context) *ed.Config {
-	customName := ctx.GlobalString(IdentityFlag.Name)
-	if len(customName) > 0 {
-		clientID += "/" + customName
+// MakeHTTPRpcHost creates the HTTP RPC listener interface string from the set
+// command line flags, returning empty if the HTTP endpoint is disabled.
+func MakeHTTPRpcHost(ctx *cli.Context) string {
+	if !ctx.GlobalBool(RPCEnabledFlag.Name) {
+		return ""
 	}
-	am := MakeAccountManager(ctx)
-	earthbase, err := ParamToAddress(ctx.GlobalString(EarthbaseFlag.Name), am)
+	return ctx.GlobalString(RPCListenAddrFlag.Name)
+}
+
+// MakeWSRpcHost creates the WebSocket RPC listener interface string from the set
+// command line flags, returning empty if the HTTP endpoint is disabled.
+func MakeWSRpcHost(ctx *cli.Context) string {
+	if !ctx.GlobalBool(WSEnabledFlag.Name) {
+		return ""
+	}
+	return ctx.GlobalString(WSListenAddrFlag.Name)
+}
+
+// MakeDatabaseHandles raises out the number of allowed file handles per process
+// for Geth and returns half of the allowance to assign to the database.
+func MakeDatabaseHandles() int {
+	if err := raiseFdLimit(2048); err != nil {
+		Fatalf("Failed to raise file descriptor allowance: %v", err)
+	}
+	limit, err := getFdLimit()
 	if err != nil {
-		glog.V(logger.Error).Infoln("WARNING: No earthbase set and no accounts found as default")
+		Fatalf("Failed to retrieve file descriptor allowance: %v", err)
 	}
-	// Assemble the entire ed configuration and return
-	cfg := &ed.Config{
-		Name:                    common.MakeName(clientID, version),
-		DataDir:                 MustDataDir(ctx),
-		GenesisFile:             ctx.GlobalString(GenesisFileFlag.Name),
+	if limit > 2048 { // cap database file descriptors even if more is available
+		limit = 2048
+	}
+	return limit / 2 // Leave half for networking and other stuff
+}
+
+// MakeAddress converts an account specified directly as a hex encoded string or
+// a key index in the key store to an internal account representation.
+func MakeAddress(accman *accounts.Manager, account string) (accounts.Account, error) {
+	// If the specified account is a valid address, return it
+	if common.IsHexAddress(account) {
+		return accounts.Account{Address: common.HexToAddress(account)}, nil
+	}
+	// Otherwise try to interpret the account as a keystore index
+	index, err := strconv.Atoi(account)
+	if err != nil {
+		return accounts.Account{}, fmt.Errorf("invalid account address or index %q", account)
+	}
+	return accman.AccountByIndex(index)
+}
+
+// MakeEtherbase retrieves the etherbase either from the directly specified
+// command line flags or from the keystore if CLI indexed.
+func MakeEtherbase(accman *accounts.Manager, ctx *cli.Context) common.Address {
+	accounts := accman.Accounts()
+	if !ctx.GlobalIsSet(EtherbaseFlag.Name) && len(accounts) == 0 {
+		glog.V(logger.Error).Infoln("WARNING: No etherbase set and no accounts found as default")
+		return common.Address{}
+	}
+	etherbase := ctx.GlobalString(EtherbaseFlag.Name)
+	if etherbase == "" {
+		return common.Address{}
+	}
+	// If the specified etherbase is a valid address, return it
+	account, err := MakeAddress(accman, etherbase)
+	if err != nil {
+		Fatalf("Option %q: %v", EtherbaseFlag.Name, err)
+	}
+	return account.Address
+}
+
+// MakeMinerExtra resolves extradata for the miner from the set command line flags
+// or returns a default one composed on the client, runtime and OS metadata.
+func MakeMinerExtra(extra []byte, ctx *cli.Context) []byte {
+	if ctx.GlobalIsSet(ExtraDataFlag.Name) {
+		return []byte(ctx.GlobalString(ExtraDataFlag.Name))
+	}
+	return extra
+}
+
+// MakePasswordList reads password lines from the file specified by --password.
+func MakePasswordList(ctx *cli.Context) []string {
+	path := ctx.GlobalString(PasswordFileFlag.Name)
+	if path == "" {
+		return nil
+	}
+	text, err := ioutil.ReadFile(path)
+	if err != nil {
+		Fatalf("Failed to read password file: %v", err)
+	}
+	lines := strings.Split(string(text), "\n")
+	// Sanitise DOS line endings.
+	for i := range lines {
+		lines[i] = strings.TrimRight(lines[i], "\r")
+	}
+	return lines
+}
+
+// MakeNode configures a node with no services from command line flags.
+func MakeNode(ctx *cli.Context, name, gitCommit string) *node.Node {
+	vsn := params.Version
+	if gitCommit != "" {
+		vsn += "-" + gitCommit[:8]
+	}
+
+	config := &node.Config{
+		DataDir:           MakeDataDir(ctx),
+		KeyStoreDir:       ctx.GlobalString(KeyStoreDirFlag.Name),
+		UseLightweightKDF: ctx.GlobalBool(LightKDFFlag.Name),
+		PrivateKey:        MakeNodeKey(ctx),
+		Name:              name,
+		Version:           vsn,
+		UserIdent:         makeNodeUserIdent(ctx),
+		NoDiscovery:       ctx.GlobalBool(NoDiscoverFlag.Name) || ctx.GlobalBool(LightModeFlag.Name),
+		DiscoveryV5:       ctx.GlobalBool(DiscoveryV5Flag.Name) || ctx.GlobalBool(LightModeFlag.Name) || ctx.GlobalInt(LightServFlag.Name) > 0,
+		DiscoveryV5Addr:   MakeDiscoveryV5Address(ctx),
+		BootstrapNodes:    MakeBootstrapNodes(ctx),
+		BootstrapNodesV5:  MakeBootstrapNodesV5(ctx),
+		ListenAddr:        MakeListenAddress(ctx),
+		NAT:               MakeNAT(ctx),
+		MaxPeers:          ctx.GlobalInt(MaxPeersFlag.Name),
+		MaxPendingPeers:   ctx.GlobalInt(MaxPendingPeersFlag.Name),
+		IPCPath:           MakeIPCPath(ctx),
+		HTTPHost:          MakeHTTPRpcHost(ctx),
+		HTTPPort:          ctx.GlobalInt(RPCPortFlag.Name),
+		HTTPCors:          ctx.GlobalString(RPCCORSDomainFlag.Name),
+		HTTPModules:       MakeRPCModules(ctx.GlobalString(RPCApiFlag.Name)),
+		WSHost:            MakeWSRpcHost(ctx),
+		WSPort:            ctx.GlobalInt(WSPortFlag.Name),
+		WSOrigins:         ctx.GlobalString(WSAllowedOriginsFlag.Name),
+		WSModules:         MakeRPCModules(ctx.GlobalString(WSApiFlag.Name)),
+	}
+	if ctx.GlobalBool(DevModeFlag.Name) {
+		if !ctx.GlobalIsSet(DataDirFlag.Name) {
+			config.DataDir = filepath.Join(os.TempDir(), "/ethereum_dev_mode")
+		}
+		// --dev mode does not need p2p networking.
+		config.MaxPeers = 0
+		config.ListenAddr = ":0"
+	}
+	if netrestrict := ctx.GlobalString(NetrestrictFlag.Name); netrestrict != "" {
+		list, err := netutil.ParseNetlist(netrestrict)
+		if err != nil {
+			Fatalf("Option %q: %v", NetrestrictFlag.Name, err)
+		}
+		config.NetRestrict = list
+	}
+
+	stack, err := node.New(config)
+	if err != nil {
+		Fatalf("Failed to create the protocol stack: %v", err)
+	}
+	return stack
+}
+
+// RegisterEthService configures eth.Ethereum from command line flags and adds it to the
+// given node.
+func RegisterEthService(ctx *cli.Context, stack *node.Node, extra []byte) {
+	// Avoid conflicting network flags
+	networks, netFlags := 0, []cli.BoolFlag{DevModeFlag, TestNetFlag}
+	for _, flag := range netFlags {
+		if ctx.GlobalBool(flag.Name) {
+			networks++
+		}
+	}
+	if networks > 1 {
+		Fatalf("The %v flags are mutually exclusive", netFlags)
+	}
+
+	ethConf := &eth.Config{
+		Etherbase:               MakeEtherbase(stack.AccountManager(), ctx),
+		ChainConfig:             MakeChainConfig(ctx, stack),
 		FastSync:                ctx.GlobalBool(FastSyncFlag.Name),
-		BlockChainVersion:       ctx.GlobalInt(BlockchainVersionFlag.Name),
-		DatabaseCache:           ctx.GlobalInt(CacheFlag.Name),
-		SkipBcVersionCheck:      false,
-		NetworkId:               ctx.GlobalInt(NetworkIdFlag.Name),
-		LogFile:                 ctx.GlobalString(LogFileFlag.Name),
-		Verbosity:               ctx.GlobalInt(VerbosityFlag.Name),
-		Earthbase:               common.HexToAddress(earthbase),
-		MinerThreads:            ctx.GlobalInt(MinerThreadsFlag.Name),
-		AccountManager:          am,
-		VmDebug:                 ctx.GlobalBool(VMDebugFlag.Name),
+		LightMode:               ctx.GlobalBool(LightModeFlag.Name),
+		LightServ:               ctx.GlobalInt(LightServFlag.Name),
+		LightPeers:              ctx.GlobalInt(LightPeersFlag.Name),
 		MaxPeers:                ctx.GlobalInt(MaxPeersFlag.Name),
-		MaxPendingPeers:         ctx.GlobalInt(MaxPendingPeersFlag.Name),
-		Port:                    ctx.GlobalString(ListenPortFlag.Name),
-		Olympic:                 ctx.GlobalBool(OlympicFlag.Name),
-		NAT:                     MakeNAT(ctx),
-		NatSpec:                 ctx.GlobalBool(NatspecEnabledFlag.Name),
+		DatabaseCache:           ctx.GlobalInt(CacheFlag.Name),
+		DatabaseHandles:         MakeDatabaseHandles(),
+		NetworkId:               ctx.GlobalInt(NetworkIdFlag.Name),
+		MinerThreads:            ctx.GlobalInt(MinerThreadsFlag.Name),
+		ExtraData:               MakeMinerExtra(extra, ctx),
 		DocRoot:                 ctx.GlobalString(DocRootFlag.Name),
-		Discovery:               !ctx.GlobalBool(NoDiscoverFlag.Name),
-		NodeKey:                 MakeNodeKey(ctx),
-		Shh:                     ctx.GlobalBool(WhisperEnabledFlag.Name),
-		Dial:                    true,
-		BootNodes:               ctx.GlobalString(BootnodesFlag.Name),
 		GasPrice:                common.String2Big(ctx.GlobalString(GasPriceFlag.Name)),
 		GpoMinGasPrice:          common.String2Big(ctx.GlobalString(GpoMinGasPriceFlag.Name)),
 		GpoMaxGasPrice:          common.String2Big(ctx.GlobalString(GpoMaxGasPriceFlag.Name)),
@@ -461,208 +741,198 @@ func MakeEthConfig(clientID, version string, ctx *cli.Context) *ed.Config {
 		GpobaseCorrectionFactor: ctx.GlobalInt(GpobaseCorrectionFactorFlag.Name),
 		SolcPath:                ctx.GlobalString(SolcPathFlag.Name),
 		AutoDAG:                 ctx.GlobalBool(AutoDAGFlag.Name) || ctx.GlobalBool(MiningEnabledFlag.Name),
+		EnablePreimageRecording: ctx.GlobalBool(VMEnableDebugFlag.Name),
 	}
 
-	if ctx.GlobalBool(DevModeFlag.Name) && ctx.GlobalBool(TestNetFlag.Name) {
-		glog.Fatalf("%s and %s are mutually exclusive\n", DevModeFlag.Name, TestNetFlag.Name)
-	}
-
-	if ctx.GlobalBool(TestNetFlag.Name) {
-		// testnet is always stored in the testnet folder
-		cfg.DataDir += "/testnet"
-		cfg.NetworkId = 2
-		cfg.TestNet = true
-		// overwrite homestead block
-		params.HomesteadBlock = params.TestNetHomesteadBlock
-	}
-
-	if ctx.GlobalBool(VMEnableJitFlag.Name) {
-		cfg.Name += "/JIT"
-	}
-	if ctx.GlobalBool(DevModeFlag.Name) {
-		if !ctx.GlobalIsSet(VMDebugFlag.Name) {
-			cfg.VmDebug = true
+	// Override any default configs in dev mode or the test net
+	switch {
+	case ctx.GlobalBool(TestNetFlag.Name):
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			ethConf.NetworkId = 3
 		}
-		if !ctx.GlobalIsSet(MaxPeersFlag.Name) {
-			cfg.MaxPeers = 0
-		}
+		ethConf.Genesis = core.DefaultTestnetGenesisBlock()
+
+	case ctx.GlobalBool(DevModeFlag.Name):
+		ethConf.Genesis = core.DevGenesisBlock()
 		if !ctx.GlobalIsSet(GasPriceFlag.Name) {
-			cfg.GasPrice = new(big.Int)
+			ethConf.GasPrice = new(big.Int)
 		}
-		if !ctx.GlobalIsSet(ListenPortFlag.Name) {
-			cfg.Port = "0" // auto port
-		}
-		if !ctx.GlobalIsSet(WhisperEnabledFlag.Name) {
-			cfg.Shh = true
-		}
-		if !ctx.GlobalIsSet(DataDirFlag.Name) {
-			cfg.DataDir = os.TempDir() + "/earthdollar_dev_mode"
-		}
-		cfg.PowTest = true
-		cfg.DevMode = true
-
-		glog.V(logger.Info).Infoln("dev mode enabled")
+		ethConf.PowTest = true
 	}
-	return cfg
+	// Override any global options pertaining to the Ethereum protocol
+	if gen := ctx.GlobalInt(TrieCacheGenFlag.Name); gen > 0 {
+		state.MaxTrieCacheGen = uint16(gen)
+	}
+
+	if ethConf.LightMode {
+		if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
+			return les.New(ctx, ethConf)
+		}); err != nil {
+			Fatalf("Failed to register the Ethereum light node service: %v", err)
+		}
+	} else {
+		if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
+			fullNode, err := eth.New(ctx, ethConf)
+			if fullNode != nil && ethConf.LightServ > 0 {
+				ls, _ := les.NewLesServer(fullNode, ethConf)
+				fullNode.AddLesServer(ls)
+			}
+			return fullNode, err
+		}); err != nil {
+			Fatalf("Failed to register the Ethereum full node service: %v", err)
+		}
+	}
 }
 
-// SetupLogger configures glog from the logging-related command line flags.
-func SetupLogger(ctx *cli.Context) {
-	glog.SetV(ctx.GlobalInt(VerbosityFlag.Name))
-	glog.CopyStandardLogTo("INFO")
-	glog.SetToStderr(true)
-	glog.SetLogDir(ctx.GlobalString(LogFileFlag.Name))
+// RegisterShhService configures Whisper and adds it to the given node.
+func RegisterShhService(stack *node.Node) {
+	if err := stack.Register(func(*node.ServiceContext) (node.Service, error) { return whisper.New(), nil }); err != nil {
+		Fatalf("Failed to register the Whisper service: %v", err)
+	}
+}
+
+// RegisterEthStatsService configures the Ethereum Stats daemon and adds it to
+// th egiven node.
+func RegisterEthStatsService(stack *node.Node, url string) {
+	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
+		// Retrieve both eth and les services
+		var ethServ *eth.Ethereum
+		ctx.Service(&ethServ)
+
+		var lesServ *les.LightEthereum
+		ctx.Service(&lesServ)
+
+		return ethstats.New(url, ethServ, lesServ)
+	}); err != nil {
+		Fatalf("Failed to register the Ethereum Stats service: %v", err)
+	}
 }
 
 // SetupNetwork configures the system for either the main net or some test network.
 func SetupNetwork(ctx *cli.Context) {
-	switch {
-	case ctx.GlobalBool(OlympicFlag.Name):
-		params.DurationLimit = big.NewInt(8)
-		params.GenesisGasLimit = big.NewInt(3141592)
-		params.MinGasLimit = big.NewInt(125000)
-		params.MaximumExtraDataSize = big.NewInt(1024)
-		NetworkIdFlag.Value = 0
-		core.BlockReward = big.NewInt(1.5e+18)
-		core.ExpDiffPeriod = big.NewInt(math.MaxInt64)
+	params.TargetGasLimit = common.String2Big(ctx.GlobalString(TargetGasLimitFlag.Name))
+}
+
+// MakeChainConfig reads the chain configuration from the database in ctx.Datadir.
+func MakeChainConfig(ctx *cli.Context, stack *node.Node) *params.ChainConfig {
+	db := MakeChainDatabase(ctx, stack)
+	defer db.Close()
+
+	return MakeChainConfigFromDb(ctx, db)
+}
+
+// MakeChainConfigFromDb reads the chain configuration from the given database.
+func MakeChainConfigFromDb(ctx *cli.Context, db ethdb.Database) *params.ChainConfig {
+	// If the chain is already initialized, use any existing chain configs
+	config := new(params.ChainConfig)
+
+	genesis := core.GetBlock(db, core.GetCanonicalHash(db, 0), 0)
+	if genesis != nil {
+		storedConfig, err := core.GetChainConfig(db, genesis.Hash())
+		switch err {
+		case nil:
+			config = storedConfig
+		case core.ChainConfigNotFoundErr:
+			// No configs found, use empty, will populate below
+		default:
+			Fatalf("Could not make chain configuration: %v", err)
+		}
+	}
+	// set chain id in case it's zero.
+	if config.ChainId == nil {
+		config.ChainId = new(big.Int)
+	}
+	// Check whether we are allowed to set default config params or not:
+	//  - If no genesis is set, we're running either mainnet or testnet (private nets use `geth init`)
+	//  - If a genesis is already set, ensure we have a configuration for it (mainnet or testnet)
+	defaults := genesis == nil ||
+		(genesis.Hash() == params.MainNetGenesisHash && !ctx.GlobalBool(TestNetFlag.Name)) ||
+		(genesis.Hash() == params.TestNetGenesisHash && ctx.GlobalBool(TestNetFlag.Name))
+
+	if defaults {
+		if ctx.GlobalBool(TestNetFlag.Name) {
+			config = params.TestnetChainConfig
+		} else {
+			// Homestead fork
+			config.HomesteadBlock = params.MainNetHomesteadBlock
+			// DAO fork
+			config.DAOForkBlock = params.MainNetDAOForkBlock
+			config.DAOForkSupport = true
+
+			// DoS reprice fork
+			config.EIP150Block = params.MainNetHomesteadGasRepriceBlock
+			config.EIP150Hash = params.MainNetHomesteadGasRepriceHash
+
+			// DoS state cleanup fork
+			config.EIP155Block = params.MainNetSpuriousDragon
+			config.EIP158Block = params.MainNetSpuriousDragon
+			config.ChainId = params.MainNetChainID
+		}
+	}
+	return config
+}
+
+func ChainDbName(ctx *cli.Context) string {
+	if ctx.GlobalBool(LightModeFlag.Name) {
+		return "lightchaindata"
+	} else {
+		return "chaindata"
 	}
 }
 
-// SetupVM configured the VM package's global settings
-func SetupVM(ctx *cli.Context) {
-	vm.EnableJit = ctx.GlobalBool(VMEnableJitFlag.Name)
-	vm.ForceJit = ctx.GlobalBool(VMForceJitFlag.Name)
-	vm.SetJITCacheSize(ctx.GlobalInt(VMJitCacheFlag.Name))
+// MakeChainDatabase open an LevelDB using the flags passed to the client and will hard crash if it fails.
+func MakeChainDatabase(ctx *cli.Context, stack *node.Node) ethdb.Database {
+	var (
+		cache   = ctx.GlobalInt(CacheFlag.Name)
+		handles = MakeDatabaseHandles()
+		name    = ChainDbName(ctx)
+	)
+
+	chainDb, err := stack.OpenDatabase(name, cache, handles)
+	if err != nil {
+		Fatalf("Could not open database: %v", err)
+	}
+	return chainDb
 }
 
 // MakeChain creates a chain manager from set command line flags.
-func MakeChain(ctx *cli.Context) (chain *core.BlockChain, chainDb eddb.Database) {
-	datadir := MustDataDir(ctx)
-	cache := ctx.GlobalInt(CacheFlag.Name)
-
+func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chainDb ethdb.Database) {
 	var err error
-	if chainDb, err = eddb.NewLDBDatabase(filepath.Join(datadir, "chaindata"), cache); err != nil {
-		Fatalf("Could not open database: %v", err)
-	}
-	if ctx.GlobalBool(OlympicFlag.Name) {
-		_, err := core.WriteTestNetGenesisBlock(chainDb, 42)
+	chainDb = MakeChainDatabase(ctx, stack)
+
+	if ctx.GlobalBool(TestNetFlag.Name) {
+		_, err := core.WriteTestNetGenesisBlock(chainDb)
 		if err != nil {
 			glog.Fatalln(err)
 		}
 	}
 
-	eventMux := new(event.TypeMux)
-	pow := ethash.New()
-	//genesis := core.GenesisBlock(uint64(ctx.GlobalInt(GenesisNonceFlag.Name)), blockDB)
-	chain, err = core.NewBlockChain(chainDb, pow, eventMux)
+	chainConfig := MakeChainConfigFromDb(ctx, chainDb)
+
+	pow := pow.PoW(core.FakePow{})
+	if !ctx.GlobalBool(FakePoWFlag.Name) {
+		pow = ethash.New()
+	}
+	chain, err = core.NewBlockChain(chainDb, chainConfig, pow, new(event.TypeMux), vm.Config{EnablePreimageRecording: ctx.GlobalBool(VMEnableDebugFlag.Name)})
 	if err != nil {
 		Fatalf("Could not start chainmanager: %v", err)
 	}
-
 	return chain, chainDb
 }
 
-// MakeChain creates an account manager from set command line flags.
-func MakeAccountManager(ctx *cli.Context) *accounts.Manager {
-	dataDir := MustDataDir(ctx)
-	if ctx.GlobalBool(TestNetFlag.Name) {
-		dataDir += "/testnet"
+// MakeConsolePreloads retrieves the absolute paths for the console JavaScript
+// scripts to preload before starting.
+func MakeConsolePreloads(ctx *cli.Context) []string {
+	// Skip preloading if there's nothing to preload
+	if ctx.GlobalString(PreloadJSFlag.Name) == "" {
+		return nil
 	}
-	scryptN := crypto.StandardScryptN
-	scryptP := crypto.StandardScryptP
-	if ctx.GlobalBool(LightKDFFlag.Name) {
-		scryptN = crypto.LightScryptN
-		scryptP = crypto.LightScryptP
+	// Otherwise resolve absolute paths and return them
+	preloads := []string{}
+
+	assets := ctx.GlobalString(JSpathFlag.Name)
+	for _, file := range strings.Split(ctx.GlobalString(PreloadJSFlag.Name), ",") {
+		preloads = append(preloads, common.AbsolutePath(assets, strings.TrimSpace(file)))
 	}
-	ks := crypto.NewKeyStorePassphrase(filepath.Join(dataDir, "keystore"), scryptN, scryptP)
-	return accounts.NewManager(ks)
-}
-
-// MustDataDir retrieves the currently requested data directory, terminating if
-// none (or the empty string) is specified.
-func MustDataDir(ctx *cli.Context) string {
-	if path := ctx.GlobalString(DataDirFlag.Name); path != "" {
-		return path
-	}
-	Fatalf("Cannot determine default data directory, please set manually (--datadir)")
-	return ""
-}
-
-func IpcSocketPath(ctx *cli.Context) (ipcpath string) {
-	if runtime.GOOS == "windows" {
-		ipcpath = common.DefaultIpcPath()
-		if ctx.GlobalIsSet(IPCPathFlag.Name) {
-			ipcpath = ctx.GlobalString(IPCPathFlag.Name)
-		}
-	} else {
-		ipcpath = common.DefaultIpcPath()
-		if ctx.GlobalIsSet(DataDirFlag.Name) {
-			ipcpath = filepath.Join(ctx.GlobalString(DataDirFlag.Name), "ged.ipc")
-		}
-		if ctx.GlobalIsSet(IPCPathFlag.Name) {
-			ipcpath = ctx.GlobalString(IPCPathFlag.Name)
-		}
-	}
-
-	return
-}
-
-func StartIPC(ed *ed.Earthdollar, ctx *cli.Context) error {
-	config := comms.IpcConfig{
-		Endpoint: IpcSocketPath(ctx),
-	}
-
-	initializer := func(conn net.Conn) (comms.Stopper, shared.EarthdollarApi, error) {
-		fe := useragent.NewRemoteFrontend(conn, ed.AccountManager())
-		xed := xed.New(ed, fe)
-		apis, err := api.ParseApiString(ctx.GlobalString(IPCApiFlag.Name), codec.JSON, xed, ed)
-		if err != nil {
-			return nil, nil, err
-		}
-		return xed, api.Merge(apis...), nil
-	}
-
-	return comms.StartIpc(config, codec.JSON, initializer)
-}
-
-func StartRPC(ed *ed.Earthdollar, ctx *cli.Context) error {
-	config := comms.HttpConfig{
-		ListenAddress: ctx.GlobalString(RPCListenAddrFlag.Name),
-		ListenPort:    uint(ctx.GlobalInt(RPCPortFlag.Name)),
-		CorsDomain:    ctx.GlobalString(RPCCORSDomainFlag.Name),
-	}
-
-	xed := xed.New(ed, nil)
-	codec := codec.JSON
-
-	apis, err := api.ParseApiString(ctx.GlobalString(RpcApiFlag.Name), codec, xed, ed)
-	if err != nil {
-		return err
-	}
-
-	return comms.StartHttp(config, codec, api.Merge(apis...))
-}
-
-func StartPProf(ctx *cli.Context) {
-	address := fmt.Sprintf("localhost:%d", ctx.GlobalInt(PProfPortFlag.Name))
-	go func() {
-		log.Println(http.ListenAndServe(address, nil))
-	}()
-}
-
-func ParamToAddress(addr string, am *accounts.Manager) (addrHex string, err error) {
-	if !((len(addr) == 40) || (len(addr) == 42)) { // with or without 0x
-		index, err := strconv.Atoi(addr)
-		if err != nil {
-			Fatalf("Invalid account address '%s'", addr)
-		}
-
-		addrHex, err = am.AddressByIndex(index)
-		if err != nil {
-			return "", err
-		}
-	} else {
-		addrHex = addr
-	}
-	return
+	return preloads
 }

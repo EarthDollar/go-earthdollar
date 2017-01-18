@@ -22,22 +22,22 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/Earthdollar/go-earthdollar/accounts"
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rlp"
+	"github.com/ethereum/ethash"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // Block Test JSON Format
@@ -106,7 +106,7 @@ type btTransaction struct {
 	Value    string
 }
 
-func RunBlockTestWithReader(r io.Reader, skipTests []string) error {
+func RunBlockTestWithReader(homesteadBlock, daoForkBlock, gasPriceFork *big.Int, r io.Reader, skipTests []string) error {
 	btjs := make(map[string]*btJSON)
 	if err := readJson(r, &btjs); err != nil {
 		return err
@@ -117,13 +117,13 @@ func RunBlockTestWithReader(r io.Reader, skipTests []string) error {
 		return err
 	}
 
-	if err := runBlockTests(bt, skipTests); err != nil {
+	if err := runBlockTests(homesteadBlock, daoForkBlock, gasPriceFork, bt, skipTests); err != nil {
 		return err
 	}
 	return nil
 }
 
-func RunBlockTest(file string, skipTests []string) error {
+func RunBlockTest(homesteadBlock, daoForkBlock, gasPriceFork *big.Int, file string, skipTests []string) error {
 	btjs := make(map[string]*btJSON)
 	if err := readJsonFile(file, &btjs); err != nil {
 		return err
@@ -133,13 +133,13 @@ func RunBlockTest(file string, skipTests []string) error {
 	if err != nil {
 		return err
 	}
-	if err := runBlockTests(bt, skipTests); err != nil {
+	if err := runBlockTests(homesteadBlock, daoForkBlock, gasPriceFork, bt, skipTests); err != nil {
 		return err
 	}
 	return nil
 }
 
-func runBlockTests(bt map[string]*BlockTest, skipTests []string) error {
+func runBlockTests(homesteadBlock, daoForkBlock, gasPriceFork *big.Int, bt map[string]*BlockTest, skipTests []string) error {
 	skipTest := make(map[string]bool, len(skipTests))
 	for _, name := range skipTests {
 		skipTest[name] = true
@@ -151,59 +151,46 @@ func runBlockTests(bt map[string]*BlockTest, skipTests []string) error {
 			continue
 		}
 		// test the block
-		if err := runBlockTest(test); err != nil {
+		if err := runBlockTest(homesteadBlock, daoForkBlock, gasPriceFork, test); err != nil {
 			return fmt.Errorf("%s: %v", name, err)
 		}
 		glog.Infoln("Block test passed: ", name)
 
 	}
 	return nil
-
 }
-func runBlockTest(test *BlockTest) error {
-	ks := crypto.NewKeyStorePassphrase(filepath.Join(common.DefaultDataDir(), "keystore"), crypto.StandardScryptN, crypto.StandardScryptP)
-	am := accounts.NewManager(ks)
-	db, _ := eddb.NewMemDatabase()
-	cfg := &ed.Config{
-		DataDir:        common.DefaultDataDir(),
-		Verbosity:      5,
-		Earthbase:      common.Address{},
-		AccountManager: am,
-		NewDB:          func(path string) (eddb.Database, error) { return db, nil },
-	}
 
-	cfg.GenesisBlock = test.Genesis
-
+func runBlockTest(homesteadBlock, daoForkBlock, gasPriceFork *big.Int, test *BlockTest) error {
 	// import pre accounts & construct test genesis block & state root
-	_, err := test.InsertPreState(db, am)
-	if err != nil {
+	db, _ := ethdb.NewMemDatabase()
+	if _, err := test.InsertPreState(db); err != nil {
 		return fmt.Errorf("InsertPreState: %v", err)
 	}
 
-	earthdollar, err := ed.New(cfg)
+	core.WriteTd(db, test.Genesis.Hash(), 0, test.Genesis.Difficulty())
+	core.WriteBlock(db, test.Genesis)
+	core.WriteCanonicalHash(db, test.Genesis.Hash(), test.Genesis.NumberU64())
+	core.WriteHeadBlockHash(db, test.Genesis.Hash())
+	evmux := new(event.TypeMux)
+	config := &params.ChainConfig{HomesteadBlock: homesteadBlock, DAOForkBlock: daoForkBlock, DAOForkSupport: true, EIP150Block: gasPriceFork}
+	chain, err := core.NewBlockChain(db, config, ethash.NewShared(), evmux, vm.Config{})
 	if err != nil {
 		return err
 	}
 
-	err = earthdollar.Start()
-	if err != nil {
-		return err
-	}
-
-	cm := earthdollar.BlockChain()
 	//vm.Debug = true
-	validBlocks, err := test.TryBlocksInsert(cm)
+	validBlocks, err := test.TryBlocksInsert(chain)
 	if err != nil {
 		return err
 	}
 
 	lastblockhash := common.HexToHash(test.lastblockhash)
-	cmlast := cm.LastBlockHash()
+	cmlast := chain.LastBlockHash()
 	if lastblockhash != cmlast {
 		return fmt.Errorf("lastblockhash validation mismatch: want: %x, have: %x", lastblockhash, cmlast)
 	}
 
-	newDB, err := cm.State()
+	newDB, err := chain.State()
 	if err != nil {
 		return err
 	}
@@ -211,21 +198,17 @@ func runBlockTest(test *BlockTest) error {
 		return fmt.Errorf("post state validation failed: %v", err)
 	}
 
-	return test.ValidateImportedHeaders(cm, validBlocks)
+	return test.ValidateImportedHeaders(chain, validBlocks)
 }
 
 // InsertPreState populates the given database with the genesis
 // accounts defined by the test.
-func (t *BlockTest) InsertPreState(db eddb.Database, am *accounts.Manager) (*state.StateDB, error) {
+func (t *BlockTest) InsertPreState(db ethdb.Database) (*state.StateDB, error) {
 	statedb, err := state.New(common.Hash{}, db)
 	if err != nil {
 		return nil, err
 	}
 	for addrString, acct := range t.preAccounts {
-		addr, err := hex.DecodeString(addrString)
-		if err != nil {
-			return nil, err
-		}
 		code, err := hex.DecodeString(strings.TrimPrefix(acct.Code, "0x"))
 		if err != nil {
 			return nil, err
@@ -238,18 +221,8 @@ func (t *BlockTest) InsertPreState(db eddb.Database, am *accounts.Manager) (*sta
 		if err != nil {
 			return nil, err
 		}
-
-		if acct.PrivateKey != "" {
-			privkey, err := hex.DecodeString(strings.TrimPrefix(acct.PrivateKey, "0x"))
-			err = crypto.ImportBlockTestKey(privkey)
-			err = am.TimedUnlock(common.BytesToAddress(addr), "", 999999*time.Second)
-			if err != nil {
-				return nil, err
-			}
-		}
-
 		obj := statedb.CreateAccount(common.HexToAddress(addrString))
-		obj.SetCode(code)
+		obj.SetCode(crypto.Keccak256Hash(code), code)
 		obj.SetBalance(balance)
 		obj.SetNonce(nonce)
 		for k, v := range acct.Storage {
@@ -257,7 +230,7 @@ func (t *BlockTest) InsertPreState(db eddb.Database, am *accounts.Manager) (*sta
 		}
 	}
 
-	root, err := statedb.Commit()
+	root, err := statedb.Commit(false)
 	if err != nil {
 		return nil, fmt.Errorf("error writing state: %v", err)
 	}
@@ -442,7 +415,7 @@ func (test *BlockTest) ValidateImportedHeaders(cm *core.BlockChain, validBlocks 
 	// block-by-block, so we can only validate imported headers after
 	// all blocks have been processed by ChainManager, as they may not
 	// be part of the longest chain until last block is imported.
-	for b := cm.CurrentBlock(); b != nil && b.NumberU64() != 0; b = cm.GetBlock(b.Header().ParentHash) {
+	for b := cm.CurrentBlock(); b != nil && b.NumberU64() != 0; b = cm.GetBlockByHash(b.Header().ParentHash) {
 		bHash := common.Bytes2Hex(b.Hash().Bytes()) // hex without 0x prefix
 		if err := validateHeader(bmap[bHash].BlockHeader, b.Header()); err != nil {
 			return fmt.Errorf("Imported block header validation failed: %v", err)
@@ -521,7 +494,7 @@ func mustConvertBytes(in string) []byte {
 	h := unfuckFuckedHex(strings.TrimPrefix(in, "0x"))
 	out, err := hex.DecodeString(h)
 	if err != nil {
-		panic(fmt.Errorf("invalid hex: %q: ", h, err))
+		panic(fmt.Errorf("invalid hex: %q", h))
 	}
 	return out
 }
@@ -580,9 +553,7 @@ func LoadBlockTests(file string) (map[string]*BlockTest, error) {
 // Nothing to see here, please move along...
 func prepInt(base int, s string) string {
 	if base == 16 {
-		if strings.HasPrefix(s, "0x") {
-			s = s[2:]
-		}
+		s = strings.TrimPrefix(s, "0x")
 		if len(s) == 0 {
 			s = "00"
 		}

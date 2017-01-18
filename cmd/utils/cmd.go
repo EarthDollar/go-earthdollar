@@ -1,47 +1,44 @@
-// Copyright 2014 The go-earthdollar Authors
-// This file is part of go-earthdollar.
+// Copyright 2014 The go-ethereum Authors
+// This file is part of go-ethereum.
 //
-// go-earthdollar is free software: you can redistribute it and/or modify
+// go-ethereum is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-earthdollar is distributed in the hope that it will be useful,
+// go-ethereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-earthdollar. If not, see <http://www.gnu.org/licenses/>.
+// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
-// Package utils contains internal helper functions for go-earthdollar commands.
+// Package utils contains internal helper functions for go-ethereum commands.
 package utils
 
 import (
-	"bufio"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
 	"os/signal"
 	"regexp"
+	"runtime"
 	"strings"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core"
-	"github.com/Earthdollar/go-earthdollar/core/types"
-	"github.com/Earthdollar/go-earthdollar/ed"
-	"github.com/Earthdollar/go-earthdollar/logger"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
-	"github.com/Earthdollar/go-earthdollar/rlp"
-	"github.com/peterh/liner"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/internal/debug"
+	"github.com/ethereum/go-ethereum/logger"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/node"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 const (
 	importBatchSize = 2500
-)
-
-var (
-	interruptCallbacks = []func(os.Signal){}
 )
 
 func openLogFile(Datadir string, filename string) *os.File {
@@ -53,68 +50,29 @@ func openLogFile(Datadir string, filename string) *os.File {
 	return file
 }
 
-func PromptConfirm(prompt string) (bool, error) {
-	var (
-		input string
-		err   error
-	)
-	prompt = prompt + " [y/N] "
-
-	// if liner.TerminalSupported() {
-	// 	fmt.Println("term")
-	// 	lr := liner.NewLiner()
-	// 	defer lr.Close()
-	// 	input, err = lr.Prompt(prompt)
-	// } else {
-	fmt.Print(prompt)
-	input, err = bufio.NewReader(os.Stdin).ReadString('\n')
-	fmt.Println()
-	// }
-
-	if len(input) > 0 && strings.ToUpper(input[:1]) == "Y" {
-		return true, nil
-	} else {
-		return false, nil
-	}
-
-	return false, err
-}
-
-func PromptPassword(prompt string, warnTerm bool) (string, error) {
-	if liner.TerminalSupported() {
-		lr := liner.NewLiner()
-		defer lr.Close()
-		return lr.PasswordPrompt(prompt)
-	}
-	if warnTerm {
-		fmt.Println("!! Unsupported terminal, password will be echoed.")
-	}
-	fmt.Print(prompt)
-	input, err := bufio.NewReader(os.Stdin).ReadString('\n')
-	input = strings.TrimRight(input, "\r\n")
-	fmt.Println()
-	return input, err
-}
-
 // Fatalf formats a message to standard error and exits the program.
 // The message is also printed to standard output if standard error
 // is redirected to a different file.
 func Fatalf(format string, args ...interface{}) {
 	w := io.MultiWriter(os.Stdout, os.Stderr)
-	outf, _ := os.Stdout.Stat()
-	errf, _ := os.Stderr.Stat()
-	if outf != nil && errf != nil && os.SameFile(outf, errf) {
-		w = os.Stderr
+	if runtime.GOOS == "windows" {
+		// The SameFile check below doesn't work on Windows.
+		// stdout is unlikely to get redirected though, so just print there.
+		w = os.Stdout
+	} else {
+		outf, _ := os.Stdout.Stat()
+		errf, _ := os.Stderr.Stat()
+		if outf != nil && errf != nil && os.SameFile(outf, errf) {
+			w = os.Stderr
+		}
 	}
 	fmt.Fprintf(w, "Fatal: "+format+"\n", args...)
-	logger.Flush()
 	os.Exit(1)
 }
 
-func StartEarthdollar(earthdollar *ed.Earthdollar) {
-	glog.V(logger.Info).Infoln("Starting", earthdollar.Name())
-	if err := earthdollar.Start(); err != nil {
-		Fatalf("Error starting Earthdollar: %v", err)
+func StartNode(stack *node.Node) {
+	if err := stack.Start(); err != nil {
+		Fatalf("Error starting protocol stack: %v", err)
 	}
 	go func() {
 		sigc := make(chan os.Signal, 1)
@@ -122,23 +80,21 @@ func StartEarthdollar(earthdollar *ed.Earthdollar) {
 		defer signal.Stop(sigc)
 		<-sigc
 		glog.V(logger.Info).Infoln("Got interrupt, shutting down...")
-		go earthdollar.Stop()
-		logger.Flush()
+		go stack.Stop()
 		for i := 10; i > 0; i-- {
 			<-sigc
 			if i > 1 {
-				glog.V(logger.Info).Infoln("Already shutting down, please be patient.")
-				glog.V(logger.Info).Infoln("Interrupt", i-1, "more times to induce panic.")
+				glog.V(logger.Info).Infof("Already shutting down, interrupt %d more times for panic.", i-1)
 			}
 		}
-		glog.V(logger.Error).Infof("Force quitting: this might not end so well.")
-		panic("boom")
+		debug.Exit() // ensure trace and CPU profile data is flushed.
+		debug.LoudPanic("boom")
 	}()
 }
 
 func FormatTransactionData(data string) []byte {
 	d := common.StringToByteFunc(data, func(s string) (ret []byte) {
-		slice := regexp.MustCompile("\\n|\\s").Split(s, 1000000000)
+		slice := regexp.MustCompile(`\n|\s`).Split(s, 1000000000)
 		for _, dataItem := range slice {
 			d := common.FormatData(dataItem)
 			ret = append(ret, d...)
@@ -172,13 +128,21 @@ func ImportChain(chain *core.BlockChain, fn string) error {
 		}
 	}
 
-	glog.Infoln("Importing blockchain", fn)
+	glog.Infoln("Importing blockchain ", fn)
 	fh, err := os.Open(fn)
 	if err != nil {
 		return err
 	}
 	defer fh.Close()
-	stream := rlp.NewStream(fh, 0)
+
+	var reader io.Reader = fh
+	if strings.HasSuffix(fn, ".gz") {
+		if reader, err = gzip.NewReader(reader); err != nil {
+			return err
+		}
+	}
+
+	stream := rlp.NewStream(reader, 0)
 
 	// Run actual the import.
 	blocks := make(types.Blocks, importBatchSize)
@@ -234,30 +198,45 @@ func hasAllBlocks(chain *core.BlockChain, bs []*types.Block) bool {
 }
 
 func ExportChain(blockchain *core.BlockChain, fn string) error {
-	glog.Infoln("Exporting blockchain to", fn)
+	glog.Infoln("Exporting blockchain to ", fn)
 	fh, err := os.OpenFile(fn, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return err
 	}
 	defer fh.Close()
-	if err := blockchain.Export(fh); err != nil {
+
+	var writer io.Writer = fh
+	if strings.HasSuffix(fn, ".gz") {
+		writer = gzip.NewWriter(writer)
+		defer writer.(*gzip.Writer).Close()
+	}
+
+	if err := blockchain.Export(writer); err != nil {
 		return err
 	}
-	glog.Infoln("Exported blockchain to", fn)
+	glog.Infoln("Exported blockchain to ", fn)
+
 	return nil
 }
 
 func ExportAppendChain(blockchain *core.BlockChain, fn string, first uint64, last uint64) error {
-	glog.Infoln("Exporting blockchain to", fn)
+	glog.Infoln("Exporting blockchain to ", fn)
 	// TODO verify mode perms
 	fh, err := os.OpenFile(fn, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}
 	defer fh.Close()
-	if err := blockchain.ExportN(fh, first, last); err != nil {
+
+	var writer io.Writer = fh
+	if strings.HasSuffix(fn, ".gz") {
+		writer = gzip.NewWriter(writer)
+		defer writer.(*gzip.Writer).Close()
+	}
+
+	if err := blockchain.ExportN(writer, first, last); err != nil {
 		return err
 	}
-	glog.Infoln("Exported blockchain to", fn)
+	glog.Infoln("Exported blockchain to ", fn)
 	return nil
 }

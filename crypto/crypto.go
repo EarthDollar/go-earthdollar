@@ -17,8 +17,6 @@
 package crypto
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -30,28 +28,17 @@ import (
 	"os"
 
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/crypto/ecies"
-	"github.com/Earthdollar/go-earthdollar/crypto/secp256k1"
-	"github.com/Earthdollar/go-earthdollar/crypto/sha3"
-	"github.com/Earthdollar/go-earthdollar/rlp"
-	"github.com/pborman/uuid"
-	"golang.org/x/crypto/pbkdf2"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto/ecies"
+	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"github.com/ethereum/go-ethereum/rlp"
 	"golang.org/x/crypto/ripemd160"
 )
 
-var secp256k1n *big.Int
-
-func init() {
-	// specify the params for the s256 curve
-	ecies.AddParamsForCurve(S256(), ecies.ECIES_AES128_SHA256)
-	secp256k1n = common.String2Big("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141")
-}
-
-func Sha3(data ...[]byte) []byte {
+func Keccak256(data ...[]byte) []byte {
 	d := sha3.NewKeccak256()
 	for _, b := range data {
 		d.Write(b)
@@ -59,7 +46,7 @@ func Sha3(data ...[]byte) []byte {
 	return d.Sum(nil)
 }
 
-func Sha3Hash(data ...[]byte) (h common.Hash) {
+func Keccak256Hash(data ...[]byte) (h common.Hash) {
 	d := sha3.NewKeccak256()
 	for _, b := range data {
 		d.Write(b)
@@ -68,11 +55,14 @@ func Sha3Hash(data ...[]byte) (h common.Hash) {
 	return h
 }
 
+// Deprecated: For backward compatibility as other packages depend on these
+func Sha3(data ...[]byte) []byte          { return Keccak256(data...) }
+func Sha3Hash(data ...[]byte) common.Hash { return Keccak256Hash(data...) }
+
 // Creates an ethereum address given the bytes and the nonce
 func CreateAddress(b common.Address, nonce uint64) common.Address {
 	data, _ := rlp.EncodeToBytes([]interface{}{b, nonce})
-	return common.BytesToAddress(Sha3(data)[12:])
-	//return Sha3(common.NewValue([]interface{}{b, nonce}).Encode())[12:]
+	return common.BytesToAddress(Keccak256(data)[12:])
 }
 
 func Sha256(data []byte) []byte {
@@ -88,6 +78,12 @@ func Ripemd160(data []byte) []byte {
 	return ripemd.Sum(nil)
 }
 
+// Ecrecover returns the public key for the private key that was used to
+// calculate the signature.
+//
+// Note: secp256k1 expects the recover id to be either 0, 1. Ethereum
+// signatures have a recover id with an offset of 27. Callers must take
+// this into account and if "recovering" from an Ethereum signature adjust.
 func Ecrecover(hash, sig []byte) ([]byte, error) {
 	return secp256k1.RecoverPubkey(hash, sig)
 }
@@ -99,9 +95,9 @@ func ToECDSA(prv []byte) *ecdsa.PrivateKey {
 	}
 
 	priv := new(ecdsa.PrivateKey)
-	priv.PublicKey.Curve = S256()
+	priv.PublicKey.Curve = secp256k1.S256()
 	priv.D = common.BigD(prv)
-	priv.PublicKey.X, priv.PublicKey.Y = S256().ScalarBaseMult(prv)
+	priv.PublicKey.X, priv.PublicKey.Y = secp256k1.S256().ScalarBaseMult(prv)
 	return priv
 }
 
@@ -116,15 +112,15 @@ func ToECDSAPub(pub []byte) *ecdsa.PublicKey {
 	if len(pub) == 0 {
 		return nil
 	}
-	x, y := elliptic.Unmarshal(S256(), pub)
-	return &ecdsa.PublicKey{S256(), x, y}
+	x, y := elliptic.Unmarshal(secp256k1.S256(), pub)
+	return &ecdsa.PublicKey{Curve: secp256k1.S256(), X: x, Y: y}
 }
 
 func FromECDSAPub(pub *ecdsa.PublicKey) []byte {
 	if pub == nil || pub.X == nil || pub.Y == nil {
 		return nil
 	}
-	return elliptic.Marshal(S256(), pub.X, pub.Y)
+	return elliptic.Marshal(secp256k1.S256(), pub.X, pub.Y)
 }
 
 // HexToECDSA parses a secp256k1 private key.
@@ -168,28 +164,22 @@ func SaveECDSA(file string, key *ecdsa.PrivateKey) error {
 }
 
 func GenerateKey() (*ecdsa.PrivateKey, error) {
-	return ecdsa.GenerateKey(S256(), rand.Reader)
+	return ecdsa.GenerateKey(secp256k1.S256(), rand.Reader)
 }
 
+// ValidateSignatureValues verifies whether the signature values are valid with
+// the given chain rules. The v value is assumed to be either 0 or 1.
 func ValidateSignatureValues(v byte, r, s *big.Int, homestead bool) bool {
 	if r.Cmp(common.Big1) < 0 || s.Cmp(common.Big1) < 0 {
 		return false
 	}
-	vint := uint32(v)
 	// reject upper range of s values (ECDSA malleability)
 	// see discussion in secp256k1/libsecp256k1/include/secp256k1.h
 	if homestead && s.Cmp(secp256k1.HalfN) > 0 {
 		return false
 	}
 	// Frontier: allow s to be in full N range
-	if s.Cmp(secp256k1.N) >= 0 {
-		return false
-	}
-	if r.Cmp(secp256k1.N) < 0 && (vint == 27 || vint == 28) {
-		return true
-	} else {
-		return false
-	}
+	return r.Cmp(secp256k1.N) < 0 && s.Cmp(secp256k1.N) < 0 && (v == 0 || v == 1)
 }
 
 func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
@@ -198,18 +188,26 @@ func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
 		return nil, err
 	}
 
-	x, y := elliptic.Unmarshal(S256(), s)
-	return &ecdsa.PublicKey{S256(), x, y}, nil
+	x, y := elliptic.Unmarshal(secp256k1.S256(), s)
+	return &ecdsa.PublicKey{Curve: secp256k1.S256(), X: x, Y: y}, nil
 }
 
-func Sign(hash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
-	if len(hash) != 32 {
-		return nil, fmt.Errorf("hash is required to be exactly 32 bytes (%d)", len(hash))
+// Sign calculates an ECDSA signature.
+//
+// This function is susceptible to chosen plaintext attacks that can leak
+// information about the private key that is used for signing. Callers must
+// be aware that the given hash cannot be chosen by an adversery. Common
+// solution is to hash any input before calculating the signature.
+//
+// The produced signature is in the [R || S || V] format where V is 0 or 1.
+func Sign(data []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
+	if len(data) != 32 {
+		return nil, fmt.Errorf("hash is required to be exactly 32 bytes (%d)", len(data))
 	}
 
 	seckey := common.LeftPadBytes(prv.D.Bytes(), prv.Params().BitSize/8)
 	defer zeroBytes(seckey)
-	sig, err = secp256k1.Sign(hash, seckey)
+	sig, err = secp256k1.Sign(data, seckey)
 	return
 }
 
@@ -222,123 +220,9 @@ func Decrypt(prv *ecdsa.PrivateKey, ct []byte) ([]byte, error) {
 	return key.Decrypt(rand.Reader, ct, nil, nil)
 }
 
-// Used only by block tests.
-func ImportBlockTestKey(privKeyBytes []byte) error {
-	ks := NewKeyStorePassphrase(common.DefaultDataDir()+"/keystore", LightScryptN, LightScryptP)
-	ecKey := ToECDSA(privKeyBytes)
-	key := &Key{
-		Id:         uuid.NewRandom(),
-		Address:    PubkeyToAddress(ecKey.PublicKey),
-		PrivateKey: ecKey,
-	}
-	err := ks.StoreKey(key, "")
-	return err
-}
-
-// creates a Key and stores that in the given KeyStore by decrypting a presale key JSON
-func ImportPreSaleKey(keyStore KeyStore, keyJSON []byte, password string) (*Key, error) {
-	key, err := decryptPreSaleKey(keyJSON, password)
-	if err != nil {
-		return nil, err
-	}
-	key.Id = uuid.NewRandom()
-	err = keyStore.StoreKey(key, password)
-	return key, err
-}
-
-func decryptPreSaleKey(fileContent []byte, password string) (key *Key, err error) {
-	preSaleKeyStruct := struct {
-		EncSeed string
-		EthAddr string
-		Email   string
-		BtcAddr string
-	}{}
-	err = json.Unmarshal(fileContent, &preSaleKeyStruct)
-	if err != nil {
-		return nil, err
-	}
-	encSeedBytes, err := hex.DecodeString(preSaleKeyStruct.EncSeed)
-	iv := encSeedBytes[:16]
-	cipherText := encSeedBytes[16:]
-	/*
-		See https://github.com/ethereum/pyethsaletool
-
-		pyethsaletool generates the encryption key from password by
-		2000 rounds of PBKDF2 with HMAC-SHA-256 using password as salt (:().
-		16 byte key length within PBKDF2 and resulting key is used as AES key
-	*/
-	passBytes := []byte(password)
-	derivedKey := pbkdf2.Key(passBytes, passBytes, 2000, 16, sha256.New)
-	plainText, err := aesCBCDecrypt(derivedKey, cipherText, iv)
-	if err != nil {
-		return nil, err
-	}
-	ethPriv := Sha3(plainText)
-	ecKey := ToECDSA(ethPriv)
-	key = &Key{
-		Id:         nil,
-		Address:    PubkeyToAddress(ecKey.PublicKey),
-		PrivateKey: ecKey,
-	}
-	derivedAddr := hex.EncodeToString(key.Address.Bytes()) // needed because .Hex() gives leading "0x"
-	expectedAddr := preSaleKeyStruct.EthAddr
-	if derivedAddr != expectedAddr {
-		err = fmt.Errorf("decrypted addr '%s' not equal to expected addr '%s'", derivedAddr, expectedAddr)
-	}
-	return key, err
-}
-
-// AES-128 is selected due to size of encryptKey
-func aesCTRXOR(key, inText, iv []byte) ([]byte, error) {
-	aesBlock, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	stream := cipher.NewCTR(aesBlock, iv)
-	outText := make([]byte, len(inText))
-	stream.XORKeyStream(outText, inText)
-	return outText, err
-}
-
-func aesCBCDecrypt(key, cipherText, iv []byte) ([]byte, error) {
-	aesBlock, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	decrypter := cipher.NewCBCDecrypter(aesBlock, iv)
-	paddedPlaintext := make([]byte, len(cipherText))
-	decrypter.CryptBlocks(paddedPlaintext, cipherText)
-	plaintext := PKCS7Unpad(paddedPlaintext)
-	if plaintext == nil {
-		err = errors.New("Decryption failed: PKCS7Unpad failed after AES decryption")
-	}
-	return plaintext, err
-}
-
-// From https://leanpub.com/gocrypto/read#leanpub-auto-block-cipher-modes
-func PKCS7Unpad(in []byte) []byte {
-	if len(in) == 0 {
-		return nil
-	}
-
-	padding := in[len(in)-1]
-	if int(padding) > len(in) || padding > aes.BlockSize {
-		return nil
-	} else if padding == 0 {
-		return nil
-	}
-
-	for i := len(in) - 1; i > len(in)-int(padding)-1; i-- {
-		if in[i] != padding {
-			return nil
-		}
-	}
-	return in[:len(in)-int(padding)]
-}
-
 func PubkeyToAddress(p ecdsa.PublicKey) common.Address {
 	pubBytes := FromECDSAPub(&p)
-	return common.BytesToAddress(Sha3(pubBytes[1:])[12:])
+	return common.BytesToAddress(Keccak256(pubBytes[1:])[12:])
 }
 
 func zeroBytes(bytes []byte) {

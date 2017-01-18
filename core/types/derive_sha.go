@@ -19,9 +19,9 @@ package types
 import (
 	"bytes"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/rlp"
-	"github.com/Earthdollar/go-earthdollar/trie"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/trie"
 )
 
 type DerivableList interface {

@@ -17,12 +17,15 @@
 package runtime
 
 import (
+	"math/big"
 	"strings"
 	"testing"
 
-	"github.com/Earthdollar/go-earthdollar/accounts/abi"
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/ethdb"
 )
 
 func TestDefaults(t *testing.T) {
@@ -53,7 +56,7 @@ func TestDefaults(t *testing.T) {
 	}
 }
 
-func TestEnvironment(t *testing.T) {
+func TestEVM(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
 			t.Fatalf("crashed with: %v", r)
@@ -71,18 +74,46 @@ func TestEnvironment(t *testing.T) {
 	}, nil, nil)
 }
 
-func TestRestoreDefaults(t *testing.T) {
-	Execute(nil, nil, &Config{Debug: true})
-	if vm.ForceJit {
-		t.Error("expected force jit to be disabled")
+func TestExecute(t *testing.T) {
+	ret, _, err := Execute([]byte{
+		byte(vm.PUSH1), 10,
+		byte(vm.PUSH1), 0,
+		byte(vm.MSTORE),
+		byte(vm.PUSH1), 32,
+		byte(vm.PUSH1), 0,
+		byte(vm.RETURN),
+	}, nil, nil)
+	if err != nil {
+		t.Fatal("didn't expect error", err)
 	}
 
-	if vm.Debug {
-		t.Error("expected debug to be disabled")
+	num := common.BytesToBig(ret)
+	if num.Cmp(big.NewInt(10)) != 0 {
+		t.Error("Expected 10, got", num)
+	}
+}
+
+func TestCall(t *testing.T) {
+	db, _ := ethdb.NewMemDatabase()
+	state, _ := state.New(common.Hash{}, db)
+	address := common.HexToAddress("0x0a")
+	state.SetCode(address, []byte{
+		byte(vm.PUSH1), 10,
+		byte(vm.PUSH1), 0,
+		byte(vm.MSTORE),
+		byte(vm.PUSH1), 32,
+		byte(vm.PUSH1), 0,
+		byte(vm.RETURN),
+	})
+
+	ret, err := Call(address, nil, &Config{State: state})
+	if err != nil {
+		t.Fatal("didn't expect error", err)
 	}
 
-	if vm.EnableJit {
-		t.Error("expected jit to be disabled")
+	num := common.BytesToBig(ret)
+	if num.Cmp(big.NewInt(10)) != 0 {
+		t.Error("Expected 10, got", num)
 	}
 }
 

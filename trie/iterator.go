@@ -16,119 +16,209 @@
 
 package trie
 
-import "bytes"
+import "github.com/ethereum/go-ethereum/common"
 
+// Iterator is a key-value trie iterator that traverses a Trie.
 type Iterator struct {
-	trie *Trie
+	trie   *Trie
+	nodeIt *NodeIterator
+	keyBuf []byte
 
-	Key   []byte
-	Value []byte
+	Key   []byte // Current data key on which the iterator is positioned on
+	Value []byte // Current data value on which the iterator is positioned on
 }
 
+// NewIterator creates a new key-value iterator.
 func NewIterator(trie *Trie) *Iterator {
-	return &Iterator{trie: trie, Key: nil}
-}
-
-func (self *Iterator) Next() bool {
-	isIterStart := false
-	if self.Key == nil {
-		isIterStart = true
-		self.Key = make([]byte, 32)
+	return &Iterator{
+		trie:   trie,
+		nodeIt: NewNodeIterator(trie),
+		keyBuf: make([]byte, 0, 64),
+		Key:    nil,
 	}
-
-	key := remTerm(compactHexDecode(self.Key))
-	k := self.next(self.trie.root, key, isIterStart)
-
-	self.Key = []byte(decodeCompact(k))
-
-	return len(k) > 0
 }
 
-func (self *Iterator) next(node interface{}, key []byte, isIterStart bool) []byte {
-	if node == nil {
+// Next moves the iterator forward one key-value entry.
+func (it *Iterator) Next() bool {
+	for it.nodeIt.Next() {
+		if it.nodeIt.Leaf {
+			it.Key = it.makeKey()
+			it.Value = it.nodeIt.LeafBlob
+			return true
+		}
+	}
+	it.Key = nil
+	it.Value = nil
+	return false
+}
+
+func (it *Iterator) makeKey() []byte {
+	key := it.keyBuf[:0]
+	for _, se := range it.nodeIt.stack {
+		switch node := se.node.(type) {
+		case *fullNode:
+			if se.child <= 16 {
+				key = append(key, byte(se.child))
+			}
+		case *shortNode:
+			if hasTerm(node.Key) {
+				key = append(key, node.Key[:len(node.Key)-1]...)
+			} else {
+				key = append(key, node.Key...)
+			}
+		}
+	}
+	return decodeCompact(key)
+}
+
+// nodeIteratorState represents the iteration state at one particular node of the
+// trie, which can be resumed at a later invocation.
+type nodeIteratorState struct {
+	hash   common.Hash // Hash of the node being iterated (nil if not standalone)
+	node   node        // Trie node being iterated
+	parent common.Hash // Hash of the first full ancestor node (nil if current is the root)
+	child  int         // Child to be processed next
+}
+
+// NodeIterator is an iterator to traverse the trie post-order.
+type NodeIterator struct {
+	trie  *Trie                // Trie being iterated
+	stack []*nodeIteratorState // Hierarchy of trie nodes persisting the iteration state
+
+	Hash     common.Hash // Hash of the current node being iterated (nil if not standalone)
+	Node     node        // Current node being iterated (internal representation)
+	Parent   common.Hash // Hash of the first full ancestor node (nil if current is the root)
+	Leaf     bool        // Flag whether the current node is a value (data) node
+	LeafBlob []byte      // Data blob contained within a leaf (otherwise nil)
+
+	Error error // Failure set in case of an internal error in the iterator
+}
+
+// NewNodeIterator creates an post-order trie iterator.
+func NewNodeIterator(trie *Trie) *NodeIterator {
+	if trie.Hash() == emptyState {
+		return new(NodeIterator)
+	}
+	return &NodeIterator{trie: trie}
+}
+
+// Next moves the iterator to the next node, returning whether there are any
+// further nodes. In case of an internal error this method returns false and
+// sets the Error field to the encountered failure.
+func (it *NodeIterator) Next() bool {
+	// If the iterator failed previously, don't do anything
+	if it.Error != nil {
+		return false
+	}
+	// Otherwise step forward with the iterator and report any errors
+	if err := it.step(); err != nil {
+		it.Error = err
+		return false
+	}
+	return it.retrieve()
+}
+
+// step moves the iterator to the next node of the trie.
+func (it *NodeIterator) step() error {
+	if it.trie == nil {
+		// Abort if we reached the end of the iteration
 		return nil
 	}
+	if len(it.stack) == 0 {
+		// Initialize the iterator if we've just started.
+		root := it.trie.Hash()
+		state := &nodeIteratorState{node: it.trie.root, child: -1}
+		if root != emptyRoot {
+			state.hash = root
+		}
+		it.stack = append(it.stack, state)
+	} else {
+		// Continue iterating at the previous node otherwise.
+		it.stack = it.stack[:len(it.stack)-1]
+		if len(it.stack) == 0 {
+			it.trie = nil
+			return nil
+		}
+	}
 
-	switch node := node.(type) {
-	case fullNode:
-		if len(key) > 0 {
-			k := self.next(node[key[0]], key[1:], isIterStart)
-			if k != nil {
-				return append([]byte{key[0]}, k...)
+	// Continue iteration to the next child
+	for {
+		parent := it.stack[len(it.stack)-1]
+		ancestor := parent.hash
+		if (ancestor == common.Hash{}) {
+			ancestor = parent.parent
+		}
+		if node, ok := parent.node.(*fullNode); ok {
+			// Full node, traverse all children, then the node itself
+			if parent.child >= len(node.Children) {
+				break
 			}
-		}
-
-		var r byte
-		if len(key) > 0 {
-			r = key[0] + 1
-		}
-
-		for i := r; i < 16; i++ {
-			k := self.key(node[i])
-			if k != nil {
-				return append([]byte{i}, k...)
-			}
-		}
-
-	case shortNode:
-		k := remTerm(node.Key)
-		if vnode, ok := node.Val.(valueNode); ok {
-			switch bytes.Compare([]byte(k), key) {
-			case 0:
-				if isIterStart {
-					self.Value = vnode
-					return k
+			for parent.child++; parent.child < len(node.Children); parent.child++ {
+				if current := node.Children[parent.child]; current != nil {
+					it.stack = append(it.stack, &nodeIteratorState{
+						hash:   common.BytesToHash(node.flags.hash),
+						node:   current,
+						parent: ancestor,
+						child:  -1,
+					})
+					break
 				}
-			case 1:
-				self.Value = vnode
-				return k
 			}
+		} else if node, ok := parent.node.(*shortNode); ok {
+			// Short node, traverse the pointer singleton child, then the node itself
+			if parent.child >= 0 {
+				break
+			}
+			parent.child++
+			it.stack = append(it.stack, &nodeIteratorState{
+				hash:   common.BytesToHash(node.flags.hash),
+				node:   node.Val,
+				parent: ancestor,
+				child:  -1,
+			})
+		} else if hash, ok := parent.node.(hashNode); ok {
+			// Hash node, resolve the hash child from the database, then the node itself
+			if parent.child >= 0 {
+				break
+			}
+			parent.child++
+
+			node, err := it.trie.resolveHash(hash, nil, nil)
+			if err != nil {
+				return err
+			}
+			it.stack = append(it.stack, &nodeIteratorState{
+				hash:   common.BytesToHash(hash),
+				node:   node,
+				parent: ancestor,
+				child:  -1,
+			})
 		} else {
-			cnode := node.Val
-
-			var ret []byte
-			skey := key[len(k):]
-			if bytes.HasPrefix(key, k) {
-				ret = self.next(cnode, skey, isIterStart)
-			} else if bytes.Compare(k, key[:len(k)]) > 0 {
-				return self.key(node)
-			}
-
-			if ret != nil {
-				return append(k, ret...)
-			}
+			break
 		}
-
-	case hashNode:
-		return self.next(self.trie.resolveHash(node), key, isIterStart)
 	}
 	return nil
 }
 
-func (self *Iterator) key(node interface{}) []byte {
-	switch node := node.(type) {
-	case shortNode:
-		// Leaf node
-		k := remTerm(node.Key)
-		if vnode, ok := node.Val.(valueNode); ok {
-			self.Value = vnode
-			return k
-		}
-		return append(k, self.key(node.Val)...)
-	case fullNode:
-		if node[16] != nil {
-			self.Value = node[16].(valueNode)
-			return []byte{16}
-		}
-		for i := 0; i < 16; i++ {
-			k := self.key(node[i])
-			if k != nil {
-				return append([]byte{byte(i)}, k...)
-			}
-		}
-	case hashNode:
-		return self.key(self.trie.resolveHash(node))
-	}
+// retrieve pulls and caches the current trie node the iterator is traversing.
+// In case of a value node, the additional leaf blob is also populated with the
+// data contents for external interpretation.
+//
+// The method returns whether there are any more data left for inspection.
+func (it *NodeIterator) retrieve() bool {
+	// Clear out any previously set values
+	it.Hash, it.Node, it.Parent, it.Leaf, it.LeafBlob = common.Hash{}, nil, common.Hash{}, false, nil
 
-	return nil
+	// If the iteration's done, return no available data
+	if it.trie == nil {
+		return false
+	}
+	// Otherwise retrieve the current node and resolve leaf accessors
+	state := it.stack[len(it.stack)-1]
+
+	it.Hash, it.Node, it.Parent = state.hash, state.node, state.parent
+	if value, ok := it.Node.(valueNode); ok {
+		it.Leaf, it.LeafBlob = true, []byte(value)
+	}
+	return true
 }

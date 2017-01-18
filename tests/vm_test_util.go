@@ -1,4 +1,4 @@
-// Copyright 2014 The go-ethereum Authors
+// Copyright 2015 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
@@ -24,11 +24,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/Earthdollar/go-earthdollar/common"
-	"github.com/Earthdollar/go-earthdollar/core/state"
-	"github.com/Earthdollar/go-earthdollar/core/vm"
-	"github.com/Earthdollar/go-earthdollar/eddb"
-	"github.com/Earthdollar/go-earthdollar/logger/glog"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/ethereum/go-ethereum/params"
 )
 
 func RunVmTestWithReader(r io.Reader, skipTests []string) error {
@@ -67,11 +69,6 @@ func BenchVmTest(p string, conf bconf, b *testing.B) error {
 		return fmt.Errorf("test not found: %s", conf.name)
 	}
 
-	pJit := vm.EnableJit
-	vm.EnableJit = conf.jit
-	pForceJit := vm.ForceJit
-	vm.ForceJit = conf.precomp
-
 	env := make(map[string]string)
 	env["currentCoinbase"] = test.Env.CurrentCoinbase
 	env["currentDifficulty"] = test.Env.CurrentDifficulty
@@ -99,23 +96,13 @@ func BenchVmTest(p string, conf bconf, b *testing.B) error {
 		benchVmTest(test, env, b)
 	}
 
-	vm.EnableJit = pJit
-	vm.ForceJit = pForceJit
-
 	return nil
 }
 
 func benchVmTest(test VmTest, env map[string]string, b *testing.B) {
 	b.StopTimer()
-	db, _ := eddb.NewMemDatabase()
-	statedb, _ := state.New(common.Hash{}, db)
-	for addr, account := range test.Pre {
-		obj := StateObjectFromAccount(db, addr, account)
-		statedb.SetStateObject(obj)
-		for a, v := range account.Storage {
-			obj.SetState(common.HexToHash(a), common.HexToHash(v))
-		}
-	}
+	db, _ := ethdb.NewMemDatabase()
+	statedb := makePreState(db, test.Pre)
 	b.StartTimer()
 
 	RunVm(statedb, env, test.Exec)
@@ -142,9 +129,9 @@ func runVmTests(tests map[string]VmTest, skipTests []string) error {
 	}
 
 	for name, test := range tests {
-		if skipTest[name] {
+		if skipTest[name] /*|| name != "loop_stacklimit_1021"*/ {
 			glog.Infoln("Skipping VM test", name)
-			return nil
+			continue
 		}
 
 		if err := runVmTest(test); err != nil {
@@ -158,15 +145,8 @@ func runVmTests(tests map[string]VmTest, skipTests []string) error {
 }
 
 func runVmTest(test VmTest) error {
-	db, _ := eddb.NewMemDatabase()
-	statedb, _ := state.New(common.Hash{}, db)
-	for addr, account := range test.Pre {
-		obj := StateObjectFromAccount(db, addr, account)
-		statedb.SetStateObject(obj)
-		for a, v := range account.Storage {
-			obj.SetState(common.HexToHash(a), common.HexToHash(v))
-		}
-	}
+	db, _ := ethdb.NewMemDatabase()
+	statedb := makePreState(db, test.Pre)
 
 	// XXX Yeah, yeah...
 	env := make(map[string]string)
@@ -185,20 +165,20 @@ func runVmTest(test VmTest) error {
 		ret  []byte
 		gas  *big.Int
 		err  error
-		logs vm.Logs
+		logs []*types.Log
 	)
 
 	ret, logs, gas, err = RunVm(statedb, env, test.Exec)
 
 	// Compare expected and actual return
 	rexp := common.FromHex(test.Out)
-	if bytes.Compare(rexp, ret) != 0 {
+	if !bytes.Equal(rexp, ret) {
 		return fmt.Errorf("return failed. Expected %x, got %x\n", rexp, ret)
 	}
 
 	// Check gas usage
 	if len(test.Gas) == 0 && err == nil {
-		return fmt.Errorf("gas unspecified, indicating an error. VM returned (incorrectly) successfull")
+		return fmt.Errorf("gas unspecified, indicating an error. VM returned (incorrectly) successful")
 	} else {
 		gexp := common.Big(test.Gas)
 		if gexp.Cmp(gas) != 0 {
@@ -212,11 +192,9 @@ func runVmTest(test VmTest) error {
 		if obj == nil {
 			continue
 		}
-
 		for addr, value := range account.Storage {
-			v := obj.GetState(common.HexToHash(addr))
+			v := statedb.GetState(obj.Address(), common.HexToHash(addr))
 			vexp := common.HexToHash(value)
-
 			if v != vexp {
 				return fmt.Errorf("(%x: %s) storage failed. Expected %x, got %x (%v %v)\n", obj.Address().Bytes()[0:4], addr, vexp, v, vexp.Big(), v.Big())
 			}
@@ -234,25 +212,23 @@ func runVmTest(test VmTest) error {
 	return nil
 }
 
-func RunVm(state *state.StateDB, env, exec map[string]string) ([]byte, vm.Logs, *big.Int, error) {
+func RunVm(statedb *state.StateDB, env, exec map[string]string) ([]byte, []*types.Log, *big.Int, error) {
+	chainConfig := &params.ChainConfig{
+		HomesteadBlock: params.MainNetHomesteadBlock,
+		DAOForkBlock:   params.MainNetDAOForkBlock,
+		DAOForkSupport: true,
+	}
 	var (
 		to    = common.HexToAddress(exec["address"])
 		from  = common.HexToAddress(exec["caller"])
 		data  = common.FromHex(exec["data"])
 		gas   = common.Big(exec["gas"])
-		price = common.Big(exec["gasPrice"])
 		value = common.Big(exec["value"])
 	)
-	// Reset the pre-compiled contracts for VM tests.
-	vm.Precompiled = make(map[string]*vm.PrecompiledAccount)
+	caller := statedb.GetOrNewStateObject(from)
+	vm.PrecompiledContracts = make(map[common.Address]vm.PrecompiledContract)
 
-	caller := state.GetOrNewStateObject(from)
-
-	vmenv := NewEnvFromMap(state, env, exec)
-	vmenv.vmTest = true
-	vmenv.skipTransfer = true
-	vmenv.initial = true
-	ret, err := vmenv.Call(caller, to, data, gas, price, value)
-
-	return ret, vmenv.state.Logs(), vmenv.Gas, err
+	environment, _ := NewEVMEnvironment(true, chainConfig, statedb, env, exec)
+	ret, err := environment.Call(caller, to, data, gas, value)
+	return ret, statedb.Logs(), gas, err
 }

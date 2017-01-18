@@ -31,11 +31,11 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/Earthdollar/go-earthdollar/crypto"
-	"github.com/Earthdollar/go-earthdollar/crypto/ecies"
-	"github.com/Earthdollar/go-earthdollar/crypto/sha3"
-	"github.com/Earthdollar/go-earthdollar/p2p/discover"
-	"github.com/Earthdollar/go-earthdollar/rlp"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/crypto/ecies"
+	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"github.com/ethereum/go-ethereum/p2p/discover"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 func TestSharedSecret(t *testing.T) {
@@ -94,6 +94,7 @@ func testEncHandshake(token []byte) error {
 	go func() {
 		r := result{side: "initiator"}
 		defer func() { output <- r }()
+		defer fd0.Close()
 
 		dest := &discover.Node{ID: discover.PubkeyID(&prv1.PublicKey)}
 		r.id, r.err = c0.doEncHandshake(prv0, dest)
@@ -108,6 +109,7 @@ func testEncHandshake(token []byte) error {
 	go func() {
 		r := result{side: "receiver"}
 		defer func() { output <- r }()
+		defer fd1.Close()
 
 		r.id, r.err = c1.doEncHandshake(prv1, nil)
 		if r.err != nil {
@@ -265,8 +267,8 @@ func TestRLPXFrameFake(t *testing.T) {
 	buf := new(bytes.Buffer)
 	hash := fakeHash([]byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
 	rw := newRLPXFrameRW(buf, secrets{
-		AES:        crypto.Sha3(),
-		MAC:        crypto.Sha3(),
+		AES:        crypto.Keccak256(),
+		MAC:        crypto.Keccak256(),
 		IngressMAC: hash,
 		EgressMAC:  hash,
 	})

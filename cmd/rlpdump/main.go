@@ -26,7 +26,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Earthdollar/go-earthdollar/rlp"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 var (

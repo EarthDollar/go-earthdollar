@@ -19,10 +19,8 @@ package common
 import (
 	"fmt"
 	"os"
-	"os/user"
 	"path/filepath"
 	"runtime"
-	"strings"
 )
 
 // MakeName creates a node name that follows the ethereum convention
@@ -30,21 +28,6 @@ import (
 // the name.
 func MakeName(name, version string) string {
 	return fmt.Sprintf("%s/v%s/%s/%s", name, version, runtime.GOOS, runtime.Version())
-}
-
-func ExpandHomePath(p string) (path string) {
-	path = p
-	sep := fmt.Sprintf("%s", os.PathSeparator)
-
-	// Check in case of paths like "/something/~/something/"
-	if len(p) > 1 && p[:1+len(sep)] == "~"+sep {
-		usr, _ := user.Current()
-		dir := usr.HomeDir
-
-		path = strings.Replace(p, "~", dir, 1)
-	}
-
-	return
 }
 
 func FileExist(filePath string) bool {
@@ -61,36 +44,4 @@ func AbsolutePath(Datadir string, filename string) string {
 		return filename
 	}
 	return filepath.Join(Datadir, filename)
-}
-
-func HomeDir() (home string) {
-	if usr, err := user.Current(); err == nil {
-		home = usr.HomeDir
-	} else {
-		home = os.Getenv("HOME")
-	}
-	return
-}
-
-func DefaultDataDir() string {
-	// Try to place the data folder in the user's home dir
-	home := HomeDir()
-	if home != "" {
-		if runtime.GOOS == "darwin" {
-			return filepath.Join(home, "Library", "Earthdollar")
-		} else if runtime.GOOS == "windows" {
-			return filepath.Join(home, "AppData", "Roaming", "Earthdollar")
-		} else {
-			return filepath.Join(home, ".earthdollar")
-		}
-	}
-	// As we cannot guess a stable location, return empty and handle later
-	return ""
-}
-
-func DefaultIpcPath() string {
-	if runtime.GOOS == "windows" {
-		return `\\.\pipe\ged.ipc`
-	}
-	return filepath.Join(DefaultDataDir(), "ged.ipc")
 }
