@@ -43,22 +43,22 @@ func tmpDatadirWithKeystore(t *testing.T) string {
 }
 
 func TestAccountListEmpty(t *testing.T) {
-	geth := runGeth(t, "account")
-	geth.expectExit()
+	ged := runGeth(t, "account")
+	ged.expectExit()
 }
 
 func TestAccountList(t *testing.T) {
 	datadir := tmpDatadirWithKeystore(t)
-	geth := runGeth(t, "--datadir", datadir, "account")
-	defer geth.expectExit()
+	ged := runGeth(t, "--datadir", datadir, "account")
+	defer ged.expectExit()
 	if runtime.GOOS == "windows" {
-		geth.expect(`
+		ged.expect(`
 Account #0: {7ef5a6135f1fd6a02593eedc869c6d41d934aef8} {{.Datadir}}\keystore\UTC--2016-03-22T12-57-55.920751759Z--7ef5a6135f1fd6a02593eedc869c6d41d934aef8
 Account #1: {f466859ead1932d743d622cb74fc058882e8648a} {{.Datadir}}\keystore\aaa
 Account #2: {289d485d9771714cce91d3393d764e1311907acc} {{.Datadir}}\keystore\zzz
 `)
 	} else {
-		geth.expect(`
+		ged.expect(`
 Account #0: {7ef5a6135f1fd6a02593eedc869c6d41d934aef8} {{.Datadir}}/keystore/UTC--2016-03-22T12-57-55.920751759Z--7ef5a6135f1fd6a02593eedc869c6d41d934aef8
 Account #1: {f466859ead1932d743d622cb74fc058882e8648a} {{.Datadir}}/keystore/aaa
 Account #2: {289d485d9771714cce91d3393d764e1311907acc} {{.Datadir}}/keystore/zzz
@@ -67,21 +67,21 @@ Account #2: {289d485d9771714cce91d3393d764e1311907acc} {{.Datadir}}/keystore/zzz
 }
 
 func TestAccountNew(t *testing.T) {
-	geth := runGeth(t, "--lightkdf", "account", "new")
-	defer geth.expectExit()
-	geth.expect(`
+	ged := runGeth(t, "--lightkdf", "account", "new")
+	defer ged.expectExit()
+	ged.expect(`
 Your new account is locked with a password. Please give a password. Do not forget this password.
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "foobar"}}
 Repeat passphrase: {{.InputLine "foobar"}}
 `)
-	geth.expectRegexp(`Address: \{[0-9a-f]{40}\}\n`)
+	ged.expectRegexp(`Address: \{[0-9a-f]{40}\}\n`)
 }
 
 func TestAccountNewBadRepeat(t *testing.T) {
-	geth := runGeth(t, "--lightkdf", "account", "new")
-	defer geth.expectExit()
-	geth.expect(`
+	ged := runGeth(t, "--lightkdf", "account", "new")
+	defer ged.expectExit()
+	ged.expect(`
 Your new account is locked with a password. Please give a password. Do not forget this password.
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "something"}}
@@ -92,11 +92,11 @@ Fatal: Passphrases do not match
 
 func TestAccountUpdate(t *testing.T) {
 	datadir := tmpDatadirWithKeystore(t)
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--datadir", datadir, "--lightkdf",
 		"account", "update", "f466859ead1932d743d622cb74fc058882e8648a")
-	defer geth.expectExit()
-	geth.expect(`
+	defer ged.expectExit()
+	ged.expect(`
 Unlocking account f466859ead1932d743d622cb74fc058882e8648a | Attempt 1/3
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "foobar"}}
@@ -107,24 +107,24 @@ Repeat passphrase: {{.InputLine "foobar2"}}
 }
 
 func TestWalletImport(t *testing.T) {
-	geth := runGeth(t, "--lightkdf", "wallet", "import", "testdata/guswallet.json")
-	defer geth.expectExit()
-	geth.expect(`
+	ged := runGeth(t, "--lightkdf", "wallet", "import", "testdata/guswallet.json")
+	defer ged.expectExit()
+	ged.expect(`
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "foo"}}
 Address: {d4584b5f6229b7be90727b0fc8c6b91bb427821f}
 `)
 
-	files, err := ioutil.ReadDir(filepath.Join(geth.Datadir, "keystore"))
+	files, err := ioutil.ReadDir(filepath.Join(ged.Datadir, "keystore"))
 	if len(files) != 1 {
 		t.Errorf("expected one key file in keystore directory, found %d files (error: %v)", len(files), err)
 	}
 }
 
 func TestWalletImportBadPassword(t *testing.T) {
-	geth := runGeth(t, "--lightkdf", "wallet", "import", "testdata/guswallet.json")
-	defer geth.expectExit()
-	geth.expect(`
+	ged := runGeth(t, "--lightkdf", "wallet", "import", "testdata/guswallet.json")
+	defer ged.expectExit()
+	ged.expect(`
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "wrong"}}
 Fatal: could not decrypt key with given passphrase
@@ -133,22 +133,22 @@ Fatal: could not decrypt key with given passphrase
 
 func TestUnlockFlag(t *testing.T) {
 	datadir := tmpDatadirWithKeystore(t)
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--datadir", datadir, "--nat", "none", "--nodiscover", "--dev",
 		"--unlock", "f466859ead1932d743d622cb74fc058882e8648a",
 		"js", "testdata/empty.js")
-	geth.expect(`
+	ged.expect(`
 Unlocking account f466859ead1932d743d622cb74fc058882e8648a | Attempt 1/3
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "foobar"}}
 `)
-	geth.expectExit()
+	ged.expectExit()
 
 	wantMessages := []string{
 		"Unlocked account f466859ead1932d743d622cb74fc058882e8648a",
 	}
 	for _, m := range wantMessages {
-		if !strings.Contains(geth.stderrText(), m) {
+		if !strings.Contains(ged.stderrText(), m) {
 			t.Errorf("stderr text does not contain %q", m)
 		}
 	}
@@ -156,11 +156,11 @@ Passphrase: {{.InputLine "foobar"}}
 
 func TestUnlockFlagWrongPassword(t *testing.T) {
 	datadir := tmpDatadirWithKeystore(t)
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--datadir", datadir, "--nat", "none", "--nodiscover", "--dev",
 		"--unlock", "f466859ead1932d743d622cb74fc058882e8648a")
-	defer geth.expectExit()
-	geth.expect(`
+	defer ged.expectExit()
+	ged.expect(`
 Unlocking account f466859ead1932d743d622cb74fc058882e8648a | Attempt 1/3
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "wrong1"}}
@@ -175,25 +175,25 @@ Fatal: Failed to unlock account f466859ead1932d743d622cb74fc058882e8648a (could 
 // https://github.com/ethereum/go-ethereum/issues/1785
 func TestUnlockFlagMultiIndex(t *testing.T) {
 	datadir := tmpDatadirWithKeystore(t)
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--datadir", datadir, "--nat", "none", "--nodiscover", "--dev",
 		"--unlock", "0,2",
 		"js", "testdata/empty.js")
-	geth.expect(`
+	ged.expect(`
 Unlocking account 0 | Attempt 1/3
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "foobar"}}
 Unlocking account 2 | Attempt 1/3
 Passphrase: {{.InputLine "foobar"}}
 `)
-	geth.expectExit()
+	ged.expectExit()
 
 	wantMessages := []string{
 		"Unlocked account 7ef5a6135f1fd6a02593eedc869c6d41d934aef8",
 		"Unlocked account 289d485d9771714cce91d3393d764e1311907acc",
 	}
 	for _, m := range wantMessages {
-		if !strings.Contains(geth.stderrText(), m) {
+		if !strings.Contains(ged.stderrText(), m) {
 			t.Errorf("stderr text does not contain %q", m)
 		}
 	}
@@ -201,18 +201,18 @@ Passphrase: {{.InputLine "foobar"}}
 
 func TestUnlockFlagPasswordFile(t *testing.T) {
 	datadir := tmpDatadirWithKeystore(t)
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--datadir", datadir, "--nat", "none", "--nodiscover", "--dev",
 		"--password", "testdata/passwords.txt", "--unlock", "0,2",
 		"js", "testdata/empty.js")
-	geth.expectExit()
+	ged.expectExit()
 
 	wantMessages := []string{
 		"Unlocked account 7ef5a6135f1fd6a02593eedc869c6d41d934aef8",
 		"Unlocked account 289d485d9771714cce91d3393d764e1311907acc",
 	}
 	for _, m := range wantMessages {
-		if !strings.Contains(geth.stderrText(), m) {
+		if !strings.Contains(ged.stderrText(), m) {
 			t.Errorf("stderr text does not contain %q", m)
 		}
 	}
@@ -220,29 +220,29 @@ func TestUnlockFlagPasswordFile(t *testing.T) {
 
 func TestUnlockFlagPasswordFileWrongPassword(t *testing.T) {
 	datadir := tmpDatadirWithKeystore(t)
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--datadir", datadir, "--nat", "none", "--nodiscover", "--dev",
 		"--password", "testdata/wrong-passwords.txt", "--unlock", "0,2")
-	defer geth.expectExit()
-	geth.expect(`
+	defer ged.expectExit()
+	ged.expect(`
 Fatal: Failed to unlock account 0 (could not decrypt key with given passphrase)
 `)
 }
 
 func TestUnlockFlagAmbiguous(t *testing.T) {
 	store := filepath.Join("..", "..", "accounts", "testdata", "dupes")
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--keystore", store, "--nat", "none", "--nodiscover", "--dev",
 		"--unlock", "f466859ead1932d743d622cb74fc058882e8648a",
 		"js", "testdata/empty.js")
-	defer geth.expectExit()
+	defer ged.expectExit()
 
 	// Helper for the expect template, returns absolute keystore path.
-	geth.setTemplateFunc("keypath", func(file string) string {
+	ged.setTemplateFunc("keypath", func(file string) string {
 		abs, _ := filepath.Abs(filepath.Join(store, file))
 		return abs
 	})
-	geth.expect(`
+	ged.expect(`
 Unlocking account f466859ead1932d743d622cb74fc058882e8648a | Attempt 1/3
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "foobar"}}
@@ -254,13 +254,13 @@ Your passphrase unlocked {{keypath "1"}}
 In order to avoid this warning, you need to remove the following duplicate key files:
    {{keypath "2"}}
 `)
-	geth.expectExit()
+	ged.expectExit()
 
 	wantMessages := []string{
 		"Unlocked account f466859ead1932d743d622cb74fc058882e8648a",
 	}
 	for _, m := range wantMessages {
-		if !strings.Contains(geth.stderrText(), m) {
+		if !strings.Contains(ged.stderrText(), m) {
 			t.Errorf("stderr text does not contain %q", m)
 		}
 	}
@@ -268,17 +268,17 @@ In order to avoid this warning, you need to remove the following duplicate key f
 
 func TestUnlockFlagAmbiguousWrongPassword(t *testing.T) {
 	store := filepath.Join("..", "..", "accounts", "testdata", "dupes")
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--keystore", store, "--nat", "none", "--nodiscover", "--dev",
 		"--unlock", "f466859ead1932d743d622cb74fc058882e8648a")
-	defer geth.expectExit()
+	defer ged.expectExit()
 
 	// Helper for the expect template, returns absolute keystore path.
-	geth.setTemplateFunc("keypath", func(file string) string {
+	ged.setTemplateFunc("keypath", func(file string) string {
 		abs, _ := filepath.Abs(filepath.Join(store, file))
 		return abs
 	})
-	geth.expect(`
+	ged.expect(`
 Unlocking account f466859ead1932d743d622cb74fc058882e8648a | Attempt 1/3
 !! Unsupported terminal, password will be echoed.
 Passphrase: {{.InputLine "wrong"}}
@@ -288,5 +288,5 @@ Multiple key files exist for address f466859ead1932d743d622cb74fc058882e8648a:
 Testing your passphrase against all of them...
 Fatal: None of the listed files could be unlocked.
 `)
-	geth.expectExit()
+	ged.expectExit()
 }

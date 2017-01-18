@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package geth
+package ged
 
 import (
 	"io/ioutil"
@@ -37,7 +37,7 @@ package go;
 import android.test.InstrumentationTestCase;
 import android.test.MoreAsserts;
 
-import org.ethereum.geth.*;
+import org.ethereum.ged.*;
 
 public class AndroidTest extends InstrumentationTestCase {
 	public AndroidTest() {}
@@ -122,7 +122,7 @@ public class AndroidTest extends InstrumentationTestCase {
 //
 // This method has been adapted from golang.org/x/mobile/bind/java/seq_test.go/runTest
 func TestAndroid(t *testing.T) {
-	// Skip tests on Windows altogether
+	// Skip tests on Windows altogeder
 	if runtime.GOOS == "windows" {
 		t.Skip("cannot test Android bindings on Windows, skipping")
 	}
@@ -146,7 +146,7 @@ func TestAndroid(t *testing.T) {
 		t.Logf("initialization took %v", time.Since(start))
 	}
 	// Create and switch to a temporary workspace
-	workspace, err := ioutil.TempDir("", "geth-android-")
+	workspace, err := ioutil.TempDir("", "ged-android-")
 	if err != nil {
 		t.Fatalf("failed to create temporary workspace: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestAndroid(t *testing.T) {
 	defer os.Chdir(pwd)
 
 	// Create the skeleton of the Android project
-	for _, dir := range []string{"src/main", "src/androidTest/java/org/ethereum/gethtest", "libs"} {
+	for _, dir := range []string{"src/main", "src/androidTest/java/org/ethereum/gedtest", "libs"} {
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
 			t.Fatal(err)
@@ -174,9 +174,9 @@ func TestAndroid(t *testing.T) {
 		t.Logf("%s", output)
 		t.Fatalf("failed to run gomobile bind: %v", err)
 	}
-	build.CopyFile(filepath.Join("libs", "geth.aar"), "geth.aar", os.ModePerm)
+	build.CopyFile(filepath.Join("libs", "ged.aar"), "ged.aar", os.ModePerm)
 
-	if err = ioutil.WriteFile(filepath.Join("src", "androidTest", "java", "org", "ethereum", "gethtest", "AndroidTest.java"), []byte(androidTestClass), os.ModePerm); err != nil {
+	if err = ioutil.WriteFile(filepath.Join("src", "androidTest", "java", "org", "ethereum", "gedtest", "AndroidTest.java"), []byte(androidTestClass), os.ModePerm); err != nil {
 		t.Fatalf("failed to write Android test class: %v", err)
 	}
 	// Finish creating the project and run the tests via gradle
@@ -194,7 +194,7 @@ func TestAndroid(t *testing.T) {
 
 const androidManifest = `<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.ethereum.gethtest"
+          package="org.ethereum.gedtest"
 	  android:versionCode="1"
 	  android:versionName="1.0">
 
@@ -223,6 +223,6 @@ repositories {
 }
 dependencies {
     compile 'com.android.support:appcompat-v7:19.0.0'
-    compile(name: "geth", ext: "aar")
+    compile(name: "ged", ext: "aar")
 }
 `

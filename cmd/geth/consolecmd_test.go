@@ -37,28 +37,28 @@ import (
 func TestConsoleWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 
-	// Start a geth console, make sure it's cleaned up and terminate the console
-	geth := runGeth(t,
+	// Start a ged console, make sure it's cleaned up and terminate the console
+	ged := runGeth(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--shh",
 		"console")
 
 	// Gather all the infos the welcome message needs to contain
-	geth.setTemplateFunc("goos", func() string { return runtime.GOOS })
-	geth.setTemplateFunc("gover", runtime.Version)
-	geth.setTemplateFunc("gethver", func() string { return params.Version })
-	geth.setTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
-	geth.setTemplateFunc("apis", func() []string {
+	ged.setTemplateFunc("goos", func() string { return runtime.GOOS })
+	ged.setTemplateFunc("gover", runtime.Version)
+	ged.setTemplateFunc("gedver", func() string { return params.Version })
+	ged.setTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
+	ged.setTemplateFunc("apis", func() []string {
 		apis := append(strings.Split(rpc.DefaultIPCApis, ","), rpc.MetadataApi)
 		sort.Strings(apis)
 		return apis
 	})
 
 	// Verify the actual welcome message to the required template
-	geth.expect(`
+	ged.expect(`
 Welcome to the Geth JavaScript console!
 
-instance: Geth/v{{gethver}}/{{goos}}/{{gover}}
+instance: Geth/v{{gedver}}/{{goos}}/{{gover}}
 coinbase: {{.Etherbase}}
 at block: 0 ({{niltime}})
  datadir: {{.Datadir}}
@@ -66,7 +66,7 @@ at block: 0 ({{niltime}})
 
 > {{.InputLine "exit"}}
 `)
-	geth.expectExit()
+	ged.expectExit()
 }
 
 // Tests that a console can be attached to a running node via various means.
@@ -75,56 +75,56 @@ func TestIPCAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	var ipc string
 	if runtime.GOOS == "windows" {
-		ipc = `\\.\pipe\geth` + strconv.Itoa(trulyRandInt(100000, 999999))
+		ipc = `\\.\pipe\ged` + strconv.Itoa(trulyRandInt(100000, 999999))
 	} else {
 		ws := tmpdir(t)
 		defer os.RemoveAll(ws)
-		ipc = filepath.Join(ws, "geth.ipc")
+		ipc = filepath.Join(ws, "ged.ipc")
 	}
 	// Note: we need --shh because testAttachWelcome checks for default
 	// list of ipc modules and shh is included there.
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--shh", "--ipcpath", ipc)
 
 	time.Sleep(2 * time.Second) // Simple way to wait for the RPC endpoint to open
-	testAttachWelcome(t, geth, "ipc:"+ipc)
+	testAttachWelcome(t, ged, "ipc:"+ipc)
 
-	geth.interrupt()
-	geth.expectExit()
+	ged.interrupt()
+	ged.expectExit()
 }
 
 func TestHTTPAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	port := strconv.Itoa(trulyRandInt(1024, 65536)) // Yeah, sometimes this will fail, sorry :P
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--rpc", "--rpcport", port)
 
 	time.Sleep(2 * time.Second) // Simple way to wait for the RPC endpoint to open
-	testAttachWelcome(t, geth, "http://localhost:"+port)
+	testAttachWelcome(t, ged, "http://localhost:"+port)
 
-	geth.interrupt()
-	geth.expectExit()
+	ged.interrupt()
+	ged.expectExit()
 }
 
 func TestWSAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	port := strconv.Itoa(trulyRandInt(1024, 65536)) // Yeah, sometimes this will fail, sorry :P
 
-	geth := runGeth(t,
+	ged := runGeth(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--ws", "--wsport", port)
 
 	time.Sleep(2 * time.Second) // Simple way to wait for the RPC endpoint to open
-	testAttachWelcome(t, geth, "ws://localhost:"+port)
+	testAttachWelcome(t, ged, "ws://localhost:"+port)
 
-	geth.interrupt()
-	geth.expectExit()
+	ged.interrupt()
+	ged.expectExit()
 }
 
-func testAttachWelcome(t *testing.T, geth *testgeth, endpoint string) {
-	// Attach to a running geth note and terminate immediately
+func testAttachWelcome(t *testing.T, ged *testged, endpoint string) {
+	// Attach to a running ged note and terminate immediately
 	attach := runGeth(t, "attach", endpoint)
 	defer attach.expectExit()
 	attach.stdin.Close()
@@ -132,11 +132,11 @@ func testAttachWelcome(t *testing.T, geth *testgeth, endpoint string) {
 	// Gather all the infos the welcome message needs to contain
 	attach.setTemplateFunc("goos", func() string { return runtime.GOOS })
 	attach.setTemplateFunc("gover", runtime.Version)
-	attach.setTemplateFunc("gethver", func() string { return params.Version })
-	attach.setTemplateFunc("etherbase", func() string { return geth.Etherbase })
+	attach.setTemplateFunc("gedver", func() string { return params.Version })
+	attach.setTemplateFunc("etherbase", func() string { return ged.Etherbase })
 	attach.setTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
 	attach.setTemplateFunc("ipc", func() bool { return strings.HasPrefix(endpoint, "ipc") })
-	attach.setTemplateFunc("datadir", func() string { return geth.Datadir })
+	attach.setTemplateFunc("datadir", func() string { return ged.Datadir })
 	attach.setTemplateFunc("apis", func() []string {
 		var apis []string
 		if strings.HasPrefix(endpoint, "ipc") {
@@ -152,7 +152,7 @@ func testAttachWelcome(t *testing.T, geth *testgeth, endpoint string) {
 	attach.expect(`
 Welcome to the Geth JavaScript console!
 
-instance: Geth/v{{gethver}}/{{goos}}/{{gover}}
+instance: Geth/v{{gedver}}/{{goos}}/{{gover}}
 coinbase: {{etherbase}}
 at block: 0 ({{niltime}}){{if ipc}}
  datadir: {{datadir}}{{end}}

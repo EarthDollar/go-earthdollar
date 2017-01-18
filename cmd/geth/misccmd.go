@@ -68,7 +68,7 @@ The output of this command is supposed to be machine-readable.
 func makedag(ctx *cli.Context) error {
 	args := ctx.Args()
 	wrongArgs := func() {
-		utils.Fatalf(`Usage: geth makedag <block number> <outputdir>`)
+		utils.Fatalf(`Usage: ged makedag <block number> <outputdir>`)
 	}
 	switch {
 	case len(args) == 2:
@@ -122,7 +122,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with geth. If not, see <http://www.gnu.org/licenses/>.
+along with ged. If not, see <http://www.gnu.org/licenses/>.
 `)
 	return nil
 }

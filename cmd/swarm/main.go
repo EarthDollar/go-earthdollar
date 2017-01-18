@@ -93,7 +93,7 @@ var (
 	EthAPIFlag = cli.StringFlag{
 		Name:  "ethapi",
 		Usage: "URL of the Ethereum API provider",
-		Value: node.DefaultIPCEndpoint("geth"),
+		Value: node.DefaultIPCEndpoint("ged"),
 	}
 	SwarmApiFlag = cli.StringFlag{
 		Name:  "bzzapi",
@@ -119,7 +119,7 @@ var (
 )
 
 func init() {
-	// Override flag defaults so bzzd can run alongside geth.
+	// Override flag defaults so bzzd can run alongside ged.
 	utils.ListenPortFlag.Value = 30399
 	utils.IPCPathFlag.Value = utils.DirectoryString{Value: "bzzd.ipc"}
 	utils.IPCApiFlag.Value = "admin, bzz, chequebook, debug, rpc, web3"
