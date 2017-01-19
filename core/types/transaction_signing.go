@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/crypto"
+	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 var ErrInvalidChainId = errors.New("invalid chaid id for signer")

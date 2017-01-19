@@ -7,10 +7,10 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/EarthDollar/go-earthdollar/accounts/abi"
+	"github.com/EarthDollar/go-earthdollar/accounts/abi/bind"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/core/types"
 )
 
 // ChequebookABI is the input ABI used to generate the binding from.

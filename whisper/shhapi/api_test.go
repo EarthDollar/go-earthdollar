@@ -23,8 +23,8 @@ import (
 
 	"encoding/json"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/whisper/whisperv5"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/whisper/whisperv5"
 )
 
 func TestBasic(t *testing.T) {

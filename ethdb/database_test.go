@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/EarthDollar/go-earthdollar/common"
 )
 
 func newDb() *LDBDatabase {

@@ -19,8 +19,8 @@ package trie
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/ethdb"
 )
 
 func TestIterator(t *testing.T) {

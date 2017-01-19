@@ -25,10 +25,10 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/logger"
+	"github.com/EarthDollar/go-earthdollar/logger/glog"
+	"github.com/EarthDollar/go-earthdollar/swarm/storage"
 )
 
 const maxParallelFiles = 5

@@ -20,12 +20,12 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/core/state"
+	"github.com/EarthDollar/go-earthdollar/core/vm"
+	"github.com/EarthDollar/go-earthdollar/crypto"
+	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 // Config is a basic type specifying certain configuration flags for running

@@ -21,8 +21,8 @@ package ged
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/EarthDollar/go-earthdollar/core/types"
+	"github.com/EarthDollar/go-earthdollar/ethclient"
 )
 
 // EthereumClient provides access to the Ethereum APIs.

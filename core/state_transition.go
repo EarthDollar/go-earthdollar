@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/core/vm"
+	"github.com/EarthDollar/go-earthdollar/logger"
+	"github.com/EarthDollar/go-earthdollar/logger/glog"
+	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 var (

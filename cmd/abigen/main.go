@@ -24,8 +24,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common/compiler"
+	"github.com/EarthDollar/go-earthdollar/accounts/abi/bind"
+	"github.com/EarthDollar/go-earthdollar/common/compiler"
 )
 
 var (

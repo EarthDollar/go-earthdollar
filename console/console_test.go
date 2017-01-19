@@ -27,11 +27,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/internal/jsre"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/eth"
+	"github.com/EarthDollar/go-earthdollar/internal/jsre"
+	"github.com/EarthDollar/go-earthdollar/node"
+	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 const (

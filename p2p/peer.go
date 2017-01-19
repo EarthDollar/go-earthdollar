@@ -25,10 +25,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/EarthDollar/go-earthdollar/logger"
+	"github.com/EarthDollar/go-earthdollar/logger/glog"
+	"github.com/EarthDollar/go-earthdollar/p2p/discover"
+	"github.com/EarthDollar/go-earthdollar/rlp"
 )
 
 const (

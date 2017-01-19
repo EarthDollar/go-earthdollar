@@ -20,18 +20,18 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/EarthDollar/go-earthdollar/logger"
+	"github.com/EarthDollar/go-earthdollar/logger/glog"
 )
 
 /*
 http roundtripper to register for bzz url scheme
-see https://github.com/ethereum/go-ethereum/issues/2040
+see https://github.com/EarthDollar/go-earthdollar/issues/2040
 Usage:
 
 import (
- "github.com/ethereum/go-ethereum/common/httpclient"
- "github.com/ethereum/go-ethereum/swarm/api/http"
+ "github.com/EarthDollar/go-earthdollar/common/httpclient"
+ "github.com/EarthDollar/go-earthdollar/swarm/api/http"
 )
 client := httpclient.New()
 // for (private) swarm proxy running locally

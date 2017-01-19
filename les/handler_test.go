@@ -20,14 +20,14 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/core"
+	"github.com/EarthDollar/go-earthdollar/core/types"
+	"github.com/EarthDollar/go-earthdollar/crypto"
+	"github.com/EarthDollar/go-earthdollar/eth/downloader"
+	"github.com/EarthDollar/go-earthdollar/p2p"
+	"github.com/EarthDollar/go-earthdollar/rlp"
+	"github.com/EarthDollar/go-earthdollar/trie"
 )
 
 func expectResponse(r p2p.MsgReader, msgcode, reqID, bv uint64, data interface{}) error {

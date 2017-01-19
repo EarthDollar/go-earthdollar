@@ -26,15 +26,15 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/p2p/discv5"
-	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/p2p/netutil"
+	"github.com/EarthDollar/go-earthdollar/accounts"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/crypto"
+	"github.com/EarthDollar/go-earthdollar/logger"
+	"github.com/EarthDollar/go-earthdollar/logger/glog"
+	"github.com/EarthDollar/go-earthdollar/p2p/discover"
+	"github.com/EarthDollar/go-earthdollar/p2p/discv5"
+	"github.com/EarthDollar/go-earthdollar/p2p/nat"
+	"github.com/EarthDollar/go-earthdollar/p2p/netutil"
 )
 
 var (

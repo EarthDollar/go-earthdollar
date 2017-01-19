@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/core/state"
+	"github.com/EarthDollar/go-earthdollar/core/types"
+	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 // ValidateDAOHeaderExtraData validates the extra-data field of a block header to

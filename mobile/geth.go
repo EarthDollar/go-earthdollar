@@ -24,15 +24,15 @@ import (
 	"math/big"
 	"path/filepath"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/ethstats"
-	"github.com/ethereum/go-ethereum/les"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/whisper/whisperv2"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/eth"
+	"github.com/EarthDollar/go-earthdollar/ethclient"
+	"github.com/EarthDollar/go-earthdollar/ethstats"
+	"github.com/EarthDollar/go-earthdollar/les"
+	"github.com/EarthDollar/go-earthdollar/node"
+	"github.com/EarthDollar/go-earthdollar/p2p/nat"
+	"github.com/EarthDollar/go-earthdollar/params"
+	"github.com/EarthDollar/go-earthdollar/whisper/whisperv2"
 )
 
 // NodeConfig represents the collection of configuration values to fine tune the Geth

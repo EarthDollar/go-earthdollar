@@ -17,7 +17,7 @@
 package ged
 
 import (
-	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/EarthDollar/go-earthdollar/logger/glog"
 )
 
 // SetVerbosity sets the global verbosity level (between 0 and 6 - see logger/verbosity.go).

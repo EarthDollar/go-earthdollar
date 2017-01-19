@@ -3,7 +3,7 @@ package vm
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 func makeStackFunc(pop, push int) stackValidationFunc {

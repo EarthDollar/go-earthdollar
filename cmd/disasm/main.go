@@ -24,7 +24,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/EarthDollar/go-earthdollar/core/vm"
 )
 
 func main() {

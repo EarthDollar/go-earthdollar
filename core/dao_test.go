@@ -20,10 +20,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/core/vm"
+	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/event"
+	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 // Tests that DAO-fork enabled clients can properly filter out fork-commencing

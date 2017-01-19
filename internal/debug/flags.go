@@ -22,8 +22,8 @@ import (
 	_ "net/http/pprof"
 	"runtime"
 
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
+	"github.com/EarthDollar/go-earthdollar/logger"
+	"github.com/EarthDollar/go-earthdollar/logger/glog"
 	"gopkg.in/urfave/cli.v1"
 )
 

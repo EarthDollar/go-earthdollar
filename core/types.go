@@ -19,9 +19,9 @@ package core
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/EarthDollar/go-earthdollar/core/state"
+	"github.com/EarthDollar/go-earthdollar/core/types"
+	"github.com/EarthDollar/go-earthdollar/core/vm"
 )
 
 // Validator is an interface which defines the standard for block validation.

@@ -22,7 +22,7 @@ package ged
 import (
 	"errors"
 
-	"github.com/ethereum/go-ethereum/p2p/discv5"
+	"github.com/EarthDollar/go-earthdollar/p2p/discv5"
 )
 
 // Enode represents a host on the network.

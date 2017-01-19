@@ -28,8 +28,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/EarthDollar/go-earthdollar/params"
+	"github.com/EarthDollar/go-earthdollar/rpc"
 )
 
 // Tests that a node embedded within a console can be started up properly and

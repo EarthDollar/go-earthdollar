@@ -17,8 +17,8 @@
 package light
 
 import (
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/trie"
 	"golang.org/x/net/context"
 )
 

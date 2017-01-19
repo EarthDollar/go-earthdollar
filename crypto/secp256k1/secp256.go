@@ -41,7 +41,7 @@ import (
 	"math/big"
 	"unsafe"
 
-	"github.com/ethereum/go-ethereum/crypto/randentropy"
+	"github.com/EarthDollar/go-earthdollar/crypto/randentropy"
 )
 
 var (

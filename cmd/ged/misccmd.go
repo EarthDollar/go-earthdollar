@@ -26,9 +26,9 @@ import (
 	"strings"
 
 	"github.com/ethereum/ethash"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/cmd/utils"
+	"github.com/EarthDollar/go-earthdollar/eth"
+	"github.com/EarthDollar/go-earthdollar/params"
 	"gopkg.in/urfave/cli.v1"
 )
 

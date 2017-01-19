@@ -3,8 +3,8 @@ package vm
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 func memoryGasCost(mem *Memory, newMemSize *big.Int) *big.Int {

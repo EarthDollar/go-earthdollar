@@ -21,7 +21,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/EarthDollar/go-earthdollar/rpc"
 	"golang.org/x/net/context"
 )
 

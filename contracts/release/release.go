@@ -24,16 +24,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/les"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/EarthDollar/go-earthdollar/accounts/abi/bind"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/eth"
+	"github.com/EarthDollar/go-earthdollar/internal/ethapi"
+	"github.com/EarthDollar/go-earthdollar/les"
+	"github.com/EarthDollar/go-earthdollar/logger"
+	"github.com/EarthDollar/go-earthdollar/logger/glog"
+	"github.com/EarthDollar/go-earthdollar/node"
+	"github.com/EarthDollar/go-earthdollar/p2p"
+	"github.com/EarthDollar/go-earthdollar/rpc"
 	"golang.org/x/net/context"
 )
 
@@ -141,7 +141,7 @@ func (r *ReleaseService) checker() {
 
 				warning := fmt.Sprintf("Client v%d.%d.%d-%x seems older than the latest upstream release v%d.%d.%d-%x",
 					r.config.Major, r.config.Minor, r.config.Patch, r.config.Commit[:4], version.Major, version.Minor, version.Patch, version.Commit[:4])
-				howtofix := fmt.Sprintf("Please check https://github.com/ethereum/go-ethereum/releases for new releases")
+				howtofix := fmt.Sprintf("Please check https://github.com/EarthDollar/go-earthdollar/releases for new releases")
 				separator := strings.Repeat("-", len(warning))
 
 				glog.V(logger.Warn).Info(separator)

@@ -19,9 +19,9 @@
 package ged
 
 import (
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/p2p/discv5"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/EarthDollar/go-earthdollar/core"
+	"github.com/EarthDollar/go-earthdollar/p2p/discv5"
+	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 // MainnetChainConfig returns the chain configurations for the main Ethereum network.

@@ -22,7 +22,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"github.com/EarthDollar/go-earthdollar/swarm/storage"
 	"gopkg.in/urfave/cli.v1"
 )
 

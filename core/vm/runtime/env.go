@@ -19,10 +19,10 @@ package runtime
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/EarthDollar/go-earthdollar/common"
+	"github.com/EarthDollar/go-earthdollar/core"
+	"github.com/EarthDollar/go-earthdollar/core/state"
+	"github.com/EarthDollar/go-earthdollar/core/vm"
 )
 
 func NewEnv(cfg *Config, state *state.StateDB) *vm.EVM {

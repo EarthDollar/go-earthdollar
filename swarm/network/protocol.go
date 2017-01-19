@@ -36,15 +36,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ethereum/go-ethereum/contracts/chequebook"
-	"github.com/ethereum/go-ethereum/errs"
-	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/logger/glog"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	bzzswap "github.com/ethereum/go-ethereum/swarm/services/swap"
-	"github.com/ethereum/go-ethereum/swarm/services/swap/swap"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"github.com/EarthDollar/go-earthdollar/contracts/chequebook"
+	"github.com/EarthDollar/go-earthdollar/errs"
+	"github.com/EarthDollar/go-earthdollar/logger"
+	"github.com/EarthDollar/go-earthdollar/logger/glog"
+	"github.com/EarthDollar/go-earthdollar/p2p"
+	"github.com/EarthDollar/go-earthdollar/p2p/discover"
+	bzzswap "github.com/EarthDollar/go-earthdollar/swarm/services/swap"
+	"github.com/EarthDollar/go-earthdollar/swarm/services/swap/swap"
+	"github.com/EarthDollar/go-earthdollar/swarm/storage"
 )
 
 const (

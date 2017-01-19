@@ -20,11 +20,11 @@ import (
 	"container/list"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/core/types"
-	// "github.com/ethereum/go-ethereum/crypto"
+	"github.com/EarthDollar/go-earthdollar/core/types"
+	// "github.com/EarthDollar/go-earthdollar/crypto"
 
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/event"
 )
 
 // Implement our EthTest Manager

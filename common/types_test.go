@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/EarthDollar/go-earthdollar/common/hexutil"
 )
 
 func TestBytesConversion(t *testing.T) {

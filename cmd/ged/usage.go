@@ -21,8 +21,8 @@ package main
 import (
 	"io"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/internal/debug"
+	"github.com/EarthDollar/go-earthdollar/cmd/utils"
+	"github.com/EarthDollar/go-earthdollar/internal/debug"
 	"gopkg.in/urfave/cli.v1"
 )
 

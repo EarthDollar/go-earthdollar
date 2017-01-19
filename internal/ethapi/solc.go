@@ -19,8 +19,8 @@ package ethapi
 import (
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common/compiler"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/EarthDollar/go-earthdollar/common/compiler"
+	"github.com/EarthDollar/go-earthdollar/rpc"
 )
 
 func makeCompilerAPIs(solcPath string) []rpc.API {

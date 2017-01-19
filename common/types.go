@@ -22,7 +22,7 @@ import (
 	"math/rand"
 	"reflect"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/EarthDollar/go-earthdollar/common/hexutil"
 )
 
 const (
