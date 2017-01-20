@@ -22,7 +22,7 @@ import (
 	"math/big"
 
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/ethclient"
+	"github.com/EarthDollar/go-earthdollar/edclient"
 )
 
 // EthereumClient provides access to the Ethereum APIs.

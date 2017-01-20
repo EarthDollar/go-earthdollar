@@ -130,7 +130,7 @@ func NewNode(datadir string, config *NodeConfig) (stack *Node, _ error) {
 	}
 	// Register the Ethereum protocol if requested
 	if config.EthereumEnabled {
-		ethConf := &eth.Config{
+		ethConf := &ed.Config{
 			ChainConfig: &params.ChainConfig{
 				ChainId:        big.NewInt(config.EthereumChainConfig.ChainID),
 				HomesteadBlock: big.NewInt(config.EthereumChainConfig.HomesteadBlock),
@@ -164,7 +164,7 @@ func NewNode(datadir string, config *NodeConfig) (stack *Node, _ error) {
 				var lesServ *les.LightEthereum
 				ctx.Service(&lesServ)
 
-				return ethstats.New(config.EthereumNetStats, nil, lesServ)
+				return edstats.New(config.EthereumNetStats, nil, lesServ)
 			}); err != nil {
 				return nil, fmt.Errorf("netstats init: %v", err)
 			}

@@ -29,14 +29,14 @@ import (
 // Constants to match up protocol versions and messages
 const (
 	ed62 = 62
-	ed63 = 63
+	eth63 = 63
 )
 
 // Official short name of the protocol used during capability negotiation.
 var ProtocolName = "ed"
 
 // Supported versions of the ed protocol (first is primary).
-var ProtocolVersions = []uint{ed63, ed62}
+var ProtocolVersions = []uint{eth63, ed62}
 
 // Number of implemented message corresponding to different protocol versions.
 var ProtocolLengths = []uint64{17, 8}

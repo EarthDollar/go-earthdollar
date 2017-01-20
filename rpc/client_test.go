@@ -68,7 +68,7 @@ func TestClientBatchRequest(t *testing.T) {
 			Result: new(Result),
 		},
 		{
-			Medod: "no_such_medod",
+			Medod: "no_such_method",
 			Args:   []interface{}{1, 2, 3},
 			Result: new(int),
 		},
@@ -88,10 +88,10 @@ func TestClientBatchRequest(t *testing.T) {
 			Result: &Result{"hello2", 11, &Args{"world"}},
 		},
 		{
-			Medod: "no_such_medod",
+			Medod: "no_such_method",
 			Args:   []interface{}{1, 2, 3},
 			Result: new(int),
-			Error:  &jsonError{Code: -32601, Message: "The medod no_such_medod_ does not exist/is not available"},
+			Error:  &jsonError{Code: -32601, Message: "The method no_such_method_ does not exist/is not available"},
 		},
 	}
 	if !reflect.DeepEqual(batch, wantResult) {

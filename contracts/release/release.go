@@ -63,7 +63,7 @@ type ReleaseService struct {
 func NewReleaseService(ctx *node.ServiceContext, config Config) (node.Service, error) {
 	// Retrieve the Ethereum service dependency to access the blockchain
 	var apiBackend edapi.Backend
-	var ethereum *eth.Ethereum
+	var ethereum *ed.Ethereum
 	if err := ctx.Service(&ethereum); err == nil {
 		apiBackend = ethereum.ApiBackend
 	} else {
@@ -75,7 +75,7 @@ func NewReleaseService(ctx *node.ServiceContext, config Config) (node.Service, e
 		}
 	}
 	// Construct the release service
-	contract, err := NewReleaseOracle(config.Oracle, eth.NewContractBackend(apiBackend))
+	contract, err := NewReleaseOracle(config.Oracle, ed.NewContractBackend(apiBackend))
 	if err != nil {
 		return nil, err
 	}

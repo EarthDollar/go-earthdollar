@@ -30,7 +30,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/console"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/ethclient"
+	"github.com/EarthDollar/go-earthdollar/edclient"
 	"github.com/EarthDollar/go-earthdollar/internal/debug"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"

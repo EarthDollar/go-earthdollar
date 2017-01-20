@@ -117,7 +117,7 @@ var (
 	NetworkIdFlag = cli.IntFlag{
 		Name:  "networkid",
 		Usage: "Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten)",
-		Value: eth.NetworkId,
+		Value: ed.NetworkId,
 	}
 	TestNetFlag = cli.BoolFlag{
 		Name:  "testnet",
@@ -718,7 +718,7 @@ func RegisterEthService(ctx *cli.Context, stack *node.Node, extra []byte) {
 		Fatalf("The %v flags are mutually exclusive", netFlags)
 	}
 
-	ethConf := &eth.Config{
+	ethConf := &ed.Config{
 		Etherbase:               MakeEtherbase(stack.AccountManager(), ctx),
 		ChainConfig:             MakeChainConfig(ctx, stack),
 		FastSync:                ctx.GlobalBool(FastSyncFlag.Name),
@@ -772,7 +772,7 @@ func RegisterEthService(ctx *cli.Context, stack *node.Node, extra []byte) {
 		}
 	} else {
 		if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-			fullNode, err := eth.New(ctx, ethConf)
+			fullNode, err := ed.New(ctx, ethConf)
 			if fullNode != nil && ethConf.LightServ > 0 {
 				ls, _ := les.NewLesServer(fullNode, ethConf)
 				fullNode.AddLesServer(ls)
@@ -796,13 +796,13 @@ func RegisterShhService(stack *node.Node) {
 func RegisterEthStatsService(stack *node.Node, url string) {
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		// Retrieve both eth and les services
-		var ethServ *eth.Ethereum
+		var ethServ *ed.Ethereum
 		ctx.Service(&ethServ)
 
 		var lesServ *les.LightEthereum
 		ctx.Service(&lesServ)
 
-		return ethstats.New(url, ethServ, lesServ)
+		return edstats.New(url, ethServ, lesServ)
 	}); err != nil {
 		Fatalf("Failed to register the Ethereum Stats service: %v", err)
 	}

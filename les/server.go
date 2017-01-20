@@ -47,7 +47,7 @@ type LesServer struct {
 	lock            sync.Mutex
 }
 
-func NewLesServer(eth *eth.Ethereum, config *eth.Config) (*LesServer, error) {
+func NewLesServer(eth *ed.Ethereum, config *ed.Config) (*LesServer, error) {
 	pm, err := NewProtocolManager(config.ChainConfig, false, config.NetworkId, eth.EventMux(), eth.Pow(), eth.BlockChain(), eth.TxPool(), eth.ChainDb(), nil, nil)
 	if err != nil {
 		return nil, err

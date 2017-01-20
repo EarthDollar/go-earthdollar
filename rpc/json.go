@@ -32,14 +32,14 @@ import (
 
 const (
 	jsonrpcVersion         = "2.0"
-	serviceMedodSeparator = "_"
-	subscribeMedod        = "ed_subscribe"
-	unsubscribeMedod      = "ed_unsubscribe"
-	notificationMedod     = "ed_subscription"
+	serviceMethodSeparator = "_"
+	subscribeMethod        = "ed_subscribe"
+	unsubscribeMethod      = "ed_unsubscribe"
+	notificationMethod     = "ed_subscription"
 )
 
 type jsonRequest struct {
-	Medod  string          `json:"medod"`
+	Medod  string          `json:"method"`
 	Version string          `json:"jsonrpc"`
 	Id      json.RawMessage `json:"id,omitempty"`
 	Payload json.RawMessage `json:"params,omitempty"`
@@ -70,7 +70,7 @@ type jsonSubscription struct {
 
 type jsonNotification struct {
 	Version string           `json:"jsonrpc"`
-	Medod  string           `json:"medod"`
+	Medod  string           `json:"method"`
 	Params  jsonSubscription `json:"params"`
 }
 
@@ -135,7 +135,7 @@ func (c *jsonCodec) ReadRequestHeaders() ([]rpcRequest, bool, Error) {
 	return parseRequest(incomingMsg)
 }
 
-// checkReqId returns an error when the given reqId isn't valid for RPC medod calls.
+// checkReqId returns an error when the given reqId isn't valid for RPC method calls.
 // valid id's are strings, numbers or null
 func checkReqId(reqId json.RawMessage) error {
 	if len(reqId) == 0 {
@@ -164,41 +164,41 @@ func parseRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) {
 		return nil, false, &invalidMessageError{err.Error()}
 	}
 
-	// subscribe are special, they will always use `subscribeMedod` as first param in the payload
-	if in.Medod == subscribeMedod {
+	// subscribe are special, they will always use `subscribeMethod` as first param in the payload
+	if in.Medod == subscribeMethod {
 		reqs := []rpcRequest{{id: &in.Id, isPubSub: true}}
 		if len(in.Payload) > 0 {
 			// first param must be subscription name
-			var subscribeMedod [1]string
-			if err := json.Unmarshal(in.Payload, &subscribeMedod); err != nil {
-				glog.V(logger.Debug).Infof("Unable to parse subscription medod: %v\n", err)
+			var subscribeMethod [1]string
+			if err := json.Unmarshal(in.Payload, &subscribeMethod); err != nil {
+				glog.V(logger.Debug).Infof("Unable to parse subscription method: %v\n", err)
 				return nil, false, &invalidRequestError{"Unable to parse subscription request"}
 			}
 
 			// all subscriptions are made on the ed service
-			reqs[0].service, reqs[0].medod = "ed", subscribeMedod[0]
+			reqs[0].service, reqs[0].method = "ed", subscribeMethod[0]
 			reqs[0].params = in.Payload
 			return reqs, false, nil
 		}
 		return nil, false, &invalidRequestError{"Unable to parse subscription request"}
 	}
 
-	if in.Medod == unsubscribeMedod {
+	if in.Medod == unsubscribeMethod {
 		return []rpcRequest{{id: &in.Id, isPubSub: true,
-			medod: unsubscribeMedod, params: in.Payload}}, false, nil
+			method: unsubscribeMethod, params: in.Payload}}, false, nil
 	}
 
-	elems := strings.Split(in.Medod, serviceMedodSeparator)
+	elems := strings.Split(in.Medod, serviceMethodSeparator)
 	if len(elems) != 2 {
-		return nil, false, &medodNotFoundError{in.Medod, ""}
+		return nil, false, &methodNotFoundError{in.Medod, ""}
 	}
 
 	// regular RPC call
 	if len(in.Payload) == 0 {
-		return []rpcRequest{{service: elems[0], medod: elems[1], id: &in.Id}}, false, nil
+		return []rpcRequest{{service: elems[0], method: elems[1], id: &in.Id}}, false, nil
 	}
 
-	return []rpcRequest{{service: elems[0], medod: elems[1], id: &in.Id, params: in.Payload}}, false, nil
+	return []rpcRequest{{service: elems[0], method: elems[1], id: &in.Id, params: in.Payload}}, false, nil
 }
 
 // parseBatchRequest will parse a batch request into a collection of requests from the given RawMessage, an indication
@@ -217,19 +217,19 @@ func parseBatchRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) 
 
 		id := &in[i].Id
 
-		// subscribe are special, they will always use `subscribeMedod` as first param in the payload
-		if r.Medod == subscribeMedod {
+		// subscribe are special, they will always use `subscribeMethod` as first param in the payload
+		if r.Medod == subscribeMethod {
 			requests[i] = rpcRequest{id: id, isPubSub: true}
 			if len(r.Payload) > 0 {
 				// first param must be subscription name
-				var subscribeMedod [1]string
-				if err := json.Unmarshal(r.Payload, &subscribeMedod); err != nil {
-					glog.V(logger.Debug).Infof("Unable to parse subscription medod: %v\n", err)
+				var subscribeMethod [1]string
+				if err := json.Unmarshal(r.Payload, &subscribeMethod); err != nil {
+					glog.V(logger.Debug).Infof("Unable to parse subscription method: %v\n", err)
 					return nil, false, &invalidRequestError{"Unable to parse subscription request"}
 				}
 
 				// all subscriptions are made on the ed service
-				requests[i].service, requests[i].medod = "ed", subscribeMedod[0]
+				requests[i].service, requests[i].method = "ed", subscribeMethod[0]
 				requests[i].params = r.Payload
 				continue
 			}
@@ -237,8 +237,8 @@ func parseBatchRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) 
 			return nil, true, &invalidRequestError{"Unable to parse (un)subscribe request arguments"}
 		}
 
-		if r.Medod == unsubscribeMedod {
-			requests[i] = rpcRequest{id: id, isPubSub: true, medod: unsubscribeMedod, params: r.Payload}
+		if r.Medod == unsubscribeMethod {
+			requests[i] = rpcRequest{id: id, isPubSub: true, method: unsubscribeMethod, params: r.Payload}
 			continue
 		}
 
@@ -247,10 +247,10 @@ func parseBatchRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) 
 		} else {
 			requests[i] = rpcRequest{id: id, params: r.Payload}
 		}
-		if elem := strings.Split(r.Medod, serviceMedodSeparator); len(elem) == 2 {
-			requests[i].service, requests[i].medod = elem[0], elem[1]
+		if elem := strings.Split(r.Medod, serviceMethodSeparator); len(elem) == 2 {
+			requests[i].service, requests[i].method = elem[0], elem[1]
 		} else {
-			requests[i].err = &medodNotFoundError{r.Medod, ""}
+			requests[i].err = &methodNotFoundError{r.Medod, ""}
 		}
 	}
 
@@ -328,11 +328,11 @@ func (c *jsonCodec) CreateErrorResponseWithInfo(id interface{}, err Error, info 
 // CreateNotification will create a JSON-RPC notification with the given subscription id and event as params.
 func (c *jsonCodec) CreateNotification(subid string, event interface{}) interface{} {
 	if isHexNum(reflect.TypeOf(event)) {
-		return &jsonNotification{Version: jsonrpcVersion, Medod: notificationMedod,
+		return &jsonNotification{Version: jsonrpcVersion, Medod: notificationMethod,
 			Params: jsonSubscription{Subscription: subid, Result: fmt.Sprintf(`%#x`, event)}}
 	}
 
-	return &jsonNotification{Version: jsonrpcVersion, Medod: notificationMedod,
+	return &jsonNotification{Version: jsonrpcVersion, Medod: notificationMethod,
 		Params: jsonSubscription{Subscription: subid, Result: event}}
 }
 
