@@ -1,18 +1,18 @@
-// Copyright 2014 The go-edereum Authors
-// This file is part of the go-edereum library.
+// Copyright 2014 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-edereum library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-edereum library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-edereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package ed implements the Ethereum protocol.
 package ed
@@ -114,7 +114,7 @@ type LesServer interface {
 type Ethereum struct {
 	chainConfig *params.ChainConfig
 	// Channel for shutting down the service
-	shutdownChan  chan bool // Channel for shutting down the edereum
+	shutdownChan  chan bool // Channel for shutting down the ethereum
 	stopDbUpgrade func()    // stop chain db sequential key upgrade
 	// Handlers
 	txPool          *core.TxPool
@@ -203,7 +203,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		if err != nil {
 			return nil, err
 		}
-		glog.V(logger.Info).Infoln("WARNING: Wrote default edereum genesis block")
+		glog.V(logger.Info).Infoln("WARNING: Wrote default ethereum genesis block")
 	}
 
 	if config.ChainConfig == nil {
@@ -306,7 +306,7 @@ func CreatePoW(config *Config) (pow.PoW, error) {
 	}
 }
 
-// APIs returns the collection of RPC services the edereum package offers.
+// APIs returns the collection of RPC services the ethereum package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
 func (s *Ethereum) APIs() []rpc.API {
 	return append(edapi.GetAPIs(s.ApiBackend, s.solcPath), []rpc.API{

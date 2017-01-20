@@ -1,18 +1,18 @@
-// Copyright 2016 The go-edereum Authors
-// This file is part of the go-edereum library.
+// Copyright 2016 The go-ethereum Authors
+// This file is part of the go-ethereum library.
 //
-// The go-edereum library is free software: you can redistribute it and/or modify
+// The go-ethereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-edereum library is distributed in the hope that it will be useful,
+// The go-ethereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-edereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -58,17 +58,17 @@ func TestClientBatchRequest(t *testing.T) {
 
 	batch := []BatchElem{
 		{
-			Medod: "service_echo",
+			Method: "service_echo",
 			Args:   []interface{}{"hello", 10, &Args{"world"}},
 			Result: new(Result),
 		},
 		{
-			Medod: "service_echo",
+			Method: "service_echo",
 			Args:   []interface{}{"hello2", 11, &Args{"world"}},
 			Result: new(Result),
 		},
 		{
-			Medod: "no_such_method",
+			Method: "no_such_method",
 			Args:   []interface{}{1, 2, 3},
 			Result: new(int),
 		},
@@ -78,17 +78,17 @@ func TestClientBatchRequest(t *testing.T) {
 	}
 	wantResult := []BatchElem{
 		{
-			Medod: "service_echo",
+			Method: "service_echo",
 			Args:   []interface{}{"hello", 10, &Args{"world"}},
 			Result: &Result{"hello", 10, &Args{"world"}},
 		},
 		{
-			Medod: "service_echo",
+			Method: "service_echo",
 			Args:   []interface{}{"hello2", 11, &Args{"world"}},
 			Result: &Result{"hello2", 11, &Args{"world"}},
 		},
 		{
-			Medod: "no_such_method",
+			Method: "no_such_method",
 			Args:   []interface{}{1, 2, 3},
 			Result: new(int),
 			Error:  &jsonError{Code: -32601, Message: "The method no_such_method_ does not exist/is not available"},
@@ -493,7 +493,7 @@ func httpTestClient(srv *Server, transport string, fl *flakeyListener) (*Client,
 
 func ipcTestClient(srv *Server, fl *flakeyListener) (*Client, net.Listener) {
 	// Listen on a random endpoint.
-	endpoint := fmt.Sprintf("go-edereum-test-ipc-%d-%d", os.Getpid(), rand.Int63())
+	endpoint := fmt.Sprintf("go-ethereum-test-ipc-%d-%d", os.Getpid(), rand.Int63())
 	if runtime.GOOS == "windows" {
 		endpoint = `\\.\pipe\` + endpoint
 	} else {
