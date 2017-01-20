@@ -29,7 +29,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core/types"
 	"github.com/EarthDollar/go-earthdollar/core/vm"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
 	"github.com/EarthDollar/go-earthdollar/params"
 )
@@ -105,7 +105,7 @@ func (self Log) Topics() [][]byte {
 	return t
 }
 
-func makePreState(db ethdb.Database, accounts map[string]Account) *state.StateDB {
+func makePreState(db eddb.Database, accounts map[string]Account) *state.StateDB {
 	statedb, _ := state.New(common.Hash{}, db)
 	for addr, account := range accounts {
 		insertAccount(statedb, addr, account)

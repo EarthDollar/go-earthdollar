@@ -30,7 +30,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core/vm"
 	"github.com/EarthDollar/go-earthdollar/core/vm/runtime"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
 	"gopkg.in/urfave/cli.v1"
 )
@@ -115,7 +115,7 @@ func run(ctx *cli.Context) error {
 	glog.SetToStderr(true)
 	glog.SetV(ctx.GlobalInt(VerbosityFlag.Name))
 
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, db)
 	sender := statedb.CreateAccount(common.StringToAddress("sender"))
 

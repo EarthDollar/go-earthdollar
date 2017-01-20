@@ -24,7 +24,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core/state"
 	"github.com/EarthDollar/go-earthdollar/core/vm"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/params"
 )
 
@@ -100,7 +100,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 	setDefaults(cfg)
 
 	if cfg.State == nil {
-		db, _ := ethdb.NewMemDatabase()
+		db, _ := eddb.NewMemDatabase()
 		cfg.State, _ = state.New(common.Hash{}, db)
 	}
 	var (
@@ -131,7 +131,7 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, error) {
 	setDefaults(cfg)
 
 	if cfg.State == nil {
-		db, _ := ethdb.NewMemDatabase()
+		db, _ := eddb.NewMemDatabase()
 		cfg.State, _ = state.New(common.Hash{}, db)
 	}
 	var (

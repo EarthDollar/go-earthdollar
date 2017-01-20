@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/EarthDollar/go-earthdollar/common"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 )
 
 // Tests that the node iterator indeed walks over the entire database contents.
@@ -46,7 +46,7 @@ func TestNodeIteratorCoverage(t *testing.T) {
 			t.Errorf("failed to retrieve reported node %x: %v", hash, err)
 		}
 	}
-	for _, key := range db.(*ethdb.MemDatabase).Keys() {
+	for _, key := range db.(*eddb.MemDatabase).Keys() {
 		if bytes.HasPrefix(key, []byte("secure-key-")) {
 			continue
 		}

@@ -20,7 +20,7 @@ import (
 	"reflect"
 
 	"github.com/EarthDollar/go-earthdollar/accounts"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
 	"github.com/EarthDollar/go-earthdollar/p2p"
 	"github.com/EarthDollar/go-earthdollar/rpc"
@@ -39,11 +39,11 @@ type ServiceContext struct {
 // OpenDatabase opens an existing database with the given name (or creates one
 // if no previous can be found) from within the node's data directory. If the
 // node is an ephemeral one, a memory database is returned.
-func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int) (ethdb.Database, error) {
+func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int) (eddb.Database, error) {
 	if ctx.config.DataDir == "" {
-		return ethdb.NewMemDatabase()
+		return eddb.NewMemDatabase()
 	}
-	return ethdb.NewLDBDatabase(ctx.config.resolvePath(name), cache, handles)
+	return eddb.NewLDBDatabase(ctx.config.resolvePath(name), cache, handles)
 }
 
 // Service retrieves a currently running service registered of a specific type.

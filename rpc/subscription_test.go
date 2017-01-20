@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-edereum Authors
+// This file is part of the go-edereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-edereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-edereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-edereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -58,7 +58,7 @@ func (s *NotificationTestService) SomeSubscription(ctx context.Context, n, val i
 
 	// by explicitly creating an subscription we make sure that the subscription id is send back to the client
 	// before the first subscription.Notify is called. Otherwise the events might be send before the response
-	// for the eth_subscribe method.
+	// for the ed_subscribe medod.
 	subscription := notifier.CreateSubscription()
 
 	go func() {
@@ -109,13 +109,13 @@ func TestNotifications(t *testing.T) {
 	server := NewServer()
 	service := &NotificationTestService{}
 
-	if err := server.RegisterName("eth", service); err != nil {
+	if err := server.RegisterName("ed", service); err != nil {
 		t.Fatalf("unable to register test service %v", err)
 	}
 
 	clientConn, serverConn := net.Pipe()
 
-	go server.ServeCodec(NewJSONCodec(serverConn), OptionMethodInvocation|OptionSubscriptions)
+	go server.ServeCodec(NewJSONCodec(serverConn), OptionMedodInvocation|OptionSubscriptions)
 
 	out := json.NewEncoder(clientConn)
 	in := json.NewDecoder(clientConn)
@@ -124,7 +124,7 @@ func TestNotifications(t *testing.T) {
 	val := 12345
 	request := map[string]interface{}{
 		"id":      1,
-		"method":  "eth_subscribe",
+		"medod":  "ed_subscribe",
 		"version": "2.0",
 		"params":  []interface{}{"someSubscription", n, val},
 	}

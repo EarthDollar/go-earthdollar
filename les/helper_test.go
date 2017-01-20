@@ -32,7 +32,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core/types"
 	"github.com/EarthDollar/go-earthdollar/core/vm"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
 	"github.com/EarthDollar/go-earthdollar/les/flowcontrol"
 	"github.com/EarthDollar/go-earthdollar/light"
@@ -129,11 +129,11 @@ func testRCL() RequestCostList {
 // newTestProtocolManager creates a new protocol manager for testing purposes,
 // with the given number of blocks already known, and potential notification
 // channels for different events.
-func newTestProtocolManager(lightSync bool, blocks int, generator func(int, *core.BlockGen)) (*ProtocolManager, ethdb.Database, *LesOdr, error) {
+func newTestProtocolManager(lightSync bool, blocks int, generator func(int, *core.BlockGen)) (*ProtocolManager, eddb.Database, *LesOdr, error) {
 	var (
 		evmux       = new(event.TypeMux)
 		pow         = new(core.FakePow)
-		db, _       = ethdb.NewMemDatabase()
+		db, _       = eddb.NewMemDatabase()
 		genesis     = core.WriteGenesisBlockForTesting(db, core.GenesisAccount{Address: testBankAddress, Balance: testBankFunds})
 		chainConfig = &params.ChainConfig{HomesteadBlock: big.NewInt(0)} // homestead set to 0 because of chain maker
 		odr         *LesOdr
@@ -176,7 +176,7 @@ func newTestProtocolManager(lightSync bool, blocks int, generator func(int, *cor
 // with the given number of blocks already known, and potential notification
 // channels for different events. In case of an error, the constructor force-
 // fails the test.
-func newTestProtocolManagerMust(t *testing.T, lightSync bool, blocks int, generator func(int, *core.BlockGen)) (*ProtocolManager, ethdb.Database, *LesOdr) {
+func newTestProtocolManagerMust(t *testing.T, lightSync bool, blocks int, generator func(int, *core.BlockGen)) (*ProtocolManager, eddb.Database, *LesOdr) {
 	pm, db, odr, err := newTestProtocolManager(lightSync, blocks, generator)
 	if err != nil {
 		t.Fatalf("Failed to create protocol manager: %v", err)

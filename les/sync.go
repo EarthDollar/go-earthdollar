@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/EarthDollar/go-earthdollar/core"
-	"github.com/EarthDollar/go-earthdollar/eth/downloader"
+	"github.com/EarthDollar/go-earthdollar/ed/downloader"
 	"github.com/EarthDollar/go-earthdollar/light"
 	"golang.org/x/net/context"
 )

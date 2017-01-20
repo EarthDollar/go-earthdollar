@@ -30,14 +30,14 @@ import (
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/core/state"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
 	"github.com/EarthDollar/go-earthdollar/params"
 )
 
 // WriteGenesisBlock writes the genesis block to the database as block number 0
-func WriteGenesisBlock(chainDb ethdb.Database, reader io.Reader) (*types.Block, error) {
+func WriteGenesisBlock(chainDb eddb.Database, reader io.Reader) (*types.Block, error) {
 	contents, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func WriteGenesisBlock(chainDb ethdb.Database, reader io.Reader) (*types.Block, 
 
 // GenesisBlockForTesting creates a block in which addr has the given wei balance.
 // The state trie of the block is written to db. the passed db needs to contain a state root
-func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big.Int) *types.Block {
+func GenesisBlockForTesting(db eddb.Database, addr common.Address, balance *big.Int) *types.Block {
 	statedb, _ := state.New(common.Hash{}, db)
 	obj := statedb.GetOrNewStateObject(addr)
 	obj.SetBalance(balance)
@@ -146,7 +146,7 @@ type GenesisAccount struct {
 	Balance *big.Int
 }
 
-func WriteGenesisBlockForTesting(db ethdb.Database, accounts ...GenesisAccount) *types.Block {
+func WriteGenesisBlockForTesting(db eddb.Database, accounts ...GenesisAccount) *types.Block {
 	accountJson := "{"
 	for i, account := range accounts {
 		if i != 0 {
@@ -168,13 +168,13 @@ func WriteGenesisBlockForTesting(db ethdb.Database, accounts ...GenesisAccount) 
 
 // WriteDefaultGenesisBlock assembles the official Ethereum genesis block and
 // writes it - along with all associated state - into a chain database.
-func WriteDefaultGenesisBlock(chainDb ethdb.Database) (*types.Block, error) {
+func WriteDefaultGenesisBlock(chainDb eddb.Database) (*types.Block, error) {
 	return WriteGenesisBlock(chainDb, strings.NewReader(DefaultGenesisBlock()))
 }
 
 // WriteTestNetGenesisBlock assembles the test network genesis block and
 // writes it - along with all associated state - into a chain database.
-func WriteTestNetGenesisBlock(chainDb ethdb.Database) (*types.Block, error) {
+func WriteTestNetGenesisBlock(chainDb eddb.Database) (*types.Block, error) {
 	return WriteGenesisBlock(chainDb, strings.NewReader(DefaultTestnetGenesisBlock()))
 }
 

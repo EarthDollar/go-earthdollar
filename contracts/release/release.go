@@ -26,8 +26,8 @@ import (
 
 	"github.com/EarthDollar/go-earthdollar/accounts/abi/bind"
 	"github.com/EarthDollar/go-earthdollar/common"
-	"github.com/EarthDollar/go-earthdollar/eth"
-	"github.com/EarthDollar/go-earthdollar/internal/ethapi"
+	"github.com/EarthDollar/go-earthdollar/ed"
+	"github.com/EarthDollar/go-earthdollar/internal/edapi"
 	"github.com/EarthDollar/go-earthdollar/les"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
@@ -62,7 +62,7 @@ type ReleaseService struct {
 // releases and notify the user of such.
 func NewReleaseService(ctx *node.ServiceContext, config Config) (node.Service, error) {
 	// Retrieve the Ethereum service dependency to access the blockchain
-	var apiBackend ethapi.Backend
+	var apiBackend edapi.Backend
 	var ethereum *eth.Ethereum
 	if err := ctx.Service(&ethereum); err == nil {
 		apiBackend = ethereum.ApiBackend

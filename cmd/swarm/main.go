@@ -91,7 +91,7 @@ var (
 		Usage: "Swarm Syncing enabled (default true)",
 	}
 	EthAPIFlag = cli.StringFlag{
-		Name:  "ethapi",
+		Name:  "edapi",
 		Usage: "URL of the Ethereum API provider",
 		Value: node.DefaultIPCEndpoint("ged"),
 	}
@@ -260,13 +260,13 @@ func registerBzzService(ctx *cli.Context, stack *node.Node) {
 	swapEnabled := ctx.GlobalBool(SwarmSwapEnabledFlag.Name)
 	syncEnabled := ctx.GlobalBoolT(SwarmSyncEnabledFlag.Name)
 
-	ethapi := ctx.GlobalString(EthAPIFlag.Name)
+	edapi := ctx.GlobalString(EthAPIFlag.Name)
 	cors := ctx.GlobalString(CorsStringFlag.Name)
 
 	boot := func(ctx *node.ServiceContext) (node.Service, error) {
 		var client *ethclient.Client
-		if len(ethapi) > 0 {
-			client, err = ethclient.Dial(ethapi)
+		if len(edapi) > 0 {
+			client, err = ethclient.Dial(edapi)
 			if err != nil {
 				utils.Fatalf("Can't connect: %v", err)
 			}

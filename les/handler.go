@@ -30,9 +30,9 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/state"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/eth"
-	"github.com/EarthDollar/go-earthdollar/eth/downloader"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/ed"
+	"github.com/EarthDollar/go-earthdollar/ed/downloader"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
@@ -99,7 +99,7 @@ type ProtocolManager struct {
 	networkId   int
 	chainConfig *params.ChainConfig
 	blockchain  BlockChain
-	chainDb     ethdb.Database
+	chainDb     eddb.Database
 	odr         *LesOdr
 	server      *LesServer
 	serverPool  *serverPool
@@ -128,7 +128,7 @@ type ProtocolManager struct {
 
 // NewProtocolManager returns a new ethereum sub protocol manager. The Ethereum sub protocol manages peers capable
 // with the ethereum network.
-func NewProtocolManager(chainConfig *params.ChainConfig, lightSync bool, networkId int, mux *event.TypeMux, pow pow.PoW, blockchain BlockChain, txpool txPool, chainDb ethdb.Database, odr *LesOdr, txrelay *LesTxRelay) (*ProtocolManager, error) {
+func NewProtocolManager(chainConfig *params.ChainConfig, lightSync bool, networkId int, mux *event.TypeMux, pow pow.PoW, blockchain BlockChain, txpool txPool, chainDb eddb.Database, odr *LesOdr, txrelay *LesTxRelay) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
 	manager := &ProtocolManager{
 		lightSync:   lightSync,

@@ -27,8 +27,8 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/state"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/eth/downloader"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/ed/downloader"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
@@ -41,7 +41,7 @@ type Backend interface {
 	AccountManager() *accounts.Manager
 	BlockChain() *core.BlockChain
 	TxPool() *core.TxPool
-	ChainDb() ethdb.Database
+	ChainDb() eddb.Database
 }
 
 // Miner creates blocks and searches for proof-of-work values.

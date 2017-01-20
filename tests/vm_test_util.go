@@ -28,7 +28,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core/state"
 	"github.com/EarthDollar/go-earthdollar/core/types"
 	"github.com/EarthDollar/go-earthdollar/core/vm"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
 	"github.com/EarthDollar/go-earthdollar/params"
 )
@@ -101,7 +101,7 @@ func BenchVmTest(p string, conf bconf, b *testing.B) error {
 
 func benchVmTest(test VmTest, env map[string]string, b *testing.B) {
 	b.StopTimer()
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb := makePreState(db, test.Pre)
 	b.StartTimer()
 
@@ -145,7 +145,7 @@ func runVmTests(tests map[string]VmTest, skipTests []string) error {
 }
 
 func runVmTest(test VmTest) error {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb := makePreState(db, test.Pre)
 
 	// XXX Yeah, yeah...

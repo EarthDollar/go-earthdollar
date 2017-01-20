@@ -28,7 +28,7 @@ import (
 	"time"
 
 	"github.com/EarthDollar/go-earthdollar/common"
-	"github.com/EarthDollar/go-earthdollar/eth"
+	"github.com/EarthDollar/go-earthdollar/ed"
 	"github.com/EarthDollar/go-earthdollar/internal/jsre"
 	"github.com/EarthDollar/go-earthdollar/node"
 	"github.com/EarthDollar/go-earthdollar/params"

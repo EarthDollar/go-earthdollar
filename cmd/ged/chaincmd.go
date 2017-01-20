@@ -31,7 +31,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/state"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
 	"github.com/EarthDollar/go-earthdollar/trie"
@@ -163,7 +163,7 @@ func importChain(ctx *cli.Context) error {
 	fmt.Printf("Import done in %v.\n\n", time.Since(start))
 
 	// Output pre-compaction stats mostly to see the import trashing
-	db := chainDb.(*ethdb.LDBDatabase)
+	db := chainDb.(*eddb.LDBDatabase)
 
 	stats, err := db.LDB().GetProperty("leveldb.stats")
 	if err != nil {
@@ -290,8 +290,8 @@ func upgradeDB(ctx *cli.Context) error {
 	return nil
 }
 
-func dbDirectory(db ethdb.Database) string {
-	ldb, ok := db.(*ethdb.LDBDatabase)
+func dbDirectory(db eddb.Database) string {
+	ldb, ok := db.(*eddb.LDBDatabase)
 	if !ok {
 		return ""
 	}
@@ -330,7 +330,7 @@ func hashish(x string) bool {
 	return err != nil
 }
 
-func closeAll(dbs ...ethdb.Database) {
+func closeAll(dbs ...eddb.Database) {
 	for _, db := range dbs {
 		db.Close()
 	}

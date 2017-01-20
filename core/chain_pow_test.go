@@ -24,7 +24,7 @@ import (
 
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/params"
 	"github.com/EarthDollar/go-earthdollar/pow"
 )
@@ -59,7 +59,7 @@ func (pow delayedPow) Turbo(bool)                  {}
 func TestPowVerification(t *testing.T) {
 	// Create a simple chain to verify
 	var (
-		testdb, _ = ethdb.NewMemDatabase()
+		testdb, _ = eddb.NewMemDatabase()
 		genesis   = GenesisBlockForTesting(testdb, common.Address{}, new(big.Int))
 		blocks, _ = GenerateChain(params.TestChainConfig, genesis, testdb, 8, nil)
 	)
@@ -114,7 +114,7 @@ func TestPowConcurrentVerification32(t *testing.T) { testPowConcurrentVerificati
 func testPowConcurrentVerification(t *testing.T, threads int) {
 	// Create a simple chain to verify
 	var (
-		testdb, _ = ethdb.NewMemDatabase()
+		testdb, _ = eddb.NewMemDatabase()
 		genesis   = GenesisBlockForTesting(testdb, common.Address{}, new(big.Int))
 		blocks, _ = GenerateChain(params.TestChainConfig, genesis, testdb, 8, nil)
 	)
@@ -185,7 +185,7 @@ func TestPowConcurrentAbortion32(t *testing.T) { testPowConcurrentAbortion(t, 32
 func testPowConcurrentAbortion(t *testing.T, threads int) {
 	// Create a simple chain to verify
 	var (
-		testdb, _ = ethdb.NewMemDatabase()
+		testdb, _ = eddb.NewMemDatabase()
 		genesis   = GenesisBlockForTesting(testdb, common.Address{}, new(big.Int))
 		blocks, _ = GenerateChain(params.TestChainConfig, genesis, testdb, 1024, nil)
 	)

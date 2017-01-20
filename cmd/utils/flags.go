@@ -35,9 +35,9 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core/state"
 	"github.com/EarthDollar/go-earthdollar/core/vm"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/eth"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
-	"github.com/EarthDollar/go-earthdollar/ethstats"
+	"github.com/EarthDollar/go-earthdollar/ed"
+	"github.com/EarthDollar/go-earthdollar/eddb"
+	"github.com/EarthDollar/go-earthdollar/edstats"
 	"github.com/EarthDollar/go-earthdollar/event"
 	"github.com/EarthDollar/go-earthdollar/les"
 	"github.com/EarthDollar/go-earthdollar/logger"
@@ -822,7 +822,7 @@ func MakeChainConfig(ctx *cli.Context, stack *node.Node) *params.ChainConfig {
 }
 
 // MakeChainConfigFromDb reads the chain configuration from the given database.
-func MakeChainConfigFromDb(ctx *cli.Context, db ethdb.Database) *params.ChainConfig {
+func MakeChainConfigFromDb(ctx *cli.Context, db eddb.Database) *params.ChainConfig {
 	// If the chain is already initialized, use any existing chain configs
 	config := new(params.ChainConfig)
 
@@ -881,7 +881,7 @@ func ChainDbName(ctx *cli.Context) string {
 }
 
 // MakeChainDatabase open an LevelDB using the flags passed to the client and will hard crash if it fails.
-func MakeChainDatabase(ctx *cli.Context, stack *node.Node) ethdb.Database {
+func MakeChainDatabase(ctx *cli.Context, stack *node.Node) eddb.Database {
 	var (
 		cache   = ctx.GlobalInt(CacheFlag.Name)
 		handles = MakeDatabaseHandles()
@@ -896,7 +896,7 @@ func MakeChainDatabase(ctx *cli.Context, stack *node.Node) ethdb.Database {
 }
 
 // MakeChain creates a chain manager from set command line flags.
-func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chainDb ethdb.Database) {
+func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chainDb eddb.Database) {
 	var err error
 	chainDb = MakeChainDatabase(ctx, stack)
 

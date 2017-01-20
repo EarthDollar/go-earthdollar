@@ -17,7 +17,7 @@
 package light
 
 import (
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/trie"
 	"golang.org/x/net/context"
 )
@@ -27,7 +27,7 @@ type LightTrie struct {
 	trie *trie.SecureTrie
 	id   *TrieID
 	odr  OdrBackend
-	db   ethdb.Database
+	db   eddb.Database
 }
 
 // NewLightTrie creates a new LightTrie instance. It doesn't instantly try to

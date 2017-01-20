@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-edereum Authors
+// This file is part of the go-edereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-edereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-edereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-edereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -32,14 +32,14 @@ import (
 
 const (
 	jsonrpcVersion         = "2.0"
-	serviceMethodSeparator = "_"
-	subscribeMethod        = "eth_subscribe"
-	unsubscribeMethod      = "eth_unsubscribe"
-	notificationMethod     = "eth_subscription"
+	serviceMedodSeparator = "_"
+	subscribeMedod        = "ed_subscribe"
+	unsubscribeMedod      = "ed_unsubscribe"
+	notificationMedod     = "ed_subscription"
 )
 
 type jsonRequest struct {
-	Method  string          `json:"method"`
+	Medod  string          `json:"medod"`
 	Version string          `json:"jsonrpc"`
 	Id      json.RawMessage `json:"id,omitempty"`
 	Payload json.RawMessage `json:"params,omitempty"`
@@ -70,7 +70,7 @@ type jsonSubscription struct {
 
 type jsonNotification struct {
 	Version string           `json:"jsonrpc"`
-	Method  string           `json:"method"`
+	Medod  string           `json:"medod"`
 	Params  jsonSubscription `json:"params"`
 }
 
@@ -135,7 +135,7 @@ func (c *jsonCodec) ReadRequestHeaders() ([]rpcRequest, bool, Error) {
 	return parseRequest(incomingMsg)
 }
 
-// checkReqId returns an error when the given reqId isn't valid for RPC method calls.
+// checkReqId returns an error when the given reqId isn't valid for RPC medod calls.
 // valid id's are strings, numbers or null
 func checkReqId(reqId json.RawMessage) error {
 	if len(reqId) == 0 {
@@ -164,41 +164,41 @@ func parseRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) {
 		return nil, false, &invalidMessageError{err.Error()}
 	}
 
-	// subscribe are special, they will always use `subscribeMethod` as first param in the payload
-	if in.Method == subscribeMethod {
+	// subscribe are special, they will always use `subscribeMedod` as first param in the payload
+	if in.Medod == subscribeMedod {
 		reqs := []rpcRequest{{id: &in.Id, isPubSub: true}}
 		if len(in.Payload) > 0 {
 			// first param must be subscription name
-			var subscribeMethod [1]string
-			if err := json.Unmarshal(in.Payload, &subscribeMethod); err != nil {
-				glog.V(logger.Debug).Infof("Unable to parse subscription method: %v\n", err)
+			var subscribeMedod [1]string
+			if err := json.Unmarshal(in.Payload, &subscribeMedod); err != nil {
+				glog.V(logger.Debug).Infof("Unable to parse subscription medod: %v\n", err)
 				return nil, false, &invalidRequestError{"Unable to parse subscription request"}
 			}
 
-			// all subscriptions are made on the eth service
-			reqs[0].service, reqs[0].method = "eth", subscribeMethod[0]
+			// all subscriptions are made on the ed service
+			reqs[0].service, reqs[0].medod = "ed", subscribeMedod[0]
 			reqs[0].params = in.Payload
 			return reqs, false, nil
 		}
 		return nil, false, &invalidRequestError{"Unable to parse subscription request"}
 	}
 
-	if in.Method == unsubscribeMethod {
+	if in.Medod == unsubscribeMedod {
 		return []rpcRequest{{id: &in.Id, isPubSub: true,
-			method: unsubscribeMethod, params: in.Payload}}, false, nil
+			medod: unsubscribeMedod, params: in.Payload}}, false, nil
 	}
 
-	elems := strings.Split(in.Method, serviceMethodSeparator)
+	elems := strings.Split(in.Medod, serviceMedodSeparator)
 	if len(elems) != 2 {
-		return nil, false, &methodNotFoundError{in.Method, ""}
+		return nil, false, &medodNotFoundError{in.Medod, ""}
 	}
 
 	// regular RPC call
 	if len(in.Payload) == 0 {
-		return []rpcRequest{{service: elems[0], method: elems[1], id: &in.Id}}, false, nil
+		return []rpcRequest{{service: elems[0], medod: elems[1], id: &in.Id}}, false, nil
 	}
 
-	return []rpcRequest{{service: elems[0], method: elems[1], id: &in.Id, params: in.Payload}}, false, nil
+	return []rpcRequest{{service: elems[0], medod: elems[1], id: &in.Id, params: in.Payload}}, false, nil
 }
 
 // parseBatchRequest will parse a batch request into a collection of requests from the given RawMessage, an indication
@@ -217,19 +217,19 @@ func parseBatchRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) 
 
 		id := &in[i].Id
 
-		// subscribe are special, they will always use `subscribeMethod` as first param in the payload
-		if r.Method == subscribeMethod {
+		// subscribe are special, they will always use `subscribeMedod` as first param in the payload
+		if r.Medod == subscribeMedod {
 			requests[i] = rpcRequest{id: id, isPubSub: true}
 			if len(r.Payload) > 0 {
 				// first param must be subscription name
-				var subscribeMethod [1]string
-				if err := json.Unmarshal(r.Payload, &subscribeMethod); err != nil {
-					glog.V(logger.Debug).Infof("Unable to parse subscription method: %v\n", err)
+				var subscribeMedod [1]string
+				if err := json.Unmarshal(r.Payload, &subscribeMedod); err != nil {
+					glog.V(logger.Debug).Infof("Unable to parse subscription medod: %v\n", err)
 					return nil, false, &invalidRequestError{"Unable to parse subscription request"}
 				}
 
-				// all subscriptions are made on the eth service
-				requests[i].service, requests[i].method = "eth", subscribeMethod[0]
+				// all subscriptions are made on the ed service
+				requests[i].service, requests[i].medod = "ed", subscribeMedod[0]
 				requests[i].params = r.Payload
 				continue
 			}
@@ -237,8 +237,8 @@ func parseBatchRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) 
 			return nil, true, &invalidRequestError{"Unable to parse (un)subscribe request arguments"}
 		}
 
-		if r.Method == unsubscribeMethod {
-			requests[i] = rpcRequest{id: id, isPubSub: true, method: unsubscribeMethod, params: r.Payload}
+		if r.Medod == unsubscribeMedod {
+			requests[i] = rpcRequest{id: id, isPubSub: true, medod: unsubscribeMedod, params: r.Payload}
 			continue
 		}
 
@@ -247,10 +247,10 @@ func parseBatchRequest(incomingMsg json.RawMessage) ([]rpcRequest, bool, Error) 
 		} else {
 			requests[i] = rpcRequest{id: id, params: r.Payload}
 		}
-		if elem := strings.Split(r.Method, serviceMethodSeparator); len(elem) == 2 {
-			requests[i].service, requests[i].method = elem[0], elem[1]
+		if elem := strings.Split(r.Medod, serviceMedodSeparator); len(elem) == 2 {
+			requests[i].service, requests[i].medod = elem[0], elem[1]
 		} else {
-			requests[i].err = &methodNotFoundError{r.Method, ""}
+			requests[i].err = &medodNotFoundError{r.Medod, ""}
 		}
 	}
 
@@ -328,11 +328,11 @@ func (c *jsonCodec) CreateErrorResponseWithInfo(id interface{}, err Error, info 
 // CreateNotification will create a JSON-RPC notification with the given subscription id and event as params.
 func (c *jsonCodec) CreateNotification(subid string, event interface{}) interface{} {
 	if isHexNum(reflect.TypeOf(event)) {
-		return &jsonNotification{Version: jsonrpcVersion, Method: notificationMethod,
+		return &jsonNotification{Version: jsonrpcVersion, Medod: notificationMedod,
 			Params: jsonSubscription{Subscription: subid, Result: fmt.Sprintf(`%#x`, event)}}
 	}
 
-	return &jsonNotification{Version: jsonrpcVersion, Method: notificationMethod,
+	return &jsonNotification{Version: jsonrpcVersion, Medod: notificationMedod,
 		Params: jsonSubscription{Subscription: subid, Result: event}}
 }
 

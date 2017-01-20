@@ -30,14 +30,14 @@ import (
 
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 )
 
 // Tests that updating a state trie does not leak any database writes prior to
 // actually committing the state.
 func TestUpdateLeaks(t *testing.T) {
 	// Create an empty state database
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	state, _ := New(common.Hash{}, db)
 
 	// Update it with some accounts
@@ -64,8 +64,8 @@ func TestUpdateLeaks(t *testing.T) {
 // only the one right before the commit.
 func TestIntermediateLeaks(t *testing.T) {
 	// Create two state databases, one transitioning to the final state, the other final from the beginning
-	transDb, _ := ethdb.NewMemDatabase()
-	finalDb, _ := ethdb.NewMemDatabase()
+	transDb, _ := eddb.NewMemDatabase()
+	finalDb, _ := eddb.NewMemDatabase()
 	transState, _ := New(common.Hash{}, transDb)
 	finalState, _ := New(common.Hash{}, finalDb)
 
@@ -282,7 +282,7 @@ func (test *snapshotTest) String() string {
 func (test *snapshotTest) run() bool {
 	// Run all actions and create snapshots.
 	var (
-		db, _        = ethdb.NewMemDatabase()
+		db, _        = eddb.NewMemDatabase()
 		state, _     = New(common.Hash{}, db)
 		snapshotRevs = make([]int, len(test.snapshots))
 		sindex       = 0
@@ -357,7 +357,7 @@ func (test *snapshotTest) checkEqual(state, checkstate *StateDB) error {
 }
 
 func TestTouchDelete(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	state, _ := New(common.Hash{}, db)
 	state.GetOrNewStateObject(common.Address{})
 	root, _ := state.Commit(false)

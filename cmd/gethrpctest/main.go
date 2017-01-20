@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2015 The go-edereum Authors
+// This file is part of go-edereum.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-edereum is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-edereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-edereum. If not, see <http://www.gnu.org/licenses/>.
 
 // gedrpctest is a command to run the external RPC tests.
 package main
@@ -24,8 +24,8 @@ import (
 	"os/signal"
 
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/eth"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/ed"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
 	"github.com/EarthDollar/go-earthdollar/node"
 	"github.com/EarthDollar/go-earthdollar/params"
@@ -89,10 +89,10 @@ func MakeSystemNode(privkey string, test *tests.BlockTest) (*node.Node, error) {
 		IPCPath:           node.DefaultIPCEndpoint(""),
 		HTTPHost:          node.DefaultHTTPHost,
 		HTTPPort:          node.DefaultHTTPPort,
-		HTTPModules:       []string{"admin", "db", "eth", "debug", "miner", "net", "shh", "txpool", "personal", "web3"},
+		HTTPModules:       []string{"admin", "db", "ed", "debug", "miner", "net", "shh", "txpool", "personal", "web3"},
 		WSHost:            node.DefaultWSHost,
 		WSPort:            node.DefaultWSPort,
-		WSModules:         []string{"admin", "db", "eth", "debug", "miner", "net", "shh", "txpool", "personal", "web3"},
+		WSModules:         []string{"admin", "db", "ed", "debug", "miner", "net", "shh", "txpool", "personal", "web3"},
 		NoDiscovery:       true,
 	})
 	if err != nil {
@@ -114,16 +114,16 @@ func MakeSystemNode(privkey string, test *tests.BlockTest) (*node.Node, error) {
 		}
 	}
 	// Initialize and register the Ethereum protocol
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	if _, err := test.InsertPreState(db); err != nil {
 		return nil, err
 	}
-	ethConf := &eth.Config{
+	edConf := &ed.Config{
 		TestGenesisState: db,
 		TestGenesisBlock: test.Genesis,
 		ChainConfig:      &params.ChainConfig{HomesteadBlock: params.MainNetHomesteadBlock},
 	}
-	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) { return eth.New(ctx, ethConf) }); err != nil {
+	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) { return ed.New(ctx, edConf) }); err != nil {
 		return nil, err
 	}
 	// Initialize and register the Whisper protocol
@@ -136,9 +136,9 @@ func MakeSystemNode(privkey string, test *tests.BlockTest) (*node.Node, error) {
 // RunTest executes the specified test against an already pre-configured protocol
 // stack to ensure basic checks pass before running RPC tests.
 func RunTest(stack *node.Node, test *tests.BlockTest) error {
-	var ethereum *eth.Ethereum
-	stack.Service(&ethereum)
-	blockchain := ethereum.BlockChain()
+	var edereum *ed.Ethereum
+	stack.Service(&edereum)
+	blockchain := edereum.BlockChain()
 
 	// Process the blocks and verify the imported headers
 	blocks, err := test.TryBlocksInsert(blockchain)

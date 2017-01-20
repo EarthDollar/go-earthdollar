@@ -24,11 +24,11 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/types"
 	"github.com/EarthDollar/go-earthdollar/core/vm"
-	"github.com/EarthDollar/go-earthdollar/eth/downloader"
-	"github.com/EarthDollar/go-earthdollar/eth/gasprice"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/ed/downloader"
+	"github.com/EarthDollar/go-earthdollar/ed/gasprice"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
-	"github.com/EarthDollar/go-earthdollar/internal/ethapi"
+	"github.com/EarthDollar/go-earthdollar/internal/edapi"
 	"github.com/EarthDollar/go-earthdollar/light"
 	"github.com/EarthDollar/go-earthdollar/params"
 	"github.com/EarthDollar/go-earthdollar/rpc"
@@ -68,7 +68,7 @@ func (b *LesApiBackend) BlockByNumber(ctx context.Context, blockNr rpc.BlockNumb
 	return b.GetBlock(ctx, header.Hash())
 }
 
-func (b *LesApiBackend) StateAndHeaderByNumber(ctx context.Context, blockNr rpc.BlockNumber) (ethapi.State, *types.Header, error) {
+func (b *LesApiBackend) StateAndHeaderByNumber(ctx context.Context, blockNr rpc.BlockNumber) (edapi.State, *types.Header, error) {
 	header, err := b.HeaderByNumber(ctx, blockNr)
 	if header == nil || err != nil {
 		return nil, nil, err
@@ -88,7 +88,7 @@ func (b *LesApiBackend) GetTd(blockHash common.Hash) *big.Int {
 	return b.eth.blockchain.GetTdByHash(blockHash)
 }
 
-func (b *LesApiBackend) GetVMEnv(ctx context.Context, msg core.Message, state ethapi.State, header *types.Header) (*vm.EVM, func() error, error) {
+func (b *LesApiBackend) GetVMEnv(ctx context.Context, msg core.Message, state edapi.State, header *types.Header) (*vm.EVM, func() error, error) {
 	stateDb := state.(*light.LightState).Copy()
 	addr := msg.From()
 	from, err := stateDb.GetOrNewStateObject(ctx, addr)
@@ -142,7 +142,7 @@ func (b *LesApiBackend) SuggestPrice(ctx context.Context) (*big.Int, error) {
 	return b.gpo.SuggestPrice(ctx)
 }
 
-func (b *LesApiBackend) ChainDb() ethdb.Database {
+func (b *LesApiBackend) ChainDb() eddb.Database {
 	return b.eth.chainDb
 }
 

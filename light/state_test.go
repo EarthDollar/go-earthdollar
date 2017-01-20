@@ -25,12 +25,12 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/state"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"golang.org/x/net/context"
 )
 
-func makeTestState() (common.Hash, ethdb.Database) {
-	sdb, _ := ethdb.NewMemDatabase()
+func makeTestState() (common.Hash, eddb.Database) {
+	sdb, _ := eddb.NewMemDatabase()
 	st, _ := state.New(common.Hash{}, sdb)
 	for i := byte(0); i < 100; i++ {
 		addr := common.Address{i}
@@ -49,7 +49,7 @@ func TestLightStateOdr(t *testing.T) {
 	root, sdb := makeTestState()
 	header := &types.Header{Root: root, Number: big.NewInt(0)}
 	core.WriteHeader(sdb, header)
-	ldb, _ := ethdb.NewMemDatabase()
+	ldb, _ := eddb.NewMemDatabase()
 	odr := &testOdr{sdb: sdb, ldb: ldb}
 	ls := NewLightState(StateTrieID(header), odr)
 	ctx := context.Background()
@@ -135,7 +135,7 @@ func TestLightStateSetCopy(t *testing.T) {
 	root, sdb := makeTestState()
 	header := &types.Header{Root: root, Number: big.NewInt(0)}
 	core.WriteHeader(sdb, header)
-	ldb, _ := ethdb.NewMemDatabase()
+	ldb, _ := eddb.NewMemDatabase()
 	odr := &testOdr{sdb: sdb, ldb: ldb}
 	ls := NewLightState(StateTrieID(header), odr)
 	ctx := context.Background()
@@ -213,7 +213,7 @@ func TestLightStateDelete(t *testing.T) {
 	root, sdb := makeTestState()
 	header := &types.Header{Root: root, Number: big.NewInt(0)}
 	core.WriteHeader(sdb, header)
-	ldb, _ := ethdb.NewMemDatabase()
+	ldb, _ := eddb.NewMemDatabase()
 	odr := &testOdr{sdb: sdb, ldb: ldb}
 	ls := NewLightState(StateTrieID(header), odr)
 	ctx := context.Background()

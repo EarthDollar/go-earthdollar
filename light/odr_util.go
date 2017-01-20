@@ -25,7 +25,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/types"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
 	"github.com/EarthDollar/go-earthdollar/rlp"
@@ -53,7 +53,7 @@ type TrustedCht struct {
 	Root   common.Hash
 }
 
-func GetTrustedCht(db ethdb.Database) TrustedCht {
+func GetTrustedCht(db eddb.Database) TrustedCht {
 	data, _ := db.Get(trustedChtKey)
 	var res TrustedCht
 	if err := rlp.DecodeBytes(data, &res); err != nil {
@@ -62,12 +62,12 @@ func GetTrustedCht(db ethdb.Database) TrustedCht {
 	return res
 }
 
-func WriteTrustedCht(db ethdb.Database, cht TrustedCht) {
+func WriteTrustedCht(db eddb.Database, cht TrustedCht) {
 	data, _ := rlp.EncodeToBytes(cht)
 	db.Put(trustedChtKey, data)
 }
 
-func DeleteTrustedCht(db ethdb.Database) {
+func DeleteTrustedCht(db eddb.Database) {
 	db.Delete(trustedChtKey)
 }
 

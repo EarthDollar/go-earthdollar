@@ -27,7 +27,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core/state"
 	"github.com/EarthDollar/go-earthdollar/core/types"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
 )
 
@@ -37,7 +37,7 @@ func transaction(nonce uint64, gaslimit *big.Int, key *ecdsa.PrivateKey) *types.
 }
 
 func setupTxPool() (*TxPool, *ecdsa.PrivateKey) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, db)
 
 	key, _ := crypto.GenerateKey()
@@ -56,7 +56,7 @@ func deriveSender(tx *types.Transaction) (common.Address, error) {
 // block head event that initiated the resetState().
 func TestStateChangeDuringPoolReset(t *testing.T) {
 	var (
-		db, _      = ethdb.NewMemDatabase()
+		db, _      = eddb.NewMemDatabase()
 		key, _     = crypto.GenerateKey()
 		address    = crypto.PubkeyToAddress(key.PublicKey)
 		mux        = new(event.TypeMux)
@@ -251,7 +251,7 @@ func TestTransactionChainFork(t *testing.T) {
 	pool, key := setupTxPool()
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 	resetState := func() {
-		db, _ := ethdb.NewMemDatabase()
+		db, _ := eddb.NewMemDatabase()
 		statedb, _ := state.New(common.Hash{}, db)
 		pool.currentState = func() (*state.StateDB, error) { return statedb, nil }
 		currentState, _ := pool.currentState()
@@ -277,7 +277,7 @@ func TestTransactionDoubleNonce(t *testing.T) {
 	pool, key := setupTxPool()
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 	resetState := func() {
-		db, _ := ethdb.NewMemDatabase()
+		db, _ := eddb.NewMemDatabase()
 		statedb, _ := state.New(common.Hash{}, db)
 		pool.currentState = func() (*state.StateDB, error) { return statedb, nil }
 		currentState, _ := pool.currentState()
@@ -560,7 +560,7 @@ func TestTransactionQueueGlobalLimiting(t *testing.T) {
 	maxQueuedInTotal = maxQueuedPerAccount * 3
 
 	// Create the pool to test the limit enforcement with
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, db)
 
 	pool := NewTxPool(testChainConfig(), new(event.TypeMux), func() (*state.StateDB, error) { return statedb, nil }, func() *big.Int { return big.NewInt(1000000) })
@@ -709,7 +709,7 @@ func TestTransactionPendingGlobalLimiting(t *testing.T) {
 	maxPendingTotal = minPendingPerAccount * 10
 
 	// Create the pool to test the limit enforcement with
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, db)
 
 	pool := NewTxPool(testChainConfig(), new(event.TypeMux), func() (*state.StateDB, error) { return statedb, nil }, func() *big.Int { return big.NewInt(1000000) })
@@ -755,7 +755,7 @@ func TestTransactionPendingMinimumAllowance(t *testing.T) {
 	maxPendingTotal = 0
 
 	// Create the pool to test the limit enforcement with
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb, _ := state.New(common.Hash{}, db)
 
 	pool := NewTxPool(testChainConfig(), new(event.TypeMux), func() (*state.StateDB, error) { return statedb, nil }, func() *big.Int { return big.NewInt(1000000) })

@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/EarthDollar/go-earthdollar/common/mclock"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/light"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
@@ -46,7 +46,7 @@ type odrPeerSelector interface {
 
 type LesOdr struct {
 	light.OdrBackend
-	db           ethdb.Database
+	db           eddb.Database
 	stop         chan struct{}
 	removePeer   peerDropFn
 	mlock, clock sync.Mutex
@@ -54,7 +54,7 @@ type LesOdr struct {
 	serverPool   odrPeerSelector
 }
 
-func NewLesOdr(db ethdb.Database) *LesOdr {
+func NewLesOdr(db eddb.Database) *LesOdr {
 	return &LesOdr{
 		db:       db,
 		stop:     make(chan struct{}),
@@ -66,13 +66,13 @@ func (odr *LesOdr) Stop() {
 	close(odr.stop)
 }
 
-func (odr *LesOdr) Database() ethdb.Database {
+func (odr *LesOdr) Database() eddb.Database {
 	return odr.db
 }
 
 // validatorFunc is a function that processes a message and returns true if
 // it was a meaningful answer to a given request
-type validatorFunc func(ethdb.Database, *Msg) bool
+type validatorFunc func(eddb.Database, *Msg) bool
 
 // sentReq is a request waiting for an answer that satisfies its valFunc
 type sentReq struct {

@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/EarthDollar/go-earthdollar/core/vm"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
 	"github.com/EarthDollar/go-earthdollar/params"
 )
@@ -32,17 +32,17 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 	forkBlock := big.NewInt(32)
 
 	// Generate a common prefix for both pro-forkers and non-forkers
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	genesis := WriteGenesisBlockForTesting(db)
 	prefix, _ := GenerateChain(params.TestChainConfig, genesis, db, int(forkBlock.Int64()-1), func(i int, gen *BlockGen) {})
 
 	// Create the concurrent, conflicting two nodes
-	proDb, _ := ethdb.NewMemDatabase()
+	proDb, _ := eddb.NewMemDatabase()
 	WriteGenesisBlockForTesting(proDb)
 	proConf := &params.ChainConfig{HomesteadBlock: big.NewInt(0), DAOForkBlock: forkBlock, DAOForkSupport: true}
 	proBc, _ := NewBlockChain(proDb, proConf, new(FakePow), new(event.TypeMux), vm.Config{})
 
-	conDb, _ := ethdb.NewMemDatabase()
+	conDb, _ := eddb.NewMemDatabase()
 	WriteGenesisBlockForTesting(conDb)
 	conConf := &params.ChainConfig{HomesteadBlock: big.NewInt(0), DAOForkBlock: forkBlock, DAOForkSupport: false}
 	conBc, _ := NewBlockChain(conDb, conConf, new(FakePow), new(event.TypeMux), vm.Config{})
@@ -56,7 +56,7 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 	// Try to expand both pro-fork and non-fork chains iteratively with other camp's blocks
 	for i := int64(0); i < params.DAOForkExtraRange.Int64(); i++ {
 		// Create a pro-fork block, and try to feed into the no-fork chain
-		db, _ = ethdb.NewMemDatabase()
+		db, _ = eddb.NewMemDatabase()
 		WriteGenesisBlockForTesting(db)
 		bc, _ := NewBlockChain(db, conConf, new(FakePow), new(event.TypeMux), vm.Config{})
 
@@ -77,7 +77,7 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 			t.Fatalf("contra-fork chain didn't accepted no-fork block: %v", err)
 		}
 		// Create a no-fork block, and try to feed into the pro-fork chain
-		db, _ = ethdb.NewMemDatabase()
+		db, _ = eddb.NewMemDatabase()
 		WriteGenesisBlockForTesting(db)
 		bc, _ = NewBlockChain(db, proConf, new(FakePow), new(event.TypeMux), vm.Config{})
 
@@ -99,7 +99,7 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 		}
 	}
 	// Verify that contra-forkers accept pro-fork extra-datas after forking finishes
-	db, _ = ethdb.NewMemDatabase()
+	db, _ = eddb.NewMemDatabase()
 	WriteGenesisBlockForTesting(db)
 	bc, _ := NewBlockChain(db, conConf, new(FakePow), new(event.TypeMux), vm.Config{})
 
@@ -115,7 +115,7 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 		t.Fatalf("contra-fork chain didn't accept pro-fork block post-fork: %v", err)
 	}
 	// Verify that pro-forkers accept contra-fork extra-datas after forking finishes
-	db, _ = ethdb.NewMemDatabase()
+	db, _ = eddb.NewMemDatabase()
 	WriteGenesisBlockForTesting(db)
 	bc, _ = NewBlockChain(db, proConf, new(FakePow), new(event.TypeMux), vm.Config{})
 

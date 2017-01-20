@@ -25,7 +25,7 @@ import (
 
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 )
 
 type StateSuite struct {
@@ -87,12 +87,12 @@ func (s *StateSuite) TestDump(c *checker.C) {
 }
 
 func (s *StateSuite) SetUpTest(c *checker.C) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	s.state, _ = New(common.Hash{}, db)
 }
 
 func TestNull(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	state, _ := New(common.Hash{}, db)
 
 	address := common.HexToAddress("0x823140710bf13990e4500136726d8b55")
@@ -130,7 +130,7 @@ func (s *StateSuite) TestSnapshot(c *checker.C) {
 }
 
 func TestSnapshotEmpty(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	state, _ := New(common.Hash{}, db)
 	state.RevertToSnapshot(state.Snapshot())
 }
@@ -138,7 +138,7 @@ func TestSnapshotEmpty(t *testing.T) {
 // use testing instead of checker because checker does not support
 // printing/logging in tests (-check.vv does not work)
 func TestSnapshot2(t *testing.T) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	state, _ := New(common.Hash{}, db)
 
 	stateobjaddr0 := toAddr([]byte("so0"))

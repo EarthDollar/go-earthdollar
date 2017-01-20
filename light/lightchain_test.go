@@ -26,7 +26,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
 	"github.com/EarthDollar/go-earthdollar/params"
 	"github.com/EarthDollar/go-earthdollar/pow"
@@ -41,7 +41,7 @@ var (
 )
 
 // makeHeaderChain creates a deterministic chain of headers rooted at parent.
-func makeHeaderChain(parent *types.Header, n int, db ethdb.Database, seed int) []*types.Header {
+func makeHeaderChain(parent *types.Header, n int, db eddb.Database, seed int) []*types.Header {
 	blocks, _ := core.GenerateChain(params.TestChainConfig, types.NewBlockWithHeader(parent), db, n, func(i int, b *core.BlockGen) {
 		b.SetCoinbase(common.Address{0: byte(seed), 19: byte(i)})
 	})
@@ -59,9 +59,9 @@ func testChainConfig() *params.ChainConfig {
 // newCanonical creates a chain database, and injects a deterministic canonical
 // chain. Depending on the full flag, if creates either a full block chain or a
 // header only chain.
-func newCanonical(n int) (ethdb.Database, *LightChain, error) {
+func newCanonical(n int) (eddb.Database, *LightChain, error) {
 	// Create te new chain database
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	evmux := &event.TypeMux{}
 
 	// Initialize a fresh chain with only a genesis block
@@ -87,7 +87,7 @@ func thePow() pow.PoW {
 	return pow
 }
 
-func theLightChain(db ethdb.Database, t *testing.T) *LightChain {
+func theLightChain(db eddb.Database, t *testing.T) *LightChain {
 	var eventMux event.TypeMux
 	core.WriteTestNetGenesisBlock(db)
 	LightChain, err := NewLightChain(&dummyOdr{db: db}, testChainConfig(), thePow(), &eventMux)
@@ -297,10 +297,10 @@ func makeHeaderChainWithDiff(genesis *types.Block, d []int, seed byte) []*types.
 
 type dummyOdr struct {
 	OdrBackend
-	db ethdb.Database
+	db eddb.Database
 }
 
-func (odr *dummyOdr) Database() ethdb.Database {
+func (odr *dummyOdr) Database() eddb.Database {
 	return odr.db
 }
 
@@ -308,7 +308,7 @@ func (odr *dummyOdr) Retrieve(ctx context.Context, req OdrRequest) error {
 	return nil
 }
 
-func chm(genesis *types.Block, db ethdb.Database) *LightChain {
+func chm(genesis *types.Block, db eddb.Database) *LightChain {
 	odr := &dummyOdr{db: db}
 	var eventMux event.TypeMux
 	bc := &LightChain{odr: odr, chainDb: db, genesisBlock: genesis, eventMux: &eventMux, pow: core.FakePow{}}
@@ -336,7 +336,7 @@ func TestReorgShortHeaders(t *testing.T) {
 
 func testReorg(t *testing.T, first, second []int, td int64) {
 	// Create a pristine block chain
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	genesis, _ := core.WriteTestNetGenesisBlock(db)
 	bc := chm(genesis, db)
 
@@ -360,7 +360,7 @@ func testReorg(t *testing.T, first, second []int, td int64) {
 // Tests that the insertion functions detect banned hashes.
 func TestBadHeaderHashes(t *testing.T) {
 	// Create a pristine block chain
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	genesis, _ := core.WriteTestNetGenesisBlock(db)
 	bc := chm(genesis, db)
 
@@ -378,7 +378,7 @@ func TestBadHeaderHashes(t *testing.T) {
 // good state prior to the bad hash.
 func TestReorgBadHeaderHashes(t *testing.T) {
 	// Create a pristine block chain
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	genesis, _ := core.WriteTestNetGenesisBlock(db)
 	bc := chm(genesis, db)
 

@@ -25,7 +25,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
@@ -46,7 +46,7 @@ var (
 // interface. It only does header validation during chain insertion.
 type LightChain struct {
 	hc           *core.HeaderChain
-	chainDb      ethdb.Database
+	chainDb      eddb.Database
 	odr          OdrBackend
 	eventMux     *event.TypeMux
 	genesisBlock *types.Block

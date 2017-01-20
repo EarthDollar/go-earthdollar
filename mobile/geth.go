@@ -25,9 +25,9 @@ import (
 	"path/filepath"
 
 	"github.com/EarthDollar/go-earthdollar/common"
-	"github.com/EarthDollar/go-earthdollar/eth"
-	"github.com/EarthDollar/go-earthdollar/ethclient"
-	"github.com/EarthDollar/go-earthdollar/ethstats"
+	"github.com/EarthDollar/go-earthdollar/ed"
+	"github.com/EarthDollar/go-earthdollar/edclient"
+	"github.com/EarthDollar/go-earthdollar/edstats"
 	"github.com/EarthDollar/go-earthdollar/les"
 	"github.com/EarthDollar/go-earthdollar/node"
 	"github.com/EarthDollar/go-earthdollar/p2p/nat"

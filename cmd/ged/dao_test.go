@@ -25,7 +25,7 @@ import (
 
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/core"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/params"
 )
 
@@ -130,7 +130,7 @@ func testDAOForkBlockNewChain(t *testing.T, test int, testnet bool, genesis stri
 	if testnet && genesis == "" {
 		path = filepath.Join(datadir, "testnet", "geth", "chaindata")
 	}
-	db, err := ethdb.NewLDBDatabase(path, 0, 0)
+	db, err := eddb.NewLDBDatabase(path, 0, 0)
 	if err != nil {
 		t.Fatalf("test %d: failed to open test database: %v", test, err)
 	}

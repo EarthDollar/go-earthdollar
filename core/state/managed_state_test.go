@@ -20,13 +20,13 @@ import (
 	"testing"
 
 	"github.com/EarthDollar/go-earthdollar/common"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 )
 
 var addr = common.BytesToAddress([]byte("test"))
 
 func create() (*ManagedState, *account) {
-	db, _ := ethdb.NewMemDatabase()
+	db, _ := eddb.NewMemDatabase()
 	statedb, _ := New(common.Hash{}, db)
 	ms := ManageState(statedb)
 	ms.StateDB.SetNonce(addr, 100)

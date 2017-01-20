@@ -24,7 +24,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/types"
 	"github.com/EarthDollar/go-earthdollar/crypto"
-	"github.com/EarthDollar/go-earthdollar/eth/downloader"
+	"github.com/EarthDollar/go-earthdollar/ed/downloader"
 	"github.com/EarthDollar/go-earthdollar/p2p"
 	"github.com/EarthDollar/go-earthdollar/rlp"
 	"github.com/EarthDollar/go-earthdollar/trie"

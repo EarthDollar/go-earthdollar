@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-edereum Authors
+// This file is part of the go-edereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-edereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-edereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-edereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package les implements the Light Ethereum Subprotocol.
 package les
@@ -28,13 +28,13 @@ import (
 	"github.com/EarthDollar/go-earthdollar/common/hexutil"
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/eth"
-	"github.com/EarthDollar/go-earthdollar/eth/downloader"
-	"github.com/EarthDollar/go-earthdollar/eth/filters"
-	"github.com/EarthDollar/go-earthdollar/eth/gasprice"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/ed"
+	"github.com/EarthDollar/go-earthdollar/ed/downloader"
+	"github.com/EarthDollar/go-earthdollar/ed/filters"
+	"github.com/EarthDollar/go-earthdollar/ed/gasprice"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
-	"github.com/EarthDollar/go-earthdollar/internal/ethapi"
+	"github.com/EarthDollar/go-earthdollar/internal/edapi"
 	"github.com/EarthDollar/go-earthdollar/light"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
@@ -56,7 +56,7 @@ type LightEthereum struct {
 	blockchain      *light.LightChain
 	protocolManager *ProtocolManager
 	// DB interfaces
-	chainDb ethdb.Database // Block chain database
+	chainDb eddb.Database // Block chain database
 
 	ApiBackend *LesApiBackend
 
@@ -67,25 +67,25 @@ type LightEthereum struct {
 	solc           *compiler.Solidity
 
 	netVersionId  int
-	netRPCService *ethapi.PublicNetAPI
+	netRPCService *edapi.PublicNetAPI
 }
 
-func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
-	chainDb, err := eth.CreateDB(ctx, config, "lightchaindata")
+func New(ctx *node.ServiceContext, config *ed.Config) (*LightEthereum, error) {
+	chainDb, err := ed.CreateDB(ctx, config, "lightchaindata")
 	if err != nil {
 		return nil, err
 	}
-	if err := eth.SetupGenesisBlock(&chainDb, config); err != nil {
+	if err := ed.SetupGenesisBlock(&chainDb, config); err != nil {
 		return nil, err
 	}
-	pow, err := eth.CreatePoW(config)
+	pow, err := ed.CreatePoW(config)
 	if err != nil {
 		return nil, err
 	}
 
 	odr := NewLesOdr(chainDb)
 	relay := NewLesTxRelay()
-	eth := &LightEthereum{
+	ed := &LightEthereum{
 		odr:            odr,
 		relay:          relay,
 		chainDb:        chainDb,
@@ -100,8 +100,8 @@ func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
 	if config.ChainConfig == nil {
 		return nil, errors.New("missing chain config")
 	}
-	eth.chainConfig = config.ChainConfig
-	eth.blockchain, err = light.NewLightChain(odr, eth.chainConfig, eth.pow, eth.eventMux)
+	ed.chainConfig = config.ChainConfig
+	ed.blockchain, err = light.NewLightChain(odr, ed.chainConfig, ed.pow, ed.eventMux)
 	if err != nil {
 		if err == core.ErrNoGenesis {
 			return nil, fmt.Errorf(`Genesis block not found. Please supply a genesis block with the "--genesis /path/to/file" argument`)
@@ -109,14 +109,14 @@ func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
 		return nil, err
 	}
 
-	eth.txPool = light.NewTxPool(eth.chainConfig, eth.eventMux, eth.blockchain, eth.relay)
-	if eth.protocolManager, err = NewProtocolManager(eth.chainConfig, config.LightMode, config.NetworkId, eth.eventMux, eth.pow, eth.blockchain, nil, chainDb, odr, relay); err != nil {
+	ed.txPool = light.NewTxPool(ed.chainConfig, ed.eventMux, ed.blockchain, ed.relay)
+	if ed.protocolManager, err = NewProtocolManager(ed.chainConfig, config.LightMode, config.NetworkId, ed.eventMux, ed.pow, ed.blockchain, nil, chainDb, odr, relay); err != nil {
 		return nil, err
 	}
 
-	eth.ApiBackend = &LesApiBackend{eth, nil}
-	eth.ApiBackend.gpo = gasprice.NewLightPriceOracle(eth.ApiBackend)
-	return eth, nil
+	ed.ApiBackend = &LesApiBackend{ed, nil}
+	ed.ApiBackend.gpo = gasprice.NewLightPriceOracle(ed.ApiBackend)
+	return ed, nil
 }
 
 type LightDummyAPI struct{}
@@ -141,22 +141,22 @@ func (s *LightDummyAPI) Mining() bool {
 	return false
 }
 
-// APIs returns the collection of RPC services the ethereum package offers.
+// APIs returns the collection of RPC services the edereum package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
 func (s *LightEthereum) APIs() []rpc.API {
-	return append(ethapi.GetAPIs(s.ApiBackend, s.solcPath), []rpc.API{
+	return append(edapi.GetAPIs(s.ApiBackend, s.solcPath), []rpc.API{
 		{
-			Namespace: "eth",
+			Namespace: "ed",
 			Version:   "1.0",
 			Service:   &LightDummyAPI{},
 			Public:    true,
 		}, {
-			Namespace: "eth",
+			Namespace: "ed",
 			Version:   "1.0",
 			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux),
 			Public:    true,
 		}, {
-			Namespace: "eth",
+			Namespace: "ed",
 			Version:   "1.0",
 			Service:   filters.NewPublicFilterAPI(s.ApiBackend, true),
 			Public:    true,
@@ -189,7 +189,7 @@ func (s *LightEthereum) Protocols() []p2p.Protocol {
 // Ethereum protocol implementation.
 func (s *LightEthereum) Start(srvr *p2p.Server) error {
 	glog.V(logger.Info).Infof("WARNING: light client mode is an experimental feature")
-	s.netRPCService = ethapi.NewPublicNetAPI(srvr, s.netVersionId)
+	s.netRPCService = edapi.NewPublicNetAPI(srvr, s.netVersionId)
 	s.protocolManager.Start(srvr)
 	return nil
 }

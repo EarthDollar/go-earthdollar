@@ -26,8 +26,8 @@ import (
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/eth"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/ed"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/les/flowcontrol"
 	"github.com/EarthDollar/go-earthdollar/light"
 	"github.com/EarthDollar/go-earthdollar/logger"
@@ -200,7 +200,7 @@ func linRegFromBytes(data []byte) *linReg {
 
 type requestCostStats struct {
 	lock  sync.RWMutex
-	db    ethdb.Database
+	db    eddb.Database
 	stats map[uint64]*linReg
 }
 
@@ -211,7 +211,7 @@ type requestCostStatsRlp []struct {
 
 var rcStatsKey = []byte("_requestCostStats")
 
-func newCostStats(db ethdb.Database) *requestCostStats {
+func newCostStats(db eddb.Database) *requestCostStats {
 	stats := make(map[uint64]*linReg)
 	for _, code := range reqList {
 		stats[code] = &linReg{cnt: 100}
@@ -353,20 +353,20 @@ var (
 	chtPrefix  = []byte("cht")           // chtPrefix + chtNum (uint64 big endian) -> trie root hash
 )
 
-func getChtRoot(db ethdb.Database, num uint64) common.Hash {
+func getChtRoot(db eddb.Database, num uint64) common.Hash {
 	var encNumber [8]byte
 	binary.BigEndian.PutUint64(encNumber[:], num)
 	data, _ := db.Get(append(chtPrefix, encNumber[:]...))
 	return common.BytesToHash(data)
 }
 
-func storeChtRoot(db ethdb.Database, num uint64, root common.Hash) {
+func storeChtRoot(db eddb.Database, num uint64, root common.Hash) {
 	var encNumber [8]byte
 	binary.BigEndian.PutUint64(encNumber[:], num)
 	db.Put(append(chtPrefix, encNumber[:]...), root[:])
 }
 
-func makeCht(db ethdb.Database) bool {
+func makeCht(db eddb.Database) bool {
 	headHash := core.GetHeadBlockHash(db)
 	headNum := core.GetBlockNumber(db, headHash)
 

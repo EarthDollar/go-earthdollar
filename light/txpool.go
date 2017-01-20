@@ -24,7 +24,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/common"
 	"github.com/EarthDollar/go-earthdollar/core"
 	"github.com/EarthDollar/go-earthdollar/core/types"
-	"github.com/EarthDollar/go-earthdollar/ethdb"
+	"github.com/EarthDollar/go-earthdollar/eddb"
 	"github.com/EarthDollar/go-earthdollar/event"
 	"github.com/EarthDollar/go-earthdollar/logger"
 	"github.com/EarthDollar/go-earthdollar/logger/glog"
@@ -51,7 +51,7 @@ type TxPool struct {
 	mu       sync.RWMutex
 	chain    *LightChain
 	odr      OdrBackend
-	chainDb  ethdb.Database
+	chainDb  eddb.Database
 	relay    TxRelayBackend
 	head     common.Hash
 	nonce    map[common.Address]uint64            // "pending" nonce
