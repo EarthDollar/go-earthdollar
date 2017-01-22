@@ -1779,7 +1779,7 @@ var ETH_UNITS = [
     'ether',
     'grand',
     'Mether',
-    'Gether',
+    'Geder',
     'Tether',
     'Pether',
     'Eether',
@@ -2575,7 +2575,7 @@ var properties = function () {
             inputFormatter: utils.toDecimal
         }),
         new Property({
-            name: 'version.ethereum',
+            name: 'version.earthdollar',
             getter: 'eth_protocolVersion',
             inputFormatter: utils.toDecimal
         }),

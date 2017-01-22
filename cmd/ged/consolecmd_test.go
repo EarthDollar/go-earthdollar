@@ -38,7 +38,7 @@ func TestConsoleWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 
 	// Start a ged console, make sure it's cleaned up and terminate the console
-	ged := runGeth(t,
+	ged := runGed(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--shh",
 		"console")
@@ -56,9 +56,9 @@ func TestConsoleWelcome(t *testing.T) {
 
 	// Verify the actual welcome message to the required template
 	ged.expect(`
-Welcome to the Geth JavaScript console!
+Welcome to the Ged JavaScript console!
 
-instance: Geth/v{{gedver}}/{{goos}}/{{gover}}
+instance: Ged/v{{gedver}}/{{goos}}/{{gover}}
 coinbase: {{.Etherbase}}
 at block: 0 ({{niltime}})
  datadir: {{.Datadir}}
@@ -83,7 +83,7 @@ func TestIPCAttachWelcome(t *testing.T) {
 	}
 	// Note: we need --shh because testAttachWelcome checks for default
 	// list of ipc modules and shh is included there.
-	ged := runGeth(t,
+	ged := runGed(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--shh", "--ipcpath", ipc)
 
@@ -97,7 +97,7 @@ func TestIPCAttachWelcome(t *testing.T) {
 func TestHTTPAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	port := strconv.Itoa(trulyRandInt(1024, 65536)) // Yeah, sometimes this will fail, sorry :P
-	ged := runGeth(t,
+	ged := runGed(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--rpc", "--rpcport", port)
 
@@ -112,7 +112,7 @@ func TestWSAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	port := strconv.Itoa(trulyRandInt(1024, 65536)) // Yeah, sometimes this will fail, sorry :P
 
-	ged := runGeth(t,
+	ged := runGed(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--ws", "--wsport", port)
 
@@ -125,7 +125,7 @@ func TestWSAttachWelcome(t *testing.T) {
 
 func testAttachWelcome(t *testing.T, ged *testged, endpoint string) {
 	// Attach to a running ged note and terminate immediately
-	attach := runGeth(t, "attach", endpoint)
+	attach := runGed(t, "attach", endpoint)
 	defer attach.expectExit()
 	attach.stdin.Close()
 
@@ -150,9 +150,9 @@ func testAttachWelcome(t *testing.T, ged *testged, endpoint string) {
 
 	// Verify the actual welcome message to the required template
 	attach.expect(`
-Welcome to the Geth JavaScript console!
+Welcome to the Ged JavaScript console!
 
-instance: Geth/v{{gedver}}/{{goos}}/{{gover}}
+instance: Ged/v{{gedver}}/{{goos}}/{{gover}}
 coinbase: {{etherbase}}
 at block: 0 ({{niltime}}){{if ipc}}
  datadir: {{datadir}}{{end}}

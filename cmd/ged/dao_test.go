@@ -109,20 +109,20 @@ func testDAOForkBlockNewChain(t *testing.T, test int, testnet bool, genesis stri
 	datadir := tmpdir(t)
 	defer os.RemoveAll(datadir)
 
-	// Start a Geth instance with the requested flags set and immediately terminate
+	// Start a Ged instance with the requested flags set and immediately terminate
 	if genesis != "" {
 		json := filepath.Join(datadir, "genesis.json")
 		if err := ioutil.WriteFile(json, []byte(genesis), 0600); err != nil {
 			t.Fatalf("test %d: failed to write genesis file: %v", test, err)
 		}
-		runGeth(t, "--datadir", datadir, "init", json).cmd.Wait()
+		runGed(t, "--datadir", datadir, "init", json).cmd.Wait()
 	} else {
 		// Force chain initialization
 		args := []string{"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none", "--ipcdisable", "--datadir", datadir}
 		if testnet {
 			args = append(args, "--testnet")
 		}
-		geth := runGeth(t, append(args, []string{"--exec", "2+2", "console"}...)...)
+		geth := runGed(t, append(args, []string{"--exec", "2+2", "console"}...)...)
 		geth.cmd.Wait()
 	}
 	// Retrieve the DAO config flag from the database

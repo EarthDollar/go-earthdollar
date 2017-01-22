@@ -36,7 +36,7 @@ var (
 		ArgsUsage: "", // TODO: Write this!
 		Category:  "CONSOLE COMMANDS",
 		Description: `
-The Geth console is an interactive shell for the JavaScript runtime environment
+The Ged console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
 See https://github.com/EarthDollar/go-earthdollar/wiki/Javascipt-Console
 `,
@@ -48,7 +48,7 @@ See https://github.com/EarthDollar/go-earthdollar/wiki/Javascipt-Console
 		ArgsUsage: "", // TODO: Write this!
 		Category:  "CONSOLE COMMANDS",
 		Description: `
-The Geth console is an interactive shell for the JavaScript runtime environment
+The Ged console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
 See https://github.com/EarthDollar/go-earthdollar/wiki/Javascipt-Console.
 This command allows to open a console on a running ged node.

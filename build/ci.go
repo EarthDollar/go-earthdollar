@@ -654,7 +654,7 @@ func doWindowsInstaller(cmdline []string) {
 	// first section contains the ged binary, second section holds the dev tools.
 	templateData := map[string]interface{}{
 		"License":  "COPYING",
-		"Geth":     gedTool,
+		"Ged":     gedTool,
 		"DevTools": devTools,
 	}
 	build.Render("build/nsis.ged.nsi", filepath.Join(*workdir, "ged.nsi"), 0644, nil)
@@ -703,7 +703,7 @@ func doAndroidArchive(cmdline []string) {
 	// Build the Android archive and Maven resources
 	build.MustRun(goTool("get", "golang.org/x/mobile/cmd/gomobile"))
 	build.MustRun(gomobileTool("init"))
-	build.MustRun(gomobileTool("bind", "--target", "android", "--javapkg", "org.ethereum", "-v", "github.com/EarthDollar/go-earthdollar/mobile"))
+	build.MustRun(gomobileTool("bind", "--target", "android", "--javapkg", "org.earthdollar", "-v", "github.com/EarthDollar/go-earthdollar/mobile"))
 
 	if *local {
 		// If we're building locally, copy bundle to build dir and skip Maven
@@ -849,8 +849,8 @@ func doXCodeFramework(cmdline []string) {
 	// Prepare and upload a PodSpec to CocoaPods
 	if *deploy != "" {
 		meta := newPodMetadata(env, archive)
-		build.Render("build/pod.podspec", "Geth.podspec", 0755, meta)
-		build.MustRunCommand("pod", *deploy, "push", "Geth.podspec", "--allow-warnings", "--verbose")
+		build.Render("build/pod.podspec", "Ged.podspec", 0755, meta)
+		build.MustRunCommand("pod", *deploy, "push", "Ged.podspec", "--allow-warnings", "--verbose")
 	}
 }
 

@@ -288,7 +288,7 @@ func Wait4(pid int, wstatus *WaitStatus, options int, rusage *Rusage) (int, erro
 
 //sys	gedostname(buf []byte) (n int, err error)
 
-func Gethostname() (name string, err error) {
+func Gedostname() (name string, err error) {
 	var buf [MaxHostNameLen]byte
 	n, err := gedostname(buf[:])
 	if n != 0 {

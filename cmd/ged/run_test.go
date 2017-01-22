@@ -56,7 +56,7 @@ type testged struct {
 }
 
 func init() {
-	// Run the app if we're the child process for runGeth.
+	// Run the app if we're the child process for runGed.
 	if os.Getenv("GETH_TEST_CHILD") != "" {
 		if err := app.Run(os.Args); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -68,7 +68,7 @@ func init() {
 
 // spawns ged with the given command line args. If the args don't set --datadir, the
 // child g gets a temporary data directory.
-func runGeth(t *testing.T, args ...string) *testged {
+func runGed(t *testing.T, args ...string) *testged {
 	tt := &testged{T: t, Executable: os.Args[0]}
 	for i, arg := range args {
 		switch {

@@ -255,9 +255,9 @@ func DefaultWSEndpoint() string {
 // NodeName returns the devp2p node identifier.
 func (c *Config) NodeName() string {
 	name := c.name()
-	// Backwards compatibility: previous versions used title-cased "Geth", keep that.
+	// Backwards compatibility: previous versions used title-cased "Ged", keep that.
 	if name == "ged" || name == "ged-testnet" {
-		name = "Geth"
+		name = "Ged"
 	}
 	if c.UserIdent != "" {
 		name += "/" + c.UserIdent
@@ -282,7 +282,7 @@ func (c *Config) name() string {
 }
 
 // These resources are resolved differently for "ged" instances.
-var isOldGethResource = map[string]bool{
+var isOldGedResource = map[string]bool{
 	"chaindata":          true,
 	"nodes":              true,
 	"nodekey":            true,
@@ -300,7 +300,7 @@ func (c *Config) resolvePath(path string) string {
 	}
 	// Backwards-compatibility: ensure that data directory files created
 	// by ged 1.4 are used if they exist.
-	if c.name() == "ged" && isOldGethResource[path] {
+	if c.name() == "ged" && isOldGedResource[path] {
 		oldpath := ""
 		if c.Name == "ged" {
 			oldpath = filepath.Join(c.DataDir, path)

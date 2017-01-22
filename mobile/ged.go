@@ -35,7 +35,7 @@ import (
 	"github.com/EarthDollar/go-earthdollar/whisper/whisperv2"
 )
 
-// NodeConfig represents the collection of configuration values to fine tune the Geth
+// NodeConfig represents the collection of configuration values to fine tune the Ged
 // node embedded into a mobile process. The available values are a subset of the
 // entire API provided by go-ethereum to reduce the maintenance surface and dev
 // complexity.
@@ -93,12 +93,12 @@ func NewNodeConfig() *NodeConfig {
 	return &config
 }
 
-// Node represents a Geth Ethereum node instance.
+// Node represents a Ged Ethereum node instance.
 type Node struct {
 	node *node.Node
 }
 
-// NewNode creates and configures a new Geth node.
+// NewNode creates and configures a new Ged node.
 func NewNode(datadir string, config *NodeConfig) (stack *Node, _ error) {
 	// If no or partial configurations were specified, use defaults
 	if config == nil {

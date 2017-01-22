@@ -23,7 +23,7 @@ dependencies:
 
 test:
   override:
-    # Build Geth and move into a known folder
+    # Build Ged and move into a known folder
     - make ged
     - cp ./build/bin/ged $HOME/ged
 

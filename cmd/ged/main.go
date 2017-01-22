@@ -47,14 +47,14 @@ const (
 var (
 	// Git SHA1 commit hash of the release (set via linker flags)
 	gitCommit = ""
-	// Ethereum address of the Geth release oracle.
+	// Ethereum address of the Ged release oracle.
 	relOracle = common.HexToAddress("0xfa7b9770ca4cb04296cac84f37736d4041251cdf")
 	// The app that holds all commands and flags.
 	app = utils.NewApp(gitCommit, "the go-ethereum command line interface")
 )
 
 func init() {
-	// Initialize the CLI app and start Geth
+	// Initialize the CLI app and start Ged
 	app.Action = ged
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2013-2016 The go-ethereum Authors"
@@ -232,7 +232,7 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 		copy(config.Commit[:], commit)
 		return release.NewReleaseService(ctx, config)
 	}); err != nil {
-		utils.Fatalf("Failed to register the Geth release oracle service: %v", err)
+		utils.Fatalf("Failed to register the Ged release oracle service: %v", err)
 	}
 	return stack
 }

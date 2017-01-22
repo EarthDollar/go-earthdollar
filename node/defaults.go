@@ -42,7 +42,7 @@ func DefaultDataDir() string {
 		} else if runtime.GOOS == "windows" {
 			return filepath.Join(home, "AppData", "Roaming", "Ethereum")
 		} else {
-			return filepath.Join(home, ".ethereum")
+			return filepath.Join(home, ".earthdollar")
 		}
 	}
 	// As we cannot guess a stable location, return empty and handle later

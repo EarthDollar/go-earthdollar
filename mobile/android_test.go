@@ -37,14 +37,14 @@ package go;
 import android.test.InstrumentationTestCase;
 import android.test.MoreAsserts;
 
-import org.ethereum.ged.*;
+import org.earthdollar.ged.*;
 
 public class AndroidTest extends InstrumentationTestCase {
 	public AndroidTest() {}
 
 	public void testAccountManagement() {
 		// Create an encrypted keystore manager with light crypto parameters.
-		AccountManager am = new AccountManager(getInstrumentation().getContext().getFilesDir() + "/keystore", Geth.LightScryptN, Geth.LightScryptP);
+		AccountManager am = new AccountManager(getInstrumentation().getContext().getFilesDir() + "/keystore", Ged.LightScryptN, Ged.LightScryptP);
 
 		try {
 			// Create a new account with the specified encryption passphrase.
@@ -89,7 +89,7 @@ public class AndroidTest extends InstrumentationTestCase {
 
 		try {
 			// Start up a new inprocess node
-			Node node = new Node(getInstrumentation().getContext().getFilesDir() + "/.ethereum", new NodeConfig());
+			Node node = new Node(getInstrumentation().getContext().getFilesDir() + "/.earthdollar", new NodeConfig());
 			node.start();
 
 			// Retrieve some data via function calls (we don't really care about the results)
@@ -168,8 +168,8 @@ func TestAndroid(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	// Generate the mobile bindings for Geth and add the tester class
-	gobind := exec.Command("gomobile", "bind", "-javapkg", "org.ethereum", "github.com/EarthDollar/go-earthdollar/mobile")
+	// Generate the mobile bindings for Ged and add the tester class
+	gobind := exec.Command("gomobile", "bind", "-javapkg", "org.earthdollar", "github.com/EarthDollar/go-earthdollar/mobile")
 	if output, err := gobind.CombinedOutput(); err != nil {
 		t.Logf("%s", output)
 		t.Fatalf("failed to run gomobile bind: %v", err)
@@ -194,7 +194,7 @@ func TestAndroid(t *testing.T) {
 
 const androidManifest = `<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.ethereum.gedtest"
+          package="org.earthdollar.gedtest"
 	  android:versionCode="1"
 	  android:versionName="1.0">
 
