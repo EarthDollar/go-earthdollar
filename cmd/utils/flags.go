@@ -282,7 +282,7 @@ var (
 	IPCPathFlag = DirectoryFlag{
 		Name:  "ipcpath",
 		Usage: "Filename for IPC socket/pipe within the datadir (explicit paths escape it)",
-		Value: DirectoryString{"geth.ipc"},
+		Value: DirectoryString{"ged.ipc"},
 	}
 	WSEnabledFlag = cli.BoolFlag{
 		Name:  "ws",
@@ -843,7 +843,7 @@ func MakeChainConfigFromDb(ctx *cli.Context, db eddb.Database) *params.ChainConf
 		config.ChainId = new(big.Int)
 	}
 	// Check whether we are allowed to set default config params or not:
-	//  - If no genesis is set, we're running either mainnet or testnet (private nets use `geth init`)
+	//  - If no genesis is set, we're running either mainnet or testnet (private nets use `ged init`)
 	//  - If a genesis is already set, ensure we have a configuration for it (mainnet or testnet)
 	defaults := genesis == nil ||
 		(genesis.Hash() == params.MainNetGenesisHash && !ctx.GlobalBool(TestNetFlag.Name)) ||

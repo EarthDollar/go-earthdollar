@@ -122,13 +122,13 @@ func testDAOForkBlockNewChain(t *testing.T, test int, testnet bool, genesis stri
 		if testnet {
 			args = append(args, "--testnet")
 		}
-		geth := runGed(t, append(args, []string{"--exec", "2+2", "console"}...)...)
-		geth.cmd.Wait()
+		ged := runGed(t, append(args, []string{"--exec", "2+2", "console"}...)...)
+		ged.cmd.Wait()
 	}
 	// Retrieve the DAO config flag from the database
-	path := filepath.Join(datadir, "geth", "chaindata")
+	path := filepath.Join(datadir, "ged", "chaindata")
 	if testnet && genesis == "" {
-		path = filepath.Join(datadir, "testnet", "geth", "chaindata")
+		path = filepath.Join(datadir, "testnet", "ged", "chaindata")
 	}
 	db, err := eddb.NewLDBDatabase(path, 0, 0)
 	if err != nil {
