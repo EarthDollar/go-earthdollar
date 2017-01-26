@@ -18,7 +18,7 @@ package core
 
 import (
 	"compress/bzip2"
-	"compress/gzip"
+	//"compress/gzip" //earthdollar
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -181,15 +181,45 @@ func WriteTestNetGenesisBlock(chainDb eddb.Database) (*types.Block, error) {
 // DefaultGenesisBlock assembles a JSON string representing the default Ethereum
 // genesis block.
 func DefaultGenesisBlock() string {
-	reader, err := gzip.NewReader(base64.NewDecoder(base64.StdEncoding, strings.NewReader(defaultGenesisBlock)))
-	if err != nil {
+	/*reader, err := gzip.NewReader(base64.NewDecoder(base64.StdEncoding, strings.NewReader(defaultGenesisBlock)))
+        fmt.Sprintf("reader: %v", reader)
+       	if err != nil {
 		panic(fmt.Sprintf("failed to access default genesis: %v", err))
 	}
 	blob, err := ioutil.ReadAll(reader)
 	if err != nil {
 		panic(fmt.Sprintf("failed to load default genesis: %v", err))
 	}
-	return string(blob)
+	return string(blob)*/
+        // earthdollar
+        gen := `{
+	"nonce": "0x000000000000002a",
+	"gasLimit":"47E7C4",
+	"difficulty":"0x20000",
+	"alloc": {
+		"0xe856f883f4862cb7f55a35a5b554451798902d16":  {"balance": "100000000000000000000000000"},  
+		"0x4e32fb7cb1d33861aa2677d7ff32da16027e7e08":  {"balance": "100000000000000000000000000"},
+		"0x2ba175ee5b11ac09eabbef73234452b5857a0f01":  {"balance": "100000000000000000000000000"},
+		"0x681c1dcdfaaf43b37bb5db81d219e801c5d6426f":  {"balance": "100000000000000000000000000"}, 
+		"0x5b1c61d10fe21e45182c71987abda0eab33ea9e7":  {"balance": "100000000000000000000000000"}, 
+		"0x84bb68e581f8513945d7c2269e134f61abdceb77":  {"balance": "100000000000000000000000000"}, 
+		"0x1ed132a81aaea349d619c71a580d1426fc8cf6dc":  {"balance": "100000000000000000000000000"}, 
+		"0xaa7a66a45e61f2e31980150dc2e79898cf2b9b6b":  {"balance": "100000000000000000000000000"}, 
+		"0x150a588f68344a61800b3c3761a37e57231bf454":  {"balance": "100000000000000000000000000"}, 
+		"0xb7fa96bb09aaa87c642c7fb753d2ef0b410ffd29":  {"balance": "100000000000000000000000000"}, 
+		"0x062305dbbeff97f2cd7d16a2e76780c64b0794e9":  {"balance": "100000000000000000000000000"}, 
+		"0xd3842991acd4823fa0f22f7915aba179ca1c84ff":  {"balance": "100000000000000000000000000"}, 
+		"0x80ef182cfd269467c8d8732aae65c046da5ccee7":  {"balance": "100000000000000000000000000"}, 
+		"0xe91efd17378a653d3d36b336bfdeefd858bf0eb4":  {"balance": "100000000000000000000000000"}, 
+		"0x61e342a5430c9fd2d9427a5794ff85bfea20af77":  {"balance": "100000000000000000000000000"}, 
+		"0xbae738480167bd65284a6f85d8bc661f22b2364e":  {"balance": "100000000000000000000000000"}, 
+		"0xba9fc55c1a79b4ec3a2c78c6e82996c74d6dc6ba":  {"balance": "100000000000000000000000000"}, 
+		"0x5768a44376352a25155452337ddeb647b7988ac0":  {"balance": "100000000000000000000000000"}, 
+		"0x61f2a927f5f7d91786f8779cd0ea4d769201f1ce":  {"balance": "100000000000000000000000000"}, 
+		"0xeef42335bc391518bf07a03518918c7ab0de9e9c":  {"balance": "100000000000000000000000000"} 
+	}
+}`
+	return gen
 }
 
 // DefaultTestnetGenesisBlock assembles a JSON string representing the default Ethereum
